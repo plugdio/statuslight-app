@@ -1,0 +1,10 @@
+/tmp/*.php
+/data/*.json
+/.git/
+/logs/*.log
+/uploads/*
+/test/*
+/vendor
+/composer.phar
+*.log
+composer.lock
