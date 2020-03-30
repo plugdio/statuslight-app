@@ -22,9 +22,11 @@ $log->pushHandler($logStdOut);
 
 $f3 = \Base::instance();
 
+$f3->set('CORS.origin', '*'); 
+
 if (!empty(getenv('STATUSLIGHT_ENV')) && (strtoupper(getenv('PRES_ENV')) != 'PROD') ) {
     $f3->set('ENV', 'DEV');
-    $f3->set('baseStaticPath', 'http://localhost:8000/blank');
+    $f3->set('baseStaticPath', 'http://localhost:8000');
     $f3->set('baseAppPath', 'http://localhost:8000');
 } else {
     $f3->set('ENV', 'PROD');
@@ -32,9 +34,9 @@ if (!empty(getenv('STATUSLIGHT_ENV')) && (strtoupper(getenv('PRES_ENV')) != 'PRO
     $f3->set('baseAppPath', 'https://my.statuslight.online');
 }
 
-$f3->set('redirectUri', $f3->get('baseAppPath') . '/login');
+$f3->set('redirectUriTeams', $f3->get('baseAppPath') . '/teams/login');
 $f3->set('scope', 'offline_access user.read Presence.Read');
-#$f3->set('scope', 'Presence.Read');
+#$f3->set('scope', 'offline_access Presence.Read');
 
 
 $path = realpath(dirname(__FILE__)) . "/";
@@ -78,17 +80,18 @@ foreach (getallheaders() as $name => $value) {
 
 if ($f3->get('ENV') == 'DEV') {
     $f3->route('GET /', '\Presenters\MainPresenter->blank');
-    $f3->route('GET /login', '\Presenters\MainPresenter->login');
-    $f3->route('GET /status', '\Presenters\MainPresenter->status');
+    $f3->route('GET /teams/login', '\Presenters\Teams->login');
+    $f3->route('GET /teams/status', '\Presenters\Teams->status');
 } else {
     $f3->route('GET /blank', '\Presenters\MainPresenter->blank');
-    $f3->route('GET /login', '\Presenters\MainPresenter->login');
-    $f3->route('GET /', '\Presenters\MainPresenter->status');
-
+    $f3->route('GET /teams/login', '\Presenters\Teams->login');
+    $f3->route('GET /teams', '\Presenters\Teams->status');
 }
 
-$f3->route('GET /ajax/status', '\Ajax\Status->getStatus');
-$f3->route('GET /ajax/config', '\Ajax\Config->getConfig');
+$f3->route('GET /teams/token', '\Presenters\Teams->getToken');
+$f3->route('GET /teams/config', '\Presenters\Teams->getConfig');
+//$f3->route('GET /ajax/status', '\Ajax\Status->getStatus');
+//$f3->route('GET /ajax/config', '\Ajax\Config->getConfig');
 
 #$f3->route('GET /logout', '\Presenters\MainPresenter->logout');
 
