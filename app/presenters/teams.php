@@ -38,6 +38,7 @@ class Teams extends \Presenters\MainPresenter {
 
 		$f3->set('SESSION.accessToken', $authResponse->accessToken);
 		$f3->set('SESSION.refreshToken', $authResponse->refreshToken);
+		$f3->set('SESSION.accessTokenExpiresOn', $authResponse->accessTokenExpiresOn);
 /*
 		$userProfileResponse = $this->graph->getSignedInUser();
 
@@ -102,14 +103,38 @@ class Teams extends \Presenters\MainPresenter {
 
 
 	function getToken($f3, $args) {
+		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
 		if (!$this->amIAuthenticated()) {
+			$this->l->error($this->tr . " - " . __METHOD__ . " - Not authenticated");
 			return;
 		}
 		$response = new \Response($this->tr);
+		$f3->set('page_type', 'AJAX');
+
+		if ($f3->get('SESSION.accessTokenExpiresOn') < time() + 600) {
+			$this->l->debug($this->tr . " - " . __METHOD__ . " - Token needs to be refreshed");
+
+			$this->graph = new \GraphAPI($f3->get('scope'), $f3->get('redirectUriTeams'), $this->tr, $this->l);
+			$this->graph->setAuthParams($f3->get('client_id'), $f3->get('client_secret'), $authCode);
+			$this->graph->setTokens($f3->get('SESSION.accessToken'), $f3->get('SESSION.refreshToken'));
+
+			$tokenResponse = $this->graph->getToken('refresh_token');
+
+		if (!$tokenResponse->success) {
+			$this->l->error($this->tr . " - " . __METHOD__ . " - Error geting new token: " . $authResponse->message); 
+			$f3->error(401, "Error authenticating: " . $authResponse->message);
+		}
+
+		$f3->set('SESSION.accessToken', $tokenResponse->accessToken);
+		$f3->set('SESSION.refreshToken', $tokenResponse->refreshToken);
+		$f3->set('SESSION.accessTokenExpiresOn', $tokenResponse->accessTokenExpiresOn);
+
+		}
+
 		$response->result->accessToken = $f3->get('SESSION.accessToken');
+		$response->result->accessTokenExpiresOn = $f3->get('SESSION.accessTokenExpiresOn');
 #		$response->result->refreshToken = $f3->get('SESSION.refreshToken');
 		$response->success = true;
-		$f3->set('page_type', 'AJAX');
 		$f3->set('data', $response);
 	} 
 

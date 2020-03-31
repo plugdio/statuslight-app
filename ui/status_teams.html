@@ -65,6 +65,10 @@
 
 		<script type="text/javascript">
 
+			var now = Math.floor(Date.now() / 1000);
+			var token = null;
+			var tokenExpiresOn = 0;
+
 			var getJSON = function(url, tokenHeader, callback) {
 				var xhr = new XMLHttpRequest();
 				xhr.open('GET', url, true);
@@ -87,23 +91,33 @@
 				xhr.send();
 			};
 
-			function getToken () {
+			function getTokenAndStatus () {
 				console.log('Getting the token ...');
-				var token = null;
+				
+				now = Math.floor(Date.now() / 1000);
 
-				getJSON('{{ @baseAppPath }}/teams/token', null, function(err, data) {
-					if (err !== null) {
-						console.log('Something went wrong #1: ' + err);
-					} else {
-						if (data.success == true) {
-							console.log('token: ' + data.result.accessToken);
-							token = data.result.accessToken;
-							checkStatus( token );
+				if (tokenExpiresOn < now + 600) {
+					console.log('Token to be refreshed');
+					getJSON('{{ @baseAppPath }}/teams/token', null, function(err, data) {
+						if (err !== null) {
+							console.log('Something went wrong #1: ' + err);
 						} else {
-							console.log('Something went wrong #2: ' + data.message);
+							if (data.success == true) {
+								console.log('token: ' + data.result.accessToken);
+								token = data.result.accessToken;
+								tokenExpiresOn = data.result.accessTokenExpiresOn;
+								checkStatus( token );
+							} else {
+								console.log('Something went wrong #2: ' + data.message);
+							}
 						}
-					}
-				});
+					});
+				} else {
+					console.log('Using the current token. Expires on:' + new Date(tokenExpiresOn * 1000));
+					checkStatus( token );
+				}
+
+
 
 			}
 
@@ -154,10 +168,10 @@
 
 
 			var interval = setInterval(function () {
-				getToken(); 
-			}, 10000);
+				getTokenAndStatus(); 
+			}, 60000);
 
-			getToken();
+			getTokenAndStatus();
 
 		</script>
 

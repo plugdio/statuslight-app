@@ -212,11 +212,13 @@ class GraphAPI {
 				return $apiResponse;
 			} else {
 				$this->l->info($this->tr . " - " . __METHOD__ . " - Got the token"); 
-				$this->l->debug($this->tr . " - " . __METHOD__ . " - Got the token: " . $tokenResponse->access_token);
+#				$this->l->debug($this->tr . " - " . __METHOD__ . " - Got the token: " . $tokenResponse->access_token);
 				$this->accessToken = $tokenResponse->access_token;
 				$this->refreshToken = $tokenResponse->refresh_token;
+				$this->accessTokenExpiresOn = time() + $tokenResponse->expires_in;
 				$apiResponse->accessToken = $this->accessToken;
 				$apiResponse->refreshToken = $this->refreshToken;
+				$apiResponse->accessTokenExpiresOn = $this->accessTokenExpiresOn;
 				$apiResponse->success = true;
 				return $apiResponse;
 				
