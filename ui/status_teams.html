@@ -106,11 +106,11 @@
 								console.log('token: ' + data.result.accessToken);
 								token = data.result.accessToken;
 								tokenExpiresOn = data.result.accessTokenExpiresOn;
-								checkStatus( token );
 							} else {
 								console.log('Something went wrong #2: ' + data.message);
 							}
 						}
+						checkStatus( token );
 					});
 				} else {
 					console.log('Using the current token. Expires on:' + new Date(tokenExpiresOn * 1000));
@@ -139,7 +139,7 @@
 								$('#statusText').text("Available"); 
 							} else if (data.availability == 'Busy') {
 								$('#statusContainer').attr('class','container vh-100 bg-danger');
-								$('#statusIcon').attr('class','fas fa-phone-alt text-light');
+								$('#statusIcon').attr('class','fas fa-phone text-light');
 								$('#statusText').text("Busy"); 
 							} else if (data.availability == 'DoNotDisturb') {
 								$('#statusContainer').attr('class','container vh-100 bg-danger');
@@ -162,6 +162,9 @@
 					});
 				} else {
 					console.log('no token');
+					$('#statusContainer').attr('class','container vh-100 bg-secondary');
+					$('#statusIcon').attr('class','fas fa-info text-light');
+					$('#statusText').text('Something went wrong');
 				}
 
 			}
