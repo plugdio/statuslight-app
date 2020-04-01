@@ -16,7 +16,8 @@ class Teams extends \Presenters\MainPresenter {
 
 		if ( !empty($f3->get('REQUEST.error')) ) {
 			$this->l->error($this->tr . " - " . __METHOD__ . " - Error authenticating: " . $f3->get('REQUEST.error') . ", " . $f3->get('REQUEST.error_description'));
-			$f3->error(401, "Authentication error");
+#			$f3->error(401, "Authentication error");
+			$f3->reroute($f3->get('baseStaticPath') . '?error=' . urlencode('Authentication error'));
 			return;
 		}
 		if ( empty($f3->get('REQUEST.code')) ) {
@@ -33,7 +34,8 @@ class Teams extends \Presenters\MainPresenter {
 
 		if (!$authResponse->success) {
 			$this->l->error($this->tr . " - " . __METHOD__ . " - Error authenticating: " . $authResponse->message); 
-			$f3->error(401, "Error authenticating: " . $authResponse->message);
+#			$f3->error(401, "Error authenticating: " . $authResponse->message);
+			$f3->reroute($f3->get('baseStaticPath') . '?error=' . urlencode('Authentication error'));
 		}
 
 		$f3->set('SESSION.accessToken', $authResponse->accessToken);
@@ -57,11 +59,7 @@ class Teams extends \Presenters\MainPresenter {
 		$f3->set('SESSION.userId', $userResponse->result['id']);
 		$f3->set('SESSION.signed_in_user', $userProfileResponse->result->displayName);
 */
-		if ($f3->get('ENV') == 'DEV') {
-			$f3->reroute('/teams/status');
-		} else {
-			$f3->reroute('/teams');
-		}
+		$f3->reroute('/teams');
 
 
 	}
@@ -122,7 +120,8 @@ class Teams extends \Presenters\MainPresenter {
 
 		if (!$tokenResponse->success) {
 			$this->l->error($this->tr . " - " . __METHOD__ . " - Error geting new token: " . $authResponse->message); 
-			$f3->error(401, "Error authenticating: " . $authResponse->message);
+#			$f3->error(401, "Error authenticating: " . $authResponse->message);
+			$f3->reroute($f3->get('baseStaticPath') . '?error=' . urlencode('Authentication error'));
 		}
 
 		$f3->set('SESSION.accessToken', $tokenResponse->accessToken);
