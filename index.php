@@ -35,6 +35,7 @@ if (!empty(getenv('STATUSLIGHT_ENV')) && (strtoupper(getenv('PRES_ENV')) != 'PRO
 }
 
 $f3->set('redirectUriTeams', $f3->get('baseAppPath') . '/teams/login');
+$f3->set('redirectUriGCal', $f3->get('baseAppPath') . '/gcal/login');
 $f3->set('scope', 'offline_access user.read Presence.Read');
 #$f3->set('scope', 'offline_access Presence.Read');
 
@@ -79,28 +80,26 @@ foreach (getallheaders() as $name => $value) {
 */
 
 if ($f3->get('ENV') == 'DEV') {
-    $f3->route('GET /', '\Presenters\MainPresenter->blank');
+    $f3->route('GET /', '\Services\ServiceBase->blank');
 } else {
     $f3->route('GET|HEAD /',
         function($f3) {
             $f3->reroute('https://statuslight.online');
         }
     );
-    $f3->route('GET /blank', '\Presenters\MainPresenter->blank');
+    $f3->route('GET /blank', '\Services\ServiceBase->blank');
 }
 
-$f3->route('GET /teams/login', '\Presenters\Teams->login');
-$f3->route('GET /teams', '\Presenters\Teams->status');
-$f3->route('GET /teams/token', '\Presenters\Teams->getToken');
-$f3->route('GET /teams/config', '\Presenters\Teams->getConfig');
+$f3->route('GET /config', '\Services\ServiceBase->getConfig');
 
-$f3->route('GET /gcal/login', '\Presenters\GCal->login');
-$f3->route('GET /gcal', '\Presenters\GCal->status');
-$f3->route('GET /gcal/token', '\Presenters\GCal->getToken');
-$f3->route('GET /gcal/config', '\Presenters\GCal->getConfig');
+$f3->route('GET /teams/login', '\Services\Teams->login');
+$f3->route('GET /teams', '\Services\Teams->status');
+$f3->route('GET /teams/token', '\Services\Teams->getToken');
 
 
-#$f3->route('GET /logout', '\Presenters\MainPresenter->logout');
+$f3->route('GET /gcal/login', '\Services\GCal->login');
+$f3->route('GET /gcal', '\Services\GCal->status');
+$f3->route('GET /gcal/token', '\Services\GCal->getToken');
 
 
 try {

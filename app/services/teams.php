@@ -1,8 +1,8 @@
 <?php
 
-namespace Presenters;
+namespace Services;
 
-class Teams extends \Presenters\MainPresenter {
+class Teams extends \Services\ServiceBase {
 
 
 	function __construct() {
@@ -102,7 +102,7 @@ class Teams extends \Presenters\MainPresenter {
 
 	function getToken($f3, $args) {
 		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
-		if (!$this->amIAuthenticated()) {
+		if (!$this->amIAuthenticated(true)) {
 			$this->l->error($this->tr . " - " . __METHOD__ . " - Not authenticated");
 			return;
 		}
@@ -120,8 +120,7 @@ class Teams extends \Presenters\MainPresenter {
 
 		if (!$tokenResponse->success) {
 			$this->l->error($this->tr . " - " . __METHOD__ . " - Error geting new token: " . $authResponse->message); 
-#			$f3->error(401, "Error authenticating: " . $authResponse->message);
-			$f3->reroute($f3->get('baseStaticPath') . '?error=' . urlencode('Authentication error'));
+			$f3->error(401, "Error authenticating: " . $authResponse->message);
 		}
 
 		$f3->set('SESSION.accessToken', $tokenResponse->accessToken);
@@ -136,34 +135,6 @@ class Teams extends \Presenters\MainPresenter {
 		$response->success = true;
 		$f3->set('data', $response);
 	} 
-
-	function getConfig($f3, $args) {
-
-		$response = new \Response($this->tr);
-		$response->result->teamsLoginUrl = 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=' . $f3->get('client_id') . '&response_type=code&redirect_uri=' . urlencode($f3->get('redirectUriTeams')) . '&response_mode=query&scope=' . urlencode($f3->get('scope')) . '&state=' . $this->tr;
-		$response->success = true;
-		$f3->set('page_type', 'AJAX');
-		$f3->set('data', $response);
-	} 
-
-	function amIAuthenticated($ajax = false) {
-		$f3=\Base::instance();
-
-#		if ( empty($f3->get('SESSION.userId')) ) {
-		if ( empty($f3->get('SESSION.accessToken')) || empty($f3->get('SESSION.refreshToken')) ) {
-			$this->l->error($this->tr . " - " . __METHOD__ . " - no tokens - " . print_r($f3->get('SESSION'), true));
-			if ($ajax) {
-				$f3->set('page_type', 'AJAX');
-				$response = new \Response($this->tr);
-				$response->message = 'Not authenticated';
-				$f3->set('data', $response);
-				return false;
-			} else {
-				$f3->reroute($f3->get('baseStaticPath'));
-			}
-		}
-		return true;
-	}
 
 	function afterroute($f3) {
 		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
