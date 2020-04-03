@@ -49,8 +49,8 @@ class ServiceBase {
 	function amIAuthenticated($ajax = false) {
 		$f3=\Base::instance();
 
-#		if ( empty($f3->get('SESSION.accessToken')) ) {
-		if ( empty($f3->get('SESSION.accessToken')) || empty($f3->get('SESSION.refreshToken')) ) {
+		if ( empty($f3->get('SESSION.accessToken')) ) {
+#		if ( empty($f3->get('SESSION.accessToken')) || empty($f3->get('SESSION.refreshToken')) ) {
 			$this->l->error($this->tr . " - " . __METHOD__ . " - no tokens - " . print_r($f3->get('SESSION'), true));
 			if ($ajax) {
 				$f3->set('page_type', 'AJAX');
@@ -112,6 +112,17 @@ class ServiceBase {
 
 	}
 
+	function logout($f3) {
+
+		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
+
+
+		$f3->clear('SESSION');
+
+		$f3->reroute($f3->get('baseStaticPath'));
+		
+
+	}
 
 
 }

@@ -91,6 +91,7 @@ if ($f3->get('ENV') == 'DEV') {
 }
 
 $f3->route('GET /config', '\Services\ServiceBase->getConfig');
+$f3->route('GET /logout', '\Services\ServiceBase->logout');
 
 $f3->route('GET /teams/login', '\Services\Teams->login');
 $f3->route('GET /teams', '\Services\Teams->status');

@@ -125,17 +125,5 @@ class GCal extends \Services\ServiceBase {
 
 	}
 
-	function logout($f3) {
-
-		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
-
-		session_destroy();
-
-		$f3->reroute('/');
-		
-
-	}
-
-
 }
 ?>
