@@ -17,10 +17,18 @@ class ServiceBase {
 		$this->gcalProvider = new Google([
 		    'clientId'     => $f3->get('gcal_client_id'),
 		    'clientSecret' => $f3->get('gcal_client_secret'),
-		    'redirectUri'  => $f3->get('redirectUriGCal'),
+		    'redirectUri'  => $f3->get('baseAppPath') . '/gcal/login',
 		    'accessType'   => 'offline',
+		    'prompt'       => 'consent'
 //		    'proxy'                   => 'localhost:8888',
 //    		'verify'                  => false
+		]);
+
+		//https://github.com/adam-paterson/oauth2-slack
+		$this->slackProvider = new \AdamPaterson\OAuth2\Client\Provider\Slack([
+		    'clientId'          => $f3->get('slack_client_id'),
+		    'clientSecret'      => $f3->get('slack_client_secret'),
+		    'redirectUri'       => $f3->get('baseAppPath') . '/slack/login',
 		]);
 
 	}
@@ -39,8 +47,13 @@ class ServiceBase {
 		    ],
 		]);
 
+		$slackLoginUrl = $this->slackProvider->getAuthorizationUrl([
+			'scope' => 'users:read'
+		]);
+
 		$response->result->teamsLoginUrl = $teamsLoginUrl;
 		$response->result->gcalLoginUrl = $gcalLoginUrl;
+		$response->result->slackLoginUrl = $slackLoginUrl;
 		$response->success = true;
 		$f3->set('page_type', 'AJAX');
 		$f3->set('data', $response);

@@ -35,7 +35,6 @@ if (!empty(getenv('STATUSLIGHT_ENV')) && (strtoupper(getenv('PRES_ENV')) != 'PRO
 }
 
 $f3->set('redirectUriTeams', $f3->get('baseAppPath') . '/teams/login');
-$f3->set('redirectUriGCal', $f3->get('baseAppPath') . '/gcal/login');
 $f3->set('scope', 'offline_access user.read Presence.Read');
 #$f3->set('scope', 'offline_access Presence.Read');
 

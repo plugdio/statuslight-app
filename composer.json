@@ -4,6 +4,7 @@
         "league/oauth2-google": "^3.0",
         "bcosca/fatfree": "^3.7",
         "monolog/monolog": "^1.25",
-        "bramus/monolog-colored-line-formatter": "^2.0"
+        "bramus/monolog-colored-line-formatter": "^2.0",
+        "adam-paterson/oauth2-slack": "^1.1"
     }
 }
