@@ -102,6 +102,10 @@ $f3->route('GET /gcal', '\Services\GCal->status');
 $f3->route('GET /gcal/token', '\Services\GCal->getToken');
 
 
+$f3->route('GET /slack/login', '\Services\Slack->login');
+$f3->route('GET /slack', '\Services\Slack->status');
+$f3->route('GET /slack/token', '\Services\Slack->getToken');
+
 try {
     $f3->run();
 } catch (Exception $e) {

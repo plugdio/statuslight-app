@@ -20,6 +20,8 @@
 				<a id="teamsLogin" href="#">Login with Teams</a>
 				<br>
 				<a id="gcalLogin" href="#">Login with Google</a>
+        <br>
+        <a id="slackLogin" href="#">Login with Slack</a>
 
 			</check>
 		</div>
@@ -65,6 +67,7 @@
             if (data.success == true) {
               $('#teamsLogin').attr("href", data.result.teamsLoginUrl);
               $('#gcalLogin').attr("href", data.result.gcalLoginUrl);
+              $('#slackLogin').attr("href", data.result.slackLoginUrl);
             } else {
               console.log('Something went wrong #2: ' + data.message);
             }
