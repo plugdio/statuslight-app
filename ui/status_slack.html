@@ -91,7 +91,7 @@
 				xhr.send();
 			};
 
-			var getJSON3 = function(method, url, token, callback) {
+			var getJSON3 = function(method, url, payload, callback) {
 				var xhr = new XMLHttpRequest();
 				xhr.open(method, url, true);
 				if (token != null) {
@@ -110,7 +110,7 @@
 				if (method == 'GET') {
 					xhr.send();	
 				} else {
-					xhr.send('token=' + token);
+					xhr.send(payload);
 				}
 				
 			};
@@ -149,31 +149,28 @@
 
 			function checkStatus (token) {
 				console.log('Getting the status ...');
+				console.log('User id: {{ @SESSION.user_id }}');
 				if (token != null) {
-					getJSON3('POST', 'https://slack.com/api/users.getPresence', token, function(err, data) {
+					getJSON3('POST', 'https://slack.com/api/users.info', 'token=' + token + '&user={{ @SESSION.user_id }}', function(err, data) {
 						if (err !== null) {
 							console.log('Something went wrong #0: ' + err);
 							$('#statusContainer').attr('class','container vh-100 bg-secondary');
 							$('#statusIcon').attr('class','fas fa-info text-light');
 							$('#statusText').text('Something went wrong');
 						} else {
-							console.log('presence: ' + JSON.stringify(data));
-							if (data.presence == 'active') {
+							console.log('user info: ' + JSON.stringify(data));
+							if (data.user.profile.status_text == '') {
 								$('#statusContainer').attr('class','container vh-100 bg-success');
 								$('#statusIcon').attr('class','fas fa-check text-light');
 								$('#statusText').text("Available"); 
-							} else if (data.availability == 'Busy') {
-								$('#statusContainer').attr('class','container vh-100 bg-danger');
-								$('#statusIcon').attr('class','fas fa-phone text-light');
-								$('#statusText').text("Busy"); 
-							} else if (data.availability == 'DoNotDisturb') {
+							} else if (data.user.profile.status_text == 'In a meeting') {
 								$('#statusContainer').attr('class','container vh-100 bg-danger');
 								$('#statusIcon').attr('class','fas fa-ban text-light');
-								$('#statusText').text("Do Not Disturb"); 
-							} else if (data.presence == 'away') {
+								$('#statusText').text("In a meeting"); 
+							} else if (data.user.profile.status_text != '') {
 								$('#statusContainer').attr('class','container vh-100 bg-warning');
 								$('#statusIcon').attr('class','fas fa-clock text-light');
-								$('#statusText').text("Away"); 
+								$('#statusText').text(data.user.profile.status_text); 
 							} else if (data.availability == 'BeRightBack') {
 								$('#statusContainer').attr('class','container vh-100 bg-warning');
 								$('#statusIcon').attr('class','fas fa-clock text-light');

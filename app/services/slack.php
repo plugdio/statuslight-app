@@ -34,9 +34,27 @@ class Slack extends \Services\ServiceBase {
     	
 
 			$f3->set('SESSION.accessToken', $token->getToken());
+			$userId = $this->slackProvider->getAuthorizedUser($token)->getId();
+
+			$this->l->debug($this->tr . " - " . __METHOD__ . " - userId: " . print_r($userId, true));
+
+/*
+			try {
+ 
+        		// We got an access token, let's now get the user's details
+        		$team = $this->slackProvider->getResourceOwner($token);
+        		$this->l->debug($this->tr . " - " . __METHOD__ . " - team: " . print_r($team, true));
+ 
+		    } catch (Exception $e) {
+ 
+		        // Failed to get user details
+		        $this->l->error($this->tr . " - " . __METHOD__ . " - Exception2: " . print_r($e, true));
+		    }
+*/
 #			$f3->set('SESSION.refreshToken', $token->getRefreshToken());
 #			$f3->set('SESSION.accessTokenExpiresOn', $token->getExpires());
 
+		    $f3->set('SESSION.user_id', $userId);
 			$f3->reroute('/slack');
 		}
 
