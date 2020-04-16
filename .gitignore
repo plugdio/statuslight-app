@@ -1,10 +1,9 @@
-/tmp/*.php
-/data/*.json
+/src/tmp/*.php
+/src/data/*.json
 /.git/
-/logs/*.log
-/uploads/*
+/src/logs/*.log
+/src/uploads/*
 /test/*
-/vendor
-/composer.phar
+/src/vendor
+/src/composer.phar
 *.log
-composer.lock

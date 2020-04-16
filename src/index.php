@@ -24,15 +24,23 @@ $f3 = \Base::instance();
 
 $f3->set('CORS.origin', '*'); 
 
-if (!empty(getenv('STATUSLIGHT_ENV')) && (strtoupper(getenv('PRES_ENV')) != 'PROD') ) {
+
+if (empty(getenv('STATUSLIGHT_ENV')) || (strtoupper(getenv('STATUSLIGHT_ENV')) == 'DEV')) {
     $f3->set('ENV', 'DEV');
     $f3->set('baseStaticPath', 'http://localhost:8000');
-    $f3->set('baseAppPath', 'http://localhost:8000');
-} else {
+    $f3->set('baseAppPath', 'http://localhost:8000');    
+} elseif ( (strtoupper(getenv('STATUSLIGHT_ENV')) == 'TEST') ) {
+    $f3->set('ENV', 'TEST');
+    $f3->set('baseStaticPath', 'http://test.statuslight.online');
+    $f3->set('baseAppPath', 'http://test.statuslight.online');
+} elseif ( (strtoupper(getenv('STATUSLIGHT_ENV')) == 'PROD') ) {
     $f3->set('ENV', 'PROD');
     $f3->set('baseStaticPath', 'https://statuslight.online');
     $f3->set('baseAppPath', 'https://my.statuslight.online');
+} else {
+    $f3->error(500, "Unknown environment");
 }
+
 
 $f3->set('redirectUriTeams', $f3->get('baseAppPath') . '/teams/login');
 $f3->set('scope', 'offline_access user.read Presence.Read');
@@ -78,7 +86,7 @@ foreach (getallheaders() as $name => $value) {
 }
 */
 
-if ($f3->get('ENV') == 'DEV') {
+if ( ($f3->get('ENV') == 'DEV') || ($f3->get('ENV') == 'TEST') ) {
     $f3->route('GET /', '\Services\ServiceBase->blank');
 } else {
     $f3->route('GET|HEAD /',
@@ -86,8 +94,9 @@ if ($f3->get('ENV') == 'DEV') {
             $f3->reroute('https://statuslight.online');
         }
     );
-    $f3->route('GET /blank', '\Services\ServiceBase->blank');
 }
+
+$f3->route('GET /blank', '\Services\ServiceBase->blank');
 
 $f3->route('GET /config', '\Services\ServiceBase->getConfig');
 $f3->route('GET /logout', '\Services\ServiceBase->logout');
