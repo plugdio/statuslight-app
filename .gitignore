@@ -6,4 +6,5 @@
 /test/*
 /src/vendor
 /src/composer.phar
+/src/start.sh
 *.log
