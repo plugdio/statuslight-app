@@ -1,6 +1,8 @@
 #!/bin/bash
 
-docker-compose pull
+git pull origin master
+
 docker-compose stop
 docker-compose rm -f
-docker-compose up -d
+docker-compose pull
+docker-compose up --build -d
