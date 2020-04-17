@@ -31,8 +31,8 @@ if (empty(getenv('STATUSLIGHT_ENV')) || (strtoupper(getenv('STATUSLIGHT_ENV')) =
     $f3->set('baseAppPath', 'http://localhost:8000');    
 } elseif ( (strtoupper(getenv('STATUSLIGHT_ENV')) == 'TEST') ) {
     $f3->set('ENV', 'TEST');
-    $f3->set('baseStaticPath', 'http://test.statuslight.online');
-    $f3->set('baseAppPath', 'http://test.statuslight.online');
+    $f3->set('baseStaticPath', 'https://test.statuslight.online');
+    $f3->set('baseAppPath', 'https://test.statuslight.online');
 } elseif ( (strtoupper(getenv('STATUSLIGHT_ENV')) == 'PROD') ) {
     $f3->set('ENV', 'PROD');
     $f3->set('baseStaticPath', 'https://statuslight.online');
