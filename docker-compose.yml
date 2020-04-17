@@ -4,6 +4,8 @@ services:
   php:
     container_name: php
     build: './php/'
+    environment:
+      - STATUSLIGHT_ENV
     networks:
       - backend
     volumes:

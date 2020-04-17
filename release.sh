@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export STATUSLIGHT_ENV="TEST"
+
 git pull origin master
 
 docker-compose stop
