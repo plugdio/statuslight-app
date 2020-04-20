@@ -1,8 +1,9 @@
 # https://www.cloudreach.com/en/resources/blog/containerize-this-how-to-use-php-apache-mysql-within-docker-containers/
+#https://stackoverflow.com/questions/37015624/how-to-run-a-cron-job-inside-a-docker-container
 version: "3.2"
 services:
   php:
-    container_name: php
+    container_name: sla_php
     build: './php/'
     environment:
       - STATUSLIGHT_ENV
@@ -11,7 +12,7 @@ services:
     volumes:
       - ./src/:/var/www/html
   nginx:
-    container_name: nginx
+    container_name: sla_nginx
     build: './nginx/'
     networks:
       - frontend
@@ -25,6 +26,7 @@ services:
     depends_on:
       - php
   composer:
+    container_name: sla_composer
     image: composer:latest
     command: ["composer", "install", "--ignore-platform-reqs"]
     volumes:

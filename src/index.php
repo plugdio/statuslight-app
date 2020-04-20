@@ -24,8 +24,7 @@ $f3 = \Base::instance();
 
 $f3->set('CORS.origin', '*'); 
 
-
-if (empty(getenv('STATUSLIGHT_ENV')) || (strtoupper(getenv('STATUSLIGHT_ENV')) == 'DEV')) {
+if (empty(getenv('STATUSLIGHT_ENV')) || (rtrim(strtoupper(getenv('STATUSLIGHT_ENV'))) == 'DEV')) {
     $f3->set('ENV', 'DEV');
     $f3->set('baseStaticPath', 'http://localhost:8000');
     $f3->set('baseAppPath', 'http://localhost:8000');    
@@ -38,7 +37,8 @@ if (empty(getenv('STATUSLIGHT_ENV')) || (strtoupper(getenv('STATUSLIGHT_ENV')) =
     $f3->set('baseStaticPath', 'https://statuslight.online');
     $f3->set('baseAppPath', 'https://my.statuslight.online');
 } else {
-    $f3->error(500, "Unknown environment");
+    $f3->error(500, "Unknown environment: " . strtoupper(getenv('STATUSLIGHT_ENV')));
+
 }
 
 
@@ -114,6 +114,12 @@ $f3->route('GET /gcal/token', '\Services\GCal->getToken');
 $f3->route('GET /slack/login', '\Services\Slack->login');
 $f3->route('GET /slack', '\Services\Slack->status');
 $f3->route('GET /slack/token', '\Services\Slack->getToken');
+
+$f3->route('GET /jobs/getstatus',
+        function($f3) {
+            echo "getstatus - " . php_sapi_name();
+        }
+    );
 
 try {
     $f3->run();
