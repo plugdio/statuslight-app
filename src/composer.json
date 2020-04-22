@@ -5,6 +5,7 @@
         "bcosca/fatfree": "^3.7",
         "monolog/monolog": "^1.25",
         "bramus/monolog-colored-line-formatter": "^2.0",
-        "adam-paterson/oauth2-slack": "^1.1"
+        "adam-paterson/oauth2-slack": "^1.1",
+        "thenetworg/oauth2-azure": "^1.4"
     }
 }

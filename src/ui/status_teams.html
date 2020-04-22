@@ -97,13 +97,13 @@
 				now = Math.floor(Date.now() / 1000);
 
 				if (tokenExpiresOn < now + 600) {
-					console.log('Token to be refreshed');
+					console.log('Token to be refreshed (' + tokenExpiresOn + ')');
 					getJSON('{{ @baseAppPath }}/teams/token', null, function(err, data) {
 						if (err !== null) {
 							console.log('Something went wrong #1: ' + err);
 						} else {
 							if (data.success == true) {
-								console.log('token: ' + data.result.accessToken);
+								console.log('got the token: ' + data.result.accessToken);
 								token = data.result.accessToken;
 								tokenExpiresOn = data.result.accessTokenExpiresOn;
 							} else {
@@ -127,7 +127,7 @@
 				if (token != null) {
 					getJSON('https://graph.microsoft.com/beta/me/presence', token, function(err, data) {
 						if (err !== null) {
-							console.log('Something went wrong #0: ' + err);
+							console.log('Something went wrong #0: ' + err + " - " + JSON.stringify(data));
 							$('#statusContainer').attr('class','container vh-100 bg-secondary');
 							$('#statusIcon').attr('class','fas fa-info text-light');
 							$('#statusText').text('Something went wrong');

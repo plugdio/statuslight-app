@@ -42,11 +42,6 @@ if (empty(getenv('STATUSLIGHT_ENV')) || (rtrim(strtoupper(getenv('STATUSLIGHT_EN
 }
 
 
-$f3->set('redirectUriTeams', $f3->get('baseAppPath') . '/teams/login');
-$f3->set('scope', 'offline_access user.read Presence.Read');
-#$f3->set('scope', 'offline_access Presence.Read');
-
-
 $path = realpath(dirname(__FILE__)) . "/";
 $f3->set('path', $path);
 $f3->set('AUTOLOAD', $path . 'app/');

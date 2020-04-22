@@ -27,6 +27,13 @@ class Teams extends \Services\ServiceBase {
 			$this->l->debug($this->tr . " - " . __METHOD__ . " - logged in");
 		}
 
+		// Check given state against previously stored one to mitigate CSRF attack
+#		} elseif (empty($_GET['state']) || ($_GET['state'] !== $_SESSION['oauth2state'])) {
+#		    unset($_SESSION['oauth2state']);
+#		    exit('Invalid state');
+#		}
+
+/*
 		$this->graph = new \GraphAPI($f3->get('scope'), $f3->get('redirectUriTeams'), $this->tr, $this->l);
 		$this->graph->setAuthParams($f3->get('client_id'), $f3->get('client_secret'), $authCode);
 
@@ -37,10 +44,28 @@ class Teams extends \Services\ServiceBase {
 #			$f3->error(401, "Error authenticating: " . $authResponse->message);
 			$f3->reroute($f3->get('baseStaticPath') . '?error=' . urlencode('Authentication error'));
 		}
+*/
 
+	    $token = $this->teamsProvider->getAccessToken('authorization_code', [
+	        'code' => $authCode,
+//	        'resource' => 'https://graph.microsoft.com/',
+	    ]);
+
+    	try {
+    		$this->l->debug($this->tr . " - " . __METHOD__ . " - token: " . print_r($token, true));
+    	} catch (Exception $e) {
+    		$this->l->error($this->tr . " - " . __METHOD__ . " - Exception: " . print_r($e, true));
+    	}
+/*
 		$f3->set('SESSION.accessToken', $authResponse->accessToken);
 		$f3->set('SESSION.refreshToken', $authResponse->refreshToken);
 		$f3->set('SESSION.accessTokenExpiresOn', $authResponse->accessTokenExpiresOn);
+*/
+
+		$f3->set('SESSION.accessToken', $token->getToken());
+		$f3->set('SESSION.refreshToken', $token->getRefreshToken());
+		$f3->set('SESSION.accessTokenExpiresOn', $token->getExpires());
+
 /*
 		$userProfileResponse = $this->graph->getSignedInUser();
 
@@ -118,16 +143,17 @@ class Teams extends \Services\ServiceBase {
 
 			$tokenResponse = $this->graph->getToken('refresh_token');
 
-		if (!$tokenResponse->success) {
-			$this->l->error($this->tr . " - " . __METHOD__ . " - Error geting new token: " . $authResponse->message); 
-			$f3->error(401, "Error authenticating: " . $authResponse->message);
-		}
+			if (!$tokenResponse->success) {
+				$this->l->error($this->tr . " - " . __METHOD__ . " - Error geting new token: " . $authResponse->message); 
+				$f3->error(401, "Error authenticating: " . $authResponse->message);
+			}
 
-		$f3->set('SESSION.accessToken', $tokenResponse->accessToken);
-		$f3->set('SESSION.refreshToken', $tokenResponse->refreshToken);
-		$f3->set('SESSION.accessTokenExpiresOn', $tokenResponse->accessTokenExpiresOn);
+			$f3->set('SESSION.accessToken', $tokenResponse->accessToken);
+			$f3->set('SESSION.refreshToken', $tokenResponse->refreshToken);
+			$f3->set('SESSION.accessTokenExpiresOn', $tokenResponse->accessTokenExpiresOn);
 
 		}
+		$this->l->debug($this->tr . " - " . __METHOD__ . " - Using current token");
 
 		$response->result->accessToken = $f3->get('SESSION.accessToken');
 		$response->result->accessTokenExpiresOn = $f3->get('SESSION.accessTokenExpiresOn');
@@ -137,7 +163,7 @@ class Teams extends \Services\ServiceBase {
 	} 
 
 	function afterroute($f3) {
-		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
+#		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
 
 		if ($f3->get('page_type') == 'AJAX') {
 			header('Content-Type: application/json');

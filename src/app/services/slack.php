@@ -101,7 +101,7 @@ class Slack extends \Services\ServiceBase {
 
 
 	function afterroute($f3) {
-		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
+#		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
 
 		if ($f3->get('page_type') == 'AJAX') {
 			header('Content-Type: application/json');
