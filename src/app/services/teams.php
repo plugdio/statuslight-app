@@ -33,18 +33,6 @@ class Teams extends \Services\ServiceBase {
 #		    exit('Invalid state');
 #		}
 
-/*
-		$this->graph = new \GraphAPI($f3->get('scope'), $f3->get('redirectUriTeams'), $this->tr, $this->l);
-		$this->graph->setAuthParams($f3->get('client_id'), $f3->get('client_secret'), $authCode);
-
-		$authResponse = $this->graph->getToken('authorization_code');
-
-		if (!$authResponse->success) {
-			$this->l->error($this->tr . " - " . __METHOD__ . " - Error authenticating: " . $authResponse->message); 
-#			$f3->error(401, "Error authenticating: " . $authResponse->message);
-			$f3->reroute($f3->get('baseStaticPath') . '?error=' . urlencode('Authentication error'));
-		}
-*/
 
 	    $token = $this->teamsProvider->getAccessToken('authorization_code', [
 	        'code' => $authCode,
@@ -56,34 +44,14 @@ class Teams extends \Services\ServiceBase {
     	} catch (Exception $e) {
     		$this->l->error($this->tr . " - " . __METHOD__ . " - Exception: " . print_r($e, true));
     	}
-/*
-		$f3->set('SESSION.accessToken', $authResponse->accessToken);
-		$f3->set('SESSION.refreshToken', $authResponse->refreshToken);
-		$f3->set('SESSION.accessTokenExpiresOn', $authResponse->accessTokenExpiresOn);
-*/
 
 		$f3->set('SESSION.accessToken', $token->getToken());
 		$f3->set('SESSION.refreshToken', $token->getRefreshToken());
 		$f3->set('SESSION.accessTokenExpiresOn', $token->getExpires());
 
-/*
-		$userProfileResponse = $this->graph->getSignedInUser();
+		$sessionModel = new \Models\Session();
+		$sessionModel->saveSession(SESSION_TYPE_TEAMS, $token);
 
-		if (!$userProfileResponse->success) {
-			$this->l->error($this->tr . " - " . __METHOD__ . " - error getting the user: " . print_r($userProfileResponse, true)); 
-#			$f3->set('SESSION.accessToken', null);
-#			$f3->set('SESSION.refreshToken', null);
-			$f3->error(401, "Error getting user details");
-		}
-
-		$userModel = new \Models\UserModel();
-		$userResponse = $userModel->saveUser($userProfileResponse->result, $authResponse->accessToken, $authResponse->refreshToken);
-
-		$this->l->error($this->tr . " - " . __METHOD__ . " - user: " . print_r($userResponse->result['id'], true)); 
-
-		$f3->set('SESSION.userId', $userResponse->result['id']);
-		$f3->set('SESSION.signed_in_user', $userProfileResponse->result->displayName);
-*/
 		$f3->reroute('/teams');
 
 

@@ -5,7 +5,7 @@ date_default_timezone_set("Europe/Oslo");
 require 'vendor/autoload.php';
 
 require_once "lib/helpers.php";
-require_once "lib/graphapi.php";
+require_once "lib/constants.php";
 
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
@@ -110,12 +110,13 @@ $f3->route('GET /slack/login', '\Services\Slack->login');
 $f3->route('GET /slack', '\Services\Slack->status');
 $f3->route('GET /slack/token', '\Services\Slack->getToken');
 
-$f3->route('GET /jobs/getstatus',
+$f3->route('GET /jobs/getstatus', '\Models\Session->refreshSessions');
+/*
         function($f3) {
             echo "getstatus - " . php_sapi_name();
         }
     );
-
+*/
 try {
     $f3->run();
 } catch (Exception $e) {

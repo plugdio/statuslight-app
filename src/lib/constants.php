@@ -1,0 +1,9 @@
+<?php
+
+const SESSION_TYPE_TEAMS = 'TEAMS';
+
+const SESSION_STATE_ACTIVE = 'ACTIVE';
+const SESSION_STATE_INACTIVE = 'INACTIVE';
+
+
+?>

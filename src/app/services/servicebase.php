@@ -17,7 +17,8 @@ class ServiceBase {
 		$this->teamsProvider = new Azure([
 		    'clientId'          => $f3->get('teams_client_id'),
 		    'clientSecret'      => $f3->get('teams_client_secret'),
-		    'redirectUri'  => $f3->get('baseAppPath') . '/teams/login',
+		    'redirectUri'		=> $f3->get('baseAppPath') . '/teams/login',
+		    'authWithResource' 	=> false,
 //		    'proxy'                   => 'localhost:8888',
 //    		'verify'                  => false
 		]);
@@ -25,7 +26,6 @@ class ServiceBase {
 		$this->teamsProvider->pathAuthorize = "/oauth2/v2.0/authorize";
 		$this->teamsProvider->pathToken = "/oauth2/v2.0/token";
 		$this->teamsProvider->scope = ["offline_access user.read Presence.Read"];
-		$this->teamsProvider->authWithResource = false;
 
 		// login link: https://developers.google.com/identity/protocols/oauth2/web-server
 		// https://github.com/thephpleague/oauth2-client
