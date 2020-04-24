@@ -3,8 +3,8 @@
 /.git/
 /src/logs/*.log
 /src/uploads/*
-/test/*
 /src/vendor
 /src/composer.phar
 /src/start.sh
 *.log
+/mosquitto/data/*

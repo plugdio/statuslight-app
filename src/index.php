@@ -11,7 +11,9 @@ use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use \Bramus\Monolog\Formatter\ColoredLineFormatter;
 
-$logStream = new Monolog\Handler\StreamHandler('logs/pres_' . date('Y-m-d', time()) . '.log', Monolog\Logger::DEBUG);
+$path = realpath(dirname(__FILE__)) . "/";
+
+$logStream = new Monolog\Handler\StreamHandler($path . 'logs/pres_' . date('Y-m-d', time()) . '.log', Monolog\Logger::DEBUG);
 $logStdOut = new Monolog\Handler\StreamHandler('php://stdout', Monolog\Logger::DEBUG);
 
 $logStdOut->setFormatter(new ColoredLineFormatter());
@@ -41,8 +43,6 @@ if (empty(getenv('STATUSLIGHT_ENV')) || (rtrim(strtoupper(getenv('STATUSLIGHT_EN
 
 }
 
-
-$path = realpath(dirname(__FILE__)) . "/";
 $f3->set('path', $path);
 $f3->set('AUTOLOAD', $path . 'app/');
 $f3->set('dbdir', $path . 'data/');
