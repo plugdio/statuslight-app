@@ -11,7 +11,7 @@ class Session {
 		$this->tr = $f3->get('tr');
 		$this->l = $f3->get('log');
 		
-        $db = new \DB\Jig('data/', \DB\Jig::FORMAT_JSON);
+        $db = new \DB\Jig($f3->get('dbdir'), \DB\Jig::FORMAT_JSON);
         $this->session = new \DB\Jig\Mapper($db, 'sessions.json');
 	}
 
