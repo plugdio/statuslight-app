@@ -1,6 +1,6 @@
 # https://www.cloudreach.com/en/resources/blog/containerize-this-how-to-use-php-apache-mysql-within-docker-containers/
 #https://stackoverflow.com/questions/37015624/how-to-run-a-cron-job-inside-a-docker-container
-version: "3.2"
+version: "2.4"
 services:
   php:
     container_name: sla_php
@@ -28,8 +28,12 @@ services:
   mosquitto:
     image: eclipse-mosquitto
     container_name: sla_mosquitto
+    expose:
+      - "1883"
+      - "9001"
     ports:
       - "1883:1883"
+    mem_limit: 150m
     volumes:
       - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
       - ./mosquitto/data/:/mosquitto/data/
