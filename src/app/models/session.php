@@ -45,27 +45,40 @@ class Session {
 
 			$accessToken = unserialize($this->session->token);
 
-			if ($accessToken->hasExpired()) {
-				$this->l->debug($this->tr . " - " . __METHOD__ . " - token needs to be refreshed");
-            	$accessToken = $provider->getAccessToken('refresh_token', [
-                	'refresh_token' => $accessToken->getRefreshToken(),
-            	]);
-            	$this->session->token = serialize($accessToken);
-        	}
+			try {
 
-			$response = $provider->request('get', $ref, $accessToken, []);
+				if ($accessToken->hasExpired()) {
+					$this->l->debug($this->tr . " - " . __METHOD__ . " - token needs to be refreshed");
+	            	$accessToken = $provider->getAccessToken('refresh_token', [
+	                	'refresh_token' => $accessToken->getRefreshToken(),
+	            	]);
+	            	$this->session->token = serialize($accessToken);
+	        	}
 
-			$this->l->debug($this->tr . " - " . __METHOD__ . " - response: " . print_r($response, true));
+				$response = $provider->request('get', $ref, $accessToken, []);
 
-			if (array_key_exists('availability', $response)) {
-				$this->session->lastUpdatedTime = time();
-				$this->session->save();
-			} else {
-				$this->session->SESSION_STATE_INACTIVE;
-				$this->session->lastUpdatedTime = time();
-				$this->session->save();
+				$this->l->debug($this->tr . " - " . __METHOD__ . " - response: " . print_r($response, true));
+
+			} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
+				$this->l->error($this->tr . " - " . __METHOD__ . " - Caught exception " . $e->getMessage() . ' - ' . $e->getTraceAsString());
+				$response = array(
+					'exception' => $e->getMessage()
+				);
 			}
 
+
+			if (array_key_exists('availability', $response)) {
+
+			} elseif (array_key_exists('exception', $response)) {
+				$this->session->state = SESSION_STATE_ERROR;
+				$this->session->error = $response["exception"];
+			} else {
+				$this->session->state = SESSION_STATE_INACTIVE;
+
+			}
+			
+			$this->session->lastUpdatedTime = time();
+			$this->session->save();
 			$this->session->next();
 		}
 	}

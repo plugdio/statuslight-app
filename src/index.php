@@ -52,7 +52,7 @@ $tr = substr(md5(uniqid(rand(), true)),0,6);
 $f3->set('tr', $tr);
 $f3->config('config.ini');
 
-
+/*
 $f3->set('ONERROR',
     function($f3) {
 
@@ -71,7 +71,7 @@ $f3->set('ONERROR',
         echo $f3->get('ERROR.text');
     }
 );
-
+*/
 
 $log->debug($tr . " - " . 'init' . " - START  ");
 $log->info($tr . ' - New request: ' . $_SERVER["REQUEST_METHOD"] . " " . $_SERVER["REQUEST_URI"] . " - " . $_SERVER["AUTH_USER"]);
