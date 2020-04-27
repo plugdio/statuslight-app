@@ -3,7 +3,7 @@
 version: "2.4"
 services:
   php:
-    container_name: sla_php
+    container_name: sl_php
     build: './php/'
     environment:
       - STATUSLIGHT_ENV
@@ -12,7 +12,7 @@ services:
     volumes:
       - ./src/:/var/www/html
   nginx:
-    container_name: sla_nginx
+    container_name: sl_nginx
     build: './nginx/'
     networks:
       - frontend
@@ -27,7 +27,7 @@ services:
       - composer
   mosquitto:
     image: eclipse-mosquitto
-    container_name: sla_mosquitto
+    container_name: sl_mosquitto
     expose:
       - "1883"
       - "9001"
@@ -36,6 +36,7 @@ services:
 #    mem_limit: 150m
     volumes:
       - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./mosquitto/acl.conf:/mosquitto/config/acl.conf
       - ./mosquitto/data/:/mosquitto/data/
     networks:
       - frontend
@@ -43,7 +44,7 @@ services:
     depends_on:
       - nginx
   composer:
-    container_name: sla_composer
+    container_name: sl_composer
     image: composer:latest
     command: ["composer", "install", "--ignore-platform-reqs"]
     volumes:
