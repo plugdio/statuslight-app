@@ -24,7 +24,7 @@ services:
       - ./src/:/var/www/html
       - ./letsencrypt/:/etc/letsencrypt/
     depends_on:
-      - php
+      - composer
   mosquitto:
     image: eclipse-mosquitto
     container_name: sla_mosquitto
@@ -33,19 +33,23 @@ services:
       - "9001"
     ports:
       - "1883:1883"
-    mem_limit: 150m
+#    mem_limit: 150m
     volumes:
       - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
       - ./mosquitto/data/:/mosquitto/data/
     networks:
       - frontend
       - backend
+    depends_on:
+      - nginx
   composer:
     container_name: sla_composer
     image: composer:latest
     command: ["composer", "install", "--ignore-platform-reqs"]
     volumes:
       - ./src/:/app
+    depends_on:
+      - php
 
 networks:
   frontend:
