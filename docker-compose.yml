@@ -25,19 +25,32 @@ services:
       - ./letsencrypt/:/etc/letsencrypt/
     depends_on:
       - composer
+#  mosquitto:
+#    image: eclipse-mosquitto
+#    container_name: sl_mosquitto
+#    expose:
+#      - "1883"
+#      - "9001"
+#    ports:
+#      - "1883:1883"
+#    volumes:
+#      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+#      - ./mosquitto/acl.conf:/mosquitto/config/acl.conf
+#      - ./mosquitto/data/:/mosquitto/data/
+#    networks:
+#      - frontend
+#      - backend
+#    depends_on:
+#      - nginx
   mosquitto:
-    image: eclipse-mosquitto
+    build: './mosquitto2/'
     container_name: sl_mosquitto
-    expose:
-      - "1883"
-      - "9001"
     ports:
       - "1883:1883"
-#    mem_limit: 150m
     volumes:
-      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
-      - ./mosquitto/acl.conf:/mosquitto/config/acl.conf
-      - ./mosquitto/data/:/mosquitto/data/
+      - ./mosquitto2/mosquitto.conf:/etc/mosquitto/mosquitto.conf
+#      - ./mosquitto2/acl.conf:/mosquitto/config/acl.conf
+#      - ./mosquitto2/data/:/mosquitto/data/
     networks:
       - frontend
       - backend
