@@ -49,8 +49,8 @@ services:
       - "1883:1883"
     volumes:
       - ./mosquitto2/mosquitto.conf:/etc/mosquitto/mosquitto.conf
-#      - ./mosquitto2/acl.conf:/mosquitto/config/acl.conf
-#      - ./mosquitto2/data/:/mosquitto/data/
+      - ./mosquitto2/conf/:/etc/mosquitto.d/
+      - ./mosquitto2/data/:/var/lib/mosquitto/
     networks:
       - frontend
       - backend
