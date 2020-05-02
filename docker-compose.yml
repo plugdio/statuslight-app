@@ -8,18 +8,18 @@ services:
     environment:
       - STATUSLIGHT_ENV
     networks:
-      - backend:
-          ipv4_address: 172.20.0.3
+      backend:
+        ipv4_address: 172.20.0.3
     volumes:
       - ./src/:/var/www/html
   nginx:
     container_name: sl_nginx
     build: './nginx/'
     networks:
-      - frontend:
-          ipv4_address: 172.10.0.2
-      - backend:
-          ipv4_address: 172.20.0.2
+      frontend:
+        ipv4_address: 172.10.0.2
+      backend:
+        ipv4_address: 172.20.0.2
     ports:
       - "80:80"
       - "443:443"
@@ -55,10 +55,10 @@ services:
       - ./mosquitto2/conf/:/etc/mosquitto.d/
       - ./mosquitto2/data/:/var/lib/mosquitto/
     networks:
-      - frontend:
-          ipv4_address: 172.10.0.4
-      - backend:
-          ipv4_address: 172.20.0.4
+      frontend:
+        ipv4_address: 172.10.0.4
+      backend:
+        ipv4_address: 172.20.0.4
     depends_on:
       - nginx
   composer:
