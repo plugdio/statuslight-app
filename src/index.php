@@ -122,9 +122,9 @@ $f3->route('POST /backend/mqtt/auth', function($f3) {
             echo "1";
         }
     );
-/*
+
 $f3->route('POST /backend/mqtt/supersuer', function($f3) {
-            echo "0";
+            echo "1";
         }
     );
 
@@ -132,7 +132,7 @@ $f3->route('POST /backend/mqtt/acl', function($f3) {
             echo "1";
         }
     );
-*/
+
 
 try {
     $f3->run();
