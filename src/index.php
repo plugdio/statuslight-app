@@ -117,6 +117,23 @@ $f3->route('GET /jobs/getstatus', '\Models\Session->refreshSessions');
         }
     );
 */
+
+$f3->route('POST /backend/mqtt/auth', function($f3) {
+            echo "1";
+        }
+    );
+/*
+$f3->route('POST /backend/mqtt/supersuer', function($f3) {
+            echo "0";
+        }
+    );
+
+$f3->route('POST /backend/mqtt/acl', function($f3) {
+            echo "1";
+        }
+    );
+*/
+
 try {
     $f3->run();
 } catch (Exception $e) {

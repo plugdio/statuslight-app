@@ -53,7 +53,7 @@ services:
     volumes:
       - ./mosquitto2/mosquitto.conf:/etc/mosquitto/mosquitto.conf
       - ./mosquitto2/conf/:/etc/mosquitto.d/
-      - ./mosquitto2/data/:/var/lib/mosquitto/
+#      - ./mosquitto2/data/:/var/lib/mosquitto/
     networks:
       frontend:
         ipv4_address: 172.10.0.4
