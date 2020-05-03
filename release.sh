@@ -3,6 +3,8 @@
 export STATUSLIGHT_ENV="TEST"
 
 git pull origin master
+#git fetch
+#git reset --hard origin/master
 
 docker-compose stop
 docker-compose rm -f
