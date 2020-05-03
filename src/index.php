@@ -123,7 +123,7 @@ $f3->route('POST /backend/mqtt/auth', function($f3) {
         }
     );
 
-$f3->route('POST /backend/mqtt/supersuer', function($f3) {
+$f3->route('POST /backend/mqtt/superuser', function($f3) {
             echo "1";
         }
     );
