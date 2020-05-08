@@ -9,13 +9,44 @@ class Teams extends \Services\ServiceBase {
 		parent::__construct();
 	}
 
-
-	function login() {
+	public static function getProvider($redirectUri) {
 		$f3=\Base::instance();
-		$this->l->debug($this->tr . " - " . __METHOD__ . " - START - " . print_r($f3->get('REQUEST'), true));
+		// https://github.com/thenetworg/oauth2-azure
+		$teamsProvider = new \TheNetworg\OAuth2\Client\Provider\Azure([
+		    'clientId'          => $f3->get('teams_client_id'),
+		    'clientSecret'      => $f3->get('teams_client_secret'),
+		    'redirectUri'		=> $f3->get('baseAppPath') . $redirectUri,
+		    'authWithResource' 	=> false,
+//		    'proxy'                   => 'localhost:8888',
+//    		'verify'                  => false
+		]);
+
+		$teamsProvider->pathAuthorize = "/oauth2/v2.0/authorize";
+		$teamsProvider->pathToken = "/oauth2/v2.0/token";
+		$teamsProvider->scope = ["offline_access user.read Presence.Read"];
+
+		return $teamsProvider;
+	} 
+
+	public static function getLoginUrl($loginType) {
+
+		if ($loginType == 'phone') {
+			return self::getProvider('/teams/login')->getAuthorizationUrl();
+		} elseif ($loginType == 'device') {
+			return self::getProvider('/device/login/teams')->getAuthorizationUrl();
+		} else {
+			return null;
+		}
+	} 
+
+	public static function getTokens($redirectUri) {
+		$f3=\Base::instance();
+		
+		$tr = $f3->get('tr');
+		$l = $f3->get('log');
 
 		if ( !empty($f3->get('REQUEST.error')) ) {
-			$this->l->error($this->tr . " - " . __METHOD__ . " - Error authenticating: " . $f3->get('REQUEST.error') . ", " . $f3->get('REQUEST.error_description'));
+			$l->error($tr . " - " . __METHOD__ . " - Error authenticating: " . $f3->get('REQUEST.error') . ", " . $f3->get('REQUEST.error_description'));
 #			$f3->error(401, "Authentication error");
 			$f3->reroute($f3->get('baseStaticPath') . '?error=' . urlencode('Authentication error'));
 			return;
@@ -24,7 +55,7 @@ class Teams extends \Services\ServiceBase {
 			$f3->reroute($f3->get('baseStaticPath'));
 		} elseif ( !empty($f3->get('REQUEST.code')) ) {
 			$authCode = $f3->get('REQUEST.code');
-			$this->l->debug($this->tr . " - " . __METHOD__ . " - logged in");
+			$l->debug($tr . " - " . __METHOD__ . " - logged in");
 		}
 
 		// Check given state against previously stored one to mitigate CSRF attack
@@ -33,28 +64,32 @@ class Teams extends \Services\ServiceBase {
 #		    exit('Invalid state');
 #		}
 
+		try {
+		    $token = self::getProvider($redirectUri)->getAccessToken('authorization_code', [
+		        'code' => $authCode,
+	//	        'resource' => 'https://graph.microsoft.com/',
+		    ]);
 
-	    $token = $this->teamsProvider->getAccessToken('authorization_code', [
-	        'code' => $authCode,
-//	        'resource' => 'https://graph.microsoft.com/',
-	    ]);
+#	   		$l->debug($tr . " - " . __METHOD__ . " - token: " . print_r($token, true));
+		} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
+			$l->error($tr . " - " . __METHOD__ . " - Caught exception " . $e->getMessage() . ' - ' . $e->getTraceAsString());
+			return null;
+		}
 
-    	try {
-    		$this->l->debug($this->tr . " - " . __METHOD__ . " - token: " . print_r($token, true));
-    	} catch (Exception $e) {
-    		$this->l->error($this->tr . " - " . __METHOD__ . " - Exception: " . print_r($e, true));
-    	}
+	    return $token;
+		
+	}
 
-		$f3->set('SESSION.accessToken', $token->getToken());
-		$f3->set('SESSION.refreshToken', $token->getRefreshToken());
-		$f3->set('SESSION.accessTokenExpiresOn', $token->getExpires());
-
-		$sessionModel = new \Models\Session();
-		$sessionModel->saveSession(SESSION_TYPE_TEAMS, $token);
+	function login() {
+		$token = self::getTokens('/teams/login');
+		
+		if (!empty($token)) {
+			$f3->set('SESSION.accessToken', $token->getToken());
+			$f3->set('SESSION.refreshToken', $token->getRefreshToken());
+			$f3->set('SESSION.accessTokenExpiresOn', $token->getExpires());
+		}
 
 		$f3->reroute('/teams');
-
-
 	}
 
 	function status($f3, $args) {
@@ -62,34 +97,6 @@ class Teams extends \Services\ServiceBase {
 		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
 
 		$this->amIAuthenticated();
-/*
-		$userId = $f3->get('SESSION.userId');
-		$userModel = new \Models\UserModel();
-
-		$userResponse = $userModel->getUser($userId);
-		if (!$userResponse->success) {
-			$f3->set('SESSION.userId', null);
-			$f3->reroute('/');
-		}
-
-		$accessToken = $userResponse->result['teamsTokens']['accessToken'];
-		$refreshToken = $userResponse->result['teamsTokens']['refreshToken'];
-
-
-		$this->graph = new \GraphAPI($f3->get('scope'), $f3->get('redirectUriTeams'), $this->tr, $this->l);
-		$this->graph->setTokens($accessToken, $refreshToken);
-
-		$presenceResponse = $this->graph->getMyPresence();
-
-		if ($presenceResponse->result->availability == 'Available') {
-			$f3->set('bg_class', 'bg-success');
-		} else {
-			$f3->set('bg_class', 'bg-danger');
-		}
-		
-		$f3->set('current_page', 'STATUS');
-		$f3->set('presence', json_encode($presenceResponse->result, JSON_PRETTY_PRINT));
-*/
 	}
 
 
@@ -125,7 +132,6 @@ class Teams extends \Services\ServiceBase {
 
 		$response->result->accessToken = $f3->get('SESSION.accessToken');
 		$response->result->accessTokenExpiresOn = $f3->get('SESSION.accessTokenExpiresOn');
-#		$response->result->refreshToken = $f3->get('SESSION.refreshToken');
 		$response->success = true;
 		$f3->set('data', $response);
 	} 

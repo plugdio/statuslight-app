@@ -17,12 +17,21 @@
 			<br>
 
 			<check if="{{ @current_page=='REGISTER' }}">
-				<a id="teamsLogin" href="#">Login with Teams</a>
+				<h3>Phone</h3>
+        <a id="teamsLogin" href="#">Login with Teams</a>
 				<br>
 				<a id="gcalLogin" href="#">Login with Google</a>
         <br>
         <a id="slackLogin" href="#">Login with Slack</a>
 
+        <hr>
+        <h3>Device</h3>
+        <a id="teamsLoginDevice" href="#">Login with Teams</a>
+<!--        <br>
+        <a id="gcalLogin" href="#">Login with Google</a>
+        <br>
+        <a id="slackLogin" href="#">Login with Slack</a>
+-->
 			</check>
 		</div>
 
@@ -68,6 +77,8 @@
               $('#teamsLogin').attr("href", data.result.teamsLoginUrl);
               $('#gcalLogin').attr("href", data.result.gcalLoginUrl);
               $('#slackLogin').attr("href", data.result.slackLoginUrl);
+
+              $('#teamsLoginDevice').attr("href", data.result.teamsLoginUrlDevice);
             } else {
               console.log('Something went wrong #2: ' + data.message);
             }

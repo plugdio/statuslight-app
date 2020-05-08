@@ -75,11 +75,6 @@ $f3->set('ONERROR',
 
 $log->debug($tr . " - " . 'init' . " - START  ");
 $log->info($tr . ' - New request: ' . $_SERVER["REQUEST_METHOD"] . " " . $_SERVER["REQUEST_URI"] . " - " . $_SERVER["AUTH_USER"]);
-/*
-foreach (getallheaders() as $name => $value) {
-    $log->debug($tr . ' -  ' . $name . ' : ' . $value);
-}
-*/
 
 if ( ($f3->get('ENV') == 'DEV') || ($f3->get('ENV') == 'TEST') ) {
     $f3->route('GET /', '\Services\ServiceBase->blank');
@@ -111,6 +106,10 @@ $f3->route('GET /slack', '\Services\Slack->status');
 $f3->route('GET /slack/token', '\Services\Slack->getToken');
 
 $f3->route('GET /jobs/getstatus', '\Models\Session->refreshSessions');
+
+$f3->route('GET /device', '\Presenters\Device->main');
+$f3->route('GET /device/login/teams', '\Presenters\Device->loginWithTeams');
+
 /*
         function($f3) {
             echo "getstatus - " . php_sapi_name();

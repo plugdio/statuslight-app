@@ -3,30 +3,15 @@
 namespace Services;
 
 use League\OAuth2\Client\Provider\Google;
-use TheNetworg\OAuth2\Client\Provider\Azure;
 
 class ServiceBase {
-
 
 	function __construct() {
 		$f3=\Base::instance();
 		$this->tr = $f3->get('tr');
 		$this->l = $f3->get('log');
 
-		// https://github.com/thenetworg/oauth2-azure
-		$this->teamsProvider = new Azure([
-		    'clientId'          => $f3->get('teams_client_id'),
-		    'clientSecret'      => $f3->get('teams_client_secret'),
-		    'redirectUri'		=> $f3->get('baseAppPath') . '/teams/login',
-		    'authWithResource' 	=> false,
-//		    'proxy'                   => 'localhost:8888',
-//    		'verify'                  => false
-		]);
-
-		$this->teamsProvider->pathAuthorize = "/oauth2/v2.0/authorize";
-		$this->teamsProvider->pathToken = "/oauth2/v2.0/token";
-		$this->teamsProvider->scope = ["offline_access user.read Presence.Read"];
-
+		
 		// login link: https://developers.google.com/identity/protocols/oauth2/web-server
 		// https://github.com/thephpleague/oauth2-client
 		$this->gcalProvider = new Google([
@@ -54,7 +39,11 @@ class ServiceBase {
 
 		$response = new \Response($this->tr);
 
-		$teamsLoginUrl = $this->teamsProvider->getAuthorizationUrl();
+#		$teamsLoginUrl = self::getTeamsProvider('/teams/login')->getAuthorizationUrl();
+#		$teamsLoginUrlDevice = self::getTeamsProvider('/device/login/teams')->getAuthorizationUrl();
+
+		$teamsLoginUrl = \Services\Teams::getLoginUrl('phone');
+		$teamsLoginUrlDevice = \Services\Teams::getLoginUrl('device');
 
 		$gcalLoginUrl = $this->gcalProvider->getAuthorizationUrl([
 		    'scope' => [
@@ -69,6 +58,9 @@ class ServiceBase {
 		$response->result->teamsLoginUrl = $teamsLoginUrl;
 		$response->result->gcalLoginUrl = $gcalLoginUrl;
 		$response->result->slackLoginUrl = $slackLoginUrl;
+		
+		$response->result->teamsLoginUrlDevice = $teamsLoginUrlDevice;
+
 		$response->success = true;
 		$f3->set('page_type', 'AJAX');
 		$f3->set('data', $response);

@@ -1,6 +1,6 @@
 <?php
 
-const SESSION_TYPE_TEAMS = 'TEAMS';
+const PROVIDER_AZURE = 'azure';
 
 const SESSION_STATE_ACTIVE = 'ACTIVE';
 const SESSION_STATE_INACTIVE = 'INACTIVE';

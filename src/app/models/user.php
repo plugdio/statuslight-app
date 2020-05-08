@@ -2,7 +2,7 @@
 
 namespace Models;
 
-class UserModel {
+class User {
 
 	function __construct() {
 		$f3=\Base::instance();		
@@ -13,32 +13,27 @@ class UserModel {
         $this->user = new \DB\Jig\Mapper($db, 'users.json');
 	}
 
-	function saveUser($teamsProfile, $accessToken, $refreshToken) {
+	function saveUser($id, $provider, $name, $email) {
 
 		$response = new \Response($this->tr);
-		$this->user->load(array('@teamsId=?', $teamsProfile->id));
+		$this->user->load(array('@id=?', $id));
 		if ($this->user->dry()) {
 			$this->user->id = guid();
-			$this->user->teamsId = $teamsProfile->id;
-			$this->user->teamsProfile = $teamsProfile;
+			$this->user->provider = $provider;
+			$this->user->name = $name;
+			$this->user->email = $email;
 			$this->user->save();
 		}
-		$teamsTokens = new \stdClass();
-		$teamsTokens->accessToken = $accessToken;
-		$teamsTokens->refreshToken = $refreshToken;
-		$this->user->teamsTokens = $teamsTokens;
-		$this->user->save();
-
 		$response->result = $this->user->cast();
 		$response->success = true;
 		return $response;
 
 	}
 
-	function getUser($userId) {
+	function getUser($id) {
 
 		$response = new \Response($this->tr);
-		$this->user->load(array('@id=?', $userId));
+		$this->user->load(array('@id=?', $id));
 		if ($this->user->dry()) {
 			$response->message = 'User not found';
 			return $response;

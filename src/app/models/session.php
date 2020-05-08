@@ -15,13 +15,27 @@ class Session {
         $this->session = new \DB\Jig\Mapper($db, 'sessions.json');
 	}
 
-	function saveSession($sessionType = null, $token = null) {
+	function saveSession($sessionType, $userId, $token) {
     	$this->session->type = $sessionType;
+    	$this->session->userId = $userId;
     	$this->session->token = serialize($token);
     	$this->session->startTime = time();
     	$this->session->lastUpdatedTime = time();
     	$this->session->state = SESSION_STATE_ACTIVE;
     	$this->session->save();
+	}
+
+	function getActiveSessionForUser($userId) {
+		$response = new \Response($this->tr);
+		$this->session->load(array('@userId=? AND @state=?', $userId, SESSION_STATE_ACTIVE));
+		if ($this->session->dry()) {
+			$response->message = 'Session not found';
+			return $response;
+		}
+
+		$response->result = $this->session->cast();
+		$response->success = true;
+		return $response;
 	}
 
 	function refreshSessions() {
@@ -43,19 +57,19 @@ class Session {
 			$provider->urlAPI = 'https://graph.microsoft.com/beta/';
 			$ref = 'me/presence';
 
-			$accessToken = unserialize($this->session->token);
+			$token = unserialize($this->session->token);
 
 			try {
 
-				if ($accessToken->hasExpired()) {
+				if ($token->hasExpired()) {
 					$this->l->debug($this->tr . " - " . __METHOD__ . " - token needs to be refreshed");
-	            	$accessToken = $provider->getAccessToken('refresh_token', [
-	                	'refresh_token' => $accessToken->getRefreshToken(),
+	            	$token = $provider->getAccessToken('refresh_token', [
+	                	'refresh_token' => $token->getRefreshToken(),
 	            	]);
-	            	$this->session->token = serialize($accessToken);
+	            	$this->session->token = serialize($token);
 	        	}
 
-				$response = $provider->request('get', $ref, $accessToken, []);
+				$response = $provider->request('get', $ref, $token, []);
 
 				$this->l->debug($this->tr . " - " . __METHOD__ . " - response: " . print_r($response, true));
 
