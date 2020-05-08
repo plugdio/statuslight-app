@@ -55,14 +55,32 @@ class Device {
 
 		$this->amIAuthenticated();
 
+		$userId = $f3->get('SESSION.userId');
+
 		$sessionModel = new \Models\Session();
-		$sessionResponse = $sessionModel->getActiveSessionForUser($f3->get('SESSION.userId'));
+		$sessionResponse = $sessionModel->getActiveSessionForUser($userId);
 
 		if (!$sessionResponse->success) {
 			//TODO
 		}
 
 		$f3->set('session_id', $sessionResponse->result['_id']);
+
+		$deviceModel = new \Models\Device();
+		$deviceResponse = $deviceModel->getDeviceByUserId($userId);
+
+		if (!$deviceResponse->success) {
+
+			$pin = mt_rand(100000, 999999);
+			while (!$deviceModel->isPinUnique($pin)) {
+				$pin = mt_rand(100000, 999999);
+			}
+
+			$deviceResponse = $deviceModel->addTempDevice($userId, $pin);
+		}
+
+		$f3->set('device', $deviceResponse->result);
+
 	}
 
 

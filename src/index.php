@@ -117,20 +117,9 @@ $f3->route('GET /device/login/teams', '\Presenters\Device->loginWithTeams');
     );
 */
 
-$f3->route('POST /backend/mqtt/auth', function($f3) {
-            echo "1";
-        }
-    );
-
-$f3->route('POST /backend/mqtt/superuser', function($f3) {
-            echo "1";
-        }
-    );
-
-$f3->route('POST /backend/mqtt/acl', function($f3) {
-            echo "1";
-        }
-    );
+$f3->route('POST /backend/mqtt/auth', '\Backend\Mqtt->auth');
+$f3->route('POST /backend/mqtt/superuser', '\Backend\Mqtt->superuser');
+$f3->route('POST /backend/mqtt/acl', '\Backend\Mqtt->acl');
 
 
 try {

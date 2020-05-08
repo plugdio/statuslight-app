@@ -18,7 +18,13 @@
       		<h3>Device</h3>
       		<p>Hello {{ @SESSION.name }}!</p>
       		<p>Session: {{ @session_id }}</p>
-			<check if="{{ @current_page=='MAIN' }}">
+			<check if="{{ @device['state'] == 'TEMP' }}">
+				<true>
+					<p>Add a device with this PIN: {{ @device['pin'] }}</p>
+				</true>
+				<false>
+					<p>Your existing device: {{ @device['_id'] }}</p>
+				</false>
 			</check>
 
 		</div>

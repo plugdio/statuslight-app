@@ -18,7 +18,7 @@ class User {
 		$response = new \Response($this->tr);
 		$this->user->load(array('@id=?', $id));
 		if ($this->user->dry()) {
-			$this->user->id = guid();
+			$this->user->id = $id;
 			$this->user->provider = $provider;
 			$this->user->name = $name;
 			$this->user->email = $email;
