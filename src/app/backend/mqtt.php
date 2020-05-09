@@ -62,7 +62,7 @@ class Mqtt {
 
 	function acl($f3, $args) {
 		# username=jane%40mens.de&password=&topic=t%2F1&acc=2&clientid=JANESUB
-		$this->l->debug($this->tr . " - " . __METHOD__ . " - START - " . $f3->get('BODY'));
+#		$this->l->debug($this->tr . " - " . __METHOD__ . " - START - " . $f3->get('BODY'));
 
 		$clientId = $f3->get('POST.username');
 		$topic = urldecode($f3->get('POST.topic'));
@@ -71,6 +71,14 @@ class Mqtt {
 
 		if (empty($clientId) || empty($topic) || empty($acc)) {
 			$this->l->debug($this->tr . " - " . __METHOD__ . " - MQTT acl failed: missing params");
+			$f3->error(403);
+		}
+
+		if (preg_match('/^SL\/' . $clientId . '\/.*/', $topic)) {
+			echo 'ok';
+			return;
+		} else {
+			$this->l->debug($this->tr . " - " . __METHOD__ . " - MQTT acl rejected - clientId: " . $clientId . ", topic: " . $topic);
 			$f3->error(403);
 		}
 
