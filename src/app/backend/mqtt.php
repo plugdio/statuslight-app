@@ -14,7 +14,8 @@ class Mqtt {
 
 	function auth($f3, $args) {
 		# username=jane%40mens.de&password=jolie&topic=&acc=-1
-		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
+		$this->l->debug($this->tr . " - " . __METHOD__ . " - START - " . $f3->get('BODY'));
+		$this->l->debug($this->tr . " - " . __METHOD__ . " - START - ", $f3->get('POST'));
 
 		$clientId = $f3->get('POST.username');
 		$password = $f3->get('POST.password');
@@ -43,7 +44,7 @@ class Mqtt {
 		
 		$this->l->debug($this->tr . " - " . __METHOD__ . " - Active device not found with clientId: " . $clientId . ' and PIN: ' . $pin );
 
-		$deviceResponse = $deviceModel->getDeviceByPin($clientId, $password);
+		$deviceResponse = $deviceModel->getDeviceByClientPin($clientId, $password);
 		if ($deviceResponse->success) {
 			$this->l->debug($this->tr . " - " . __METHOD__ . " - Temp device has been activated with clientId: " . $clientId);
 			echo "ok";
@@ -62,7 +63,7 @@ class Mqtt {
 
 	function acl($f3, $args) {
 		# username=jane%40mens.de&password=&topic=t%2F1&acc=2&clientid=JANESUB
-		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
+		$this->l->debug($this->tr . " - " . __METHOD__ . " - START - " . $f3->get('BODY'));
 
 		$clientId = $f3->get('POST.username');
 		$topic = urldecode($f3->get('POST.topic'));
