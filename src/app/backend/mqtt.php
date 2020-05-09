@@ -77,6 +77,9 @@ class Mqtt {
 		if (preg_match('/^SL\/' . $clientId . '\/.*/', $topic)) {
 			echo 'ok';
 			return;
+		} elseif (preg_match('/^SL\/\$broadcast\/$/', $topic)) {
+			echo 'ok';
+			return;
 		} else {
 			$this->l->debug($this->tr . " - " . __METHOD__ . " - MQTT acl rejected - clientId: " . $clientId . ", topic: " . $topic);
 			$f3->error(403);
