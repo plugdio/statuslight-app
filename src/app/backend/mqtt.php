@@ -34,8 +34,8 @@ class Mqtt {
 		}
 
 		$deviceModel = new \Models\Device();
-		$deviceResult = $deviceModel->getDeviceByClientId($clientId, $password);
-		if ($deviceResult->success) {
+		$deviceResponse = $deviceModel->getDeviceByClientId($clientId, $password);
+		if ($deviceResponse->success) {
 			$this->l->debug($this->tr . " - " . __METHOD__ . " - Device authenticated with clientId: " . $clientId);
 			echo "ok";
 			return;
@@ -43,10 +43,8 @@ class Mqtt {
 		
 		$this->l->debug($this->tr . " - " . __METHOD__ . " - Active device not found with clientId: " . $clientId . ' and PIN: ' . $pin );
 
-		}
-
-		$deviceResult = $deviceModel->getDeviceByPin($clientId, $password);
-		if ($deviceResult->success) {
+		$deviceResponse = $deviceModel->getDeviceByPin($clientId, $password);
+		if ($deviceResponse->success) {
 			$this->l->debug($this->tr . " - " . __METHOD__ . " - Temp device has been activated with clientId: " . $clientId);
 			echo "ok";
 			return;
