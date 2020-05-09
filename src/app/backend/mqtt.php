@@ -31,6 +31,8 @@ class Mqtt {
 				$this->l->debug($this->tr . " - " . __METHOD__ . " - MQTT auth failed: admin credentials don't match");
 				$f3->error(403);
 			}
+			echo "ok";
+			return;
 		}
 
 		$deviceModel = new \Models\Device();
@@ -57,7 +59,7 @@ class Mqtt {
 	}
 
 	function superuser($f3, $args) {
-		$this->l->debug($this->tr . " - " . __METHOD__ . " - START - " . $f3->get('BODY'));
+#		$this->l->debug($this->tr . " - " . __METHOD__ . " - START - " . $f3->get('BODY'));
 		$f3->error(403);
 	}
 
