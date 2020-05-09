@@ -57,6 +57,7 @@ class Mqtt {
 	}
 
 	function superuser($f3, $args) {
+		$this->l->debug($this->tr . " - " . __METHOD__ . " - START - " . $f3->get('BODY'));
 		$f3->error(403);
 	}
 
@@ -77,7 +78,7 @@ class Mqtt {
 		if (preg_match('/^SL\/' . $clientId . '\/.*/', $topic)) {
 			echo 'ok';
 			return;
-		} elseif (preg_match('/^SL\/\$broadcast\/$/', $topic)) {
+		} elseif (preg_match('/^SL\/\$broadcast\/\s?$/', $topic)) {
 			echo 'ok';
 			return;
 		} else {
