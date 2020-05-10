@@ -27,6 +27,7 @@ $f3 = \Base::instance();
 $f3->set('CORS.origin', '*'); 
 
 if (empty(getenv('STATUSLIGHT_ENV')) || (rtrim(strtoupper(getenv('STATUSLIGHT_ENV'))) == 'DEV')) {
+    $f3->set('DEBUG',3);
     $f3->set('ENV', 'DEV');
     $f3->set('baseStaticPath', 'http://localhost:8000');
     $f3->set('baseAppPath', 'http://localhost:8000');    
@@ -107,6 +108,8 @@ $f3->route('GET /slack/token', '\Services\Slack->getToken');
 
 $f3->route('GET /jobs/getstatus', '\Models\Session->refreshSessions');
 
+$f3->route('GET /mqttconnect', '\Backend\MqttComm->subscribe');
+
 $f3->route('GET /device', '\Presenters\Device->main');
 $f3->route('GET /device/login/teams', '\Presenters\Device->loginWithTeams');
 
@@ -117,9 +120,9 @@ $f3->route('GET /device/login/teams', '\Presenters\Device->loginWithTeams');
     );
 */
 
-$f3->route('POST /backend/mqtt/auth', '\Backend\Mqtt->auth');
-$f3->route('POST /backend/mqtt/superuser', '\Backend\Mqtt->superuser');
-$f3->route('POST /backend/mqtt/acl', '\Backend\Mqtt->acl');
+$f3->route('POST /backend/mqtt/auth', '\Backend\MqttAuth->auth');
+$f3->route('POST /backend/mqtt/superuser', '\Backend\MqttAuth->superuser');
+$f3->route('POST /backend/mqtt/acl', '\Backend\MqttAuth->acl');
 
 
 try {

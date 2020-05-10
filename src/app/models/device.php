@@ -38,16 +38,25 @@ class Device {
 			$response->message = 'Device not found';
 			return $response;
 		}
-		if ($this->device->state == DEVICE_STATE_TEMP) {
-			if ($this->device->validity < time()) {
-				$this->device->state = DEVICE_STATE_INACTIVE;
-				$this->device->save();
-				$response->message = 'Device not found';
-				return $response;		
+
+		$response->result = array();
+
+		while (!$this->device->dry()) {
+			if ($this->device->state == DEVICE_STATE_TEMP) {
+				if ($this->device->validity < time()) {
+					$this->device->state = DEVICE_STATE_INACTIVE;
+					$this->device->save();
+					$response->message = 'Device not found';
+					return $response;		
+				} else {
+					$response->result[] = $this->device->cast();
+				}
+			} else {
+				$response->result[] = $this->device->cast();
 			}
+			$this->device->next();
 		}
 
-		$response->result = $this->device->cast();
 		$response->success = true;
 		return $response;
 

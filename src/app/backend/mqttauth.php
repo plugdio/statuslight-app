@@ -2,7 +2,7 @@
 
 namespace Backend;
 
-class Mqtt {
+class MqttAuth {
 
 
 	function __construct() {

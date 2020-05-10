@@ -67,8 +67,26 @@ class Device {
 		$f3->set('session_id', $sessionResponse->result['_id']);
 
 		$deviceModel = new \Models\Device();
+		$mqttClientModel = new \Models\MqttClient();
 		$deviceResponse = $deviceModel->getDeviceByUserId($userId);
 
+		$myDevices = array();
+
+		if ($deviceResponse->success && count($deviceResponse->result) > 0) {
+			foreach ($deviceResponse->result as $device) {
+				$clientResponse = $mqttClientModel->getClientById($device["clientId"]);
+				if ($clientResponse->success) {
+					$device["clientState"] = $clientResponse->result["state"];
+					$device["updated"] = date('Y-m-d H:i:s', $clientResponse->result["updated"]);
+				} else {
+					$device["state"] = '-';
+					$device["updated"] = '-';
+				}
+				$myDevices[] = $device;
+			}
+		}
+
+/*
 		if (!$deviceResponse->success) {
 
 			$pin = mt_rand(100000, 999999);
@@ -78,8 +96,8 @@ class Device {
 
 			$deviceResponse = $deviceModel->addTempDevice($userId, $pin);
 		}
-
-		$f3->set('device', $deviceResponse->result);
+*/
+		$f3->set('myDevices', $myDevices);
 
 	}
 
@@ -98,7 +116,6 @@ class Device {
 
 	function afterroute($f3) {
 #		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
-
 		echo \Template::instance()->render('device.html');
 
 	}
