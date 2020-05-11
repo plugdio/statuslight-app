@@ -39,8 +39,8 @@ class Session {
 	}
 
 	function refreshSessions($f3, $args) {
-
-		$env = $args["env"];
+		$this->l->debug($this->tr . " - " . __METHOD__ . " - START - " . $f3->get('GET.env'));
+		$env = $f3->get('GET.env');
 		if (strtoupper($env) != $f3->get('ENV')) {
 			$f3->set('ENV', $env);
 			if ($env != 'DEV') {
