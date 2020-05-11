@@ -13,4 +13,4 @@ RUN /usr/bin/crontab /crontab.txt
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-ENTRYPOINT [ "sh", "-c", "./entrypoint.sh" ]
+ENTRYPOINT [ "sh", "-c", "/entrypoint.sh" ]
