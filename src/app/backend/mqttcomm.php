@@ -15,10 +15,10 @@ class MqttComm {
 		$this->l = $f3->get('log');
 
 		$this->broker = new \phpMQTT('test.statuslight.online', 1883, 'statuslightapp'); 
-		if ($this->broker->connect(true, NULL, 'adm_app', 'sladmin123')) {
+		if ($this->broker->connect(true, NULL, 'adm_app_' . $f3->get('ENV'), 'sladmin123')) {
 			$this->l->debug($this->tr . " - " . __METHOD__ . " - Conected to the broker");
 		} else {
-			$this->l->error($this->tr . " - " . __METHOD__ . " - Connection to broker failed");
+			$this->l->error($this->tr . " - " . __METHOD__ . " - Connection to broker failed with user " . 'adm_app_' . $f3->get('ENV'));
 			$this->broker = null;
 		}
 
@@ -43,6 +43,11 @@ class MqttComm {
 
 	public function subscribe() {
 		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
+
+		if (empty($this->broker)) {
+			$this->l->error($this->tr . " - " . __METHOD__ . " - No broker connetion");
+			return;
+		}
 
 		$topics['SL/#'] = array("qos"=>0, "function"=>'\Backend\MqttComm::procMqttMessage');
 		$this->broker->subscribe($topics, 0);

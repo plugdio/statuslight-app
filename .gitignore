@@ -6,5 +6,6 @@
 /src/vendor
 /src/composer.phar
 /src/start.sh
+/src/mqttconnect.sh
 *.log
 /mosquitto/data/*
