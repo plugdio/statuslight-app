@@ -23,7 +23,7 @@ class MqttComm {
 		$mqttUser = 'adm_app_' . $f3->get('ENV');
 		$mqttPass = 'sladmin123';
 
-		$l->info($tr . " - " . __METHOD__ . " - Connecting to: " . $mqttHost);
+		$this->l->info($tr . " - " . __METHOD__ . " - Connecting to: " . $mqttHost);
 
 		$this->broker = new \phpMQTT($mqttHost, $mqttPort, 'statuslightapp'); 
 		if ($this->broker->connect(true, NULL, $mqttUser, $mqttPass)) {

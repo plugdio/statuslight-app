@@ -74,7 +74,7 @@ $f3->set('ONERROR',
 );
 */
 
-$log->debug($tr . " - " . 'init' . " - START  ");
+$log->debug($tr . " - " . 'init' . " - START - ENV: " . getenv('STATUSLIGHT_ENV'));
 $log->info($tr . ' - New request: ' . $_SERVER["REQUEST_METHOD"] . " " . $_SERVER["REQUEST_URI"] . " - " . $_SERVER["AUTH_USER"]);
 
 if ( ($f3->get('ENV') == 'DEV') || ($f3->get('ENV') == 'TEST') ) {
