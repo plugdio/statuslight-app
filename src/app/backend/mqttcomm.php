@@ -14,11 +14,20 @@ class MqttComm {
 		$this->tr = $f3->get('tr');
 		$this->l = $f3->get('log');
 
-		$this->broker = new \phpMQTT('test.statuslight.online', 1883, 'statuslightapp'); 
-		if ($this->broker->connect(true, NULL, 'adm_app_' . $f3->get('ENV'), 'sladmin123')) {
+		if ($f3->get('ENV') == 'DEV') {
+			$mqttHost = 'test.statuslight.online';
+		} else {
+			$mqttHost = 'sl_mosquitto.statuslight-app_backend';
+		}
+		$mqttPort = 1883;
+		$mqttUser = 'adm_app_' . $f3->get('ENV');
+		$mqttPass = 'sladmin123';
+
+		$this->broker = new \phpMQTT($mqttHost, $mqttPort, 'statuslightapp'); 
+		if ($this->broker->connect(true, NULL, $mqttUser, $mqttPass)) {
 			$this->l->debug($this->tr . " - " . __METHOD__ . " - Conected to the broker");
 		} else {
-			$this->l->error($this->tr . " - " . __METHOD__ . " - Connection to broker failed with user " . 'adm_app_' . $f3->get('ENV'));
+			$this->l->error($this->tr . " - " . __METHOD__ . " - Connection to broker failed with user " . $mqttUser);
 			$this->broker = null;
 		}
 
