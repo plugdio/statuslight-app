@@ -1,9 +1,5 @@
 #!/bin/sh
 
-#echo "$1"
-
-set
-
 # Kick off cron
 /usr/sbin/crond -f -d 8 &
 

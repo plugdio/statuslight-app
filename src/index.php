@@ -106,7 +106,7 @@ $f3->route('GET /slack/login', '\Services\Slack->login');
 $f3->route('GET /slack', '\Services\Slack->status');
 $f3->route('GET /slack/token', '\Services\Slack->getToken');
 
-$f3->route('GET /jobs/getstatus', '\Models\Session->refreshSessions');
+$f3->route('GET /jobs/getstatus?env=@env', '\Models\Session->refreshSessions');
 
 $f3->route('GET /mqttconnect', '\Backend\MqttComm->subscribe');
 

@@ -38,8 +38,15 @@ class Session {
 		return $response;
 	}
 
-	function refreshSessions() {
-		$f3=\Base::instance();
+	function refreshSessions($f3, $args) {
+
+		$env = $args["env"];
+		if (strtoupper($env) != $f3->get('ENV')) {
+			$f3->set('ENV', $env);
+			if ($env != 'DEV') {
+				$f3->set('DEBUG', 0);
+			}
+		}
 
 		$this->session->load(array('@state=?', SESSION_STATE_ACTIVE));
 		while(!$this->session->dry()) {
