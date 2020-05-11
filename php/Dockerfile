@@ -12,4 +12,6 @@ RUN /usr/bin/crontab /crontab.txt
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-ENTRYPOINT [ "/entrypoint.sh" ]
+#ENTRYPOINT [ "/entrypoint.sh" ]
+#CMD [$STATUSLIGHT_ENV]
+ENTRYPOINT [ "sh", "-c", "./entrypoint.sh" ]
