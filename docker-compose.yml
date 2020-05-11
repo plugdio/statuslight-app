@@ -12,6 +12,8 @@ services:
         ipv4_address: 172.20.0.3
     volumes:
       - ./src/:/var/www/html
+    depends_on:
+      - mosquitto
   nginx:
     container_name: sl_nginx
     build: './nginx/'
@@ -27,7 +29,7 @@ services:
       - ./src/:/var/www/html
       - ./letsencrypt/:/etc/letsencrypt/
     depends_on:
-      - composer
+      - php
   mosquitto:
     build: './mosquitto/'
     container_name: sl_mosquitto
@@ -43,15 +45,13 @@ services:
       backend:
         ipv4_address: 172.20.0.4
     depends_on:
-      - nginx
+      - composer
   composer:
     container_name: sl_composer
     image: composer:latest
     command: ["composer", "install", "--ignore-platform-reqs"]
     volumes:
       - ./src/:/app
-    depends_on:
-      - php
 
 networks:
   frontend:
