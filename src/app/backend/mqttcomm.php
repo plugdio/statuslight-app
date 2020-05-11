@@ -25,12 +25,15 @@ class MqttComm {
 
 		$this->l->info($this->tr . " - " . __METHOD__ . " - Connecting to: " . $mqttHost);
 
-		$this->broker = new \phpMQTT($mqttHost, $mqttPort, 'statuslightapp'); 
-		if ($this->broker->connect(true, NULL, $mqttUser, $mqttPass)) {
-			$this->l->debug($this->tr . " - " . __METHOD__ . " - Conected to the broker");
-		} else {
-			$this->l->error($this->tr . " - " . __METHOD__ . " - Connection to broker failed with user " . $mqttUser);
-			$this->broker = null;
+		while ($this->broker = null) {
+			$this->broker = new \phpMQTT($mqttHost, $mqttPort, 'statuslightapp'); 
+			if ($this->broker->connect(true, NULL, $mqttUser, $mqttPass)) {
+				$this->l->debug($this->tr . " - " . __METHOD__ . " - Conected to the broker");
+			} else {
+				$this->l->error($this->tr . " - " . __METHOD__ . " - Connection to broker failed with user " . $mqttUser);
+				$this->broker = null;
+				sleep(5);
+			}
 		}
 
 	}
