@@ -3,6 +3,8 @@ FROM php:7.3-fpm-alpine3.10
 #    apk upgrade;
 #RUN apk add composer;
 #RUN docker-php-ext-install mysqli
+ARG STATUSLIGHT_ENV
+ENV STATUSLIGHT_ENV=$STATUSLIGHT_ENV
 COPY crontab.txt /crontab.txt
 RUN /usr/bin/crontab /crontab.txt
 

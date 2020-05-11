@@ -28,32 +28,15 @@ services:
       - ./letsencrypt/:/etc/letsencrypt/
     depends_on:
       - composer
-#  mosquitto:
-#    image: eclipse-mosquitto
-#    container_name: sl_mosquitto
-#    expose:
-#      - "1883"
-#      - "9001"
-#    ports:
-#      - "1883:1883"
-#    volumes:
-#      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
-#      - ./mosquitto/acl.conf:/mosquitto/config/acl.conf
-#      - ./mosquitto/data/:/mosquitto/data/
-#    networks:
-#      - frontend
-#      - backend
-#    depends_on:
-#      - nginx
   mosquitto:
-    build: './mosquitto2/'
+    build: './mosquitto/'
     container_name: sl_mosquitto
     ports:
       - "1883:1883"
     volumes:
-      - ./mosquitto2/mosquitto.conf:/etc/mosquitto/mosquitto.conf
-      - ./mosquitto2/conf/:/etc/mosquitto.d/
-#      - ./mosquitto2/data/:/var/lib/mosquitto/
+      - ./mosquitto/mosquitto.conf:/etc/mosquitto/mosquitto.conf
+      - ./mosquitto/conf/:/etc/mosquitto.d/
+#      - ./mosquitto/data/:/var/lib/mosquitto/
     networks:
       frontend:
         ipv4_address: 172.10.0.4
