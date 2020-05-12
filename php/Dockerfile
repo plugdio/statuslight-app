@@ -6,7 +6,7 @@ FROM php:7.3-fpm-alpine3.10
 ARG STATUSLIGHT_ENV
 ENV STATUSLIGHT_ENV=$STATUSLIGHT_ENV
 COPY crontab.txt /crontab.txt
-RUN sed -i.bak "s/XXX/${STATUSLIGHT_ENV}/" /crontab.txt
+RUN sed -i.bak "s/XXX/\${STATUSLIGHT_ENV}/" /crontab.txt
 RUN /usr/bin/crontab /crontab.txt
 
 # Copy entrypoint

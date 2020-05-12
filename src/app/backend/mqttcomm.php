@@ -32,7 +32,7 @@ class MqttComm {
 			} else {
 				$this->l->error($this->tr . " - " . __METHOD__ . " - Connection to broker failed with user " . $mqttUser);
 				$this->broker = null;
-				sleep(5);
+				sleep(10);
 			}
 		}
 
