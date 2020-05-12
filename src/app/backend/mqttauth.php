@@ -14,7 +14,7 @@ class MqttAuth {
 
 	function auth($f3, $args) {
 		# username=jane%40mens.de&password=jolie&topic=&acc=-1
-#		$this->l->debug($this->tr . " - " . __METHOD__ . " - START - ", $f3->get('POST'));
+		$this->l->debug($this->tr . " - " . __METHOD__ . " - START - ", $f3->get('POST'));
 
 		$clientId = $f3->get('POST.username');
 		$password = $f3->get('POST.password');
@@ -59,13 +59,13 @@ class MqttAuth {
 	}
 
 	function superuser($f3, $args) {
-#		$this->l->debug($this->tr . " - " . __METHOD__ . " - START - " . $f3->get('BODY'));
+		$this->l->debug($this->tr . " - " . __METHOD__ . " - START - " . $f3->get('BODY'));
 		$f3->error(403);
 	}
 
 	function acl($f3, $args) {
 		# username=jane%40mens.de&password=&topic=t%2F1&acc=2&clientid=JANESUB
-#		$this->l->debug($this->tr . " - " . __METHOD__ . " - START - " . $f3->get('BODY'));
+		$this->l->debug($this->tr . " - " . __METHOD__ . " - START - " . $f3->get('BODY'));
 
 		$clientId = $f3->get('POST.username');
 		$topic = urldecode($f3->get('POST.topic'));
