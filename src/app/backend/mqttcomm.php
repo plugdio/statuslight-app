@@ -24,14 +24,15 @@ class MqttComm {
 		$mqttPass = 'sladmin123';
 
 		$this->l->info($this->tr . " - " . __METHOD__ . " - Connecting to: " . $mqttHost);
-
-		while ($this->broker == null) {
+		$a = 1;
+		while (($this->broker == null) && $a < 100) {
 			$this->broker = new \phpMQTT($mqttHost, $mqttPort, 'statuslightapp'); 
 			if ($this->broker->connect(true, NULL, $mqttUser, $mqttPass)) {
 				$this->l->debug($this->tr . " - " . __METHOD__ . " - Conected to the broker");
 			} else {
 				$this->l->error($this->tr . " - " . __METHOD__ . " - Connection to broker failed with user " . $mqttUser);
 				$this->broker = null;
+				$a++;
 				sleep(10);
 			}
 		}
