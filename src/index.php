@@ -51,7 +51,7 @@ $f3->set('dbdir', $path . 'data/');
 $f3->set('log', $log);
 $tr = substr(md5(uniqid(rand(), true)),0,6);
 $f3->set('tr', $tr);
-$f3->config('config.ini');
+$f3->config($path . 'config.ini');
 
 /*
 $f3->set('ONERROR',
