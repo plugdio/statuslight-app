@@ -1,1 +1,1 @@
-* * * * * su - www-data -s /bin/sh -c 'php /var/www/html/index.php "/jobs/getstatus?env=XXX"'
+* * * * * su - www-data -s /bin/sh -c 'php /var/www/html/index.php "/backend/jobs/getstatus?env=XXX"'

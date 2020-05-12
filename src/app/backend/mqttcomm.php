@@ -67,10 +67,28 @@ class MqttComm {
 		$topics['SL/#'] = array("qos"=>0, "function"=>'\Backend\MqttComm::procMqttMessage');
 		$this->broker->subscribe($topics, 0);
 
+		$mqttMessageModel = new \Models\MqttMessage();
+
 		$i = 0;
 		while ($this->broker->proc(true) && ($i < 1500000)) {
-#			$i++;
-#			$this->l->debug($this->tr . " - " . __METHOD__ . " - Proc: " . $i . " - " . $this->broker->proc());
+			$i++;
+#			$this->l->debug($this->tr . " - " . __METHOD__ . " - Proc: " . $i);
+
+			$messageResponse = $mqttMessageModel->getFromQueue();
+			if ($messageResponse->success) {
+				foreach ($messageResponse->result as $message) {
+					$this->l->debug($this->tr . " - " . __METHOD__ . " - message: " . print_r($message, true));
+					$this->broker->publish($message['topic'], $message['content']);
+					$mqttMessageModel->updateMessage($message['_id'], MQTTMSG_SENT);
+					$i = 0;
+				}
+			}
+
+			if ($i == 120) {
+				$this->broker->ping();
+				$i = 0;
+			}
+
 		}
 
 	}

@@ -10,7 +10,17 @@ const DEVICE_STATE_TEMP = 'TEMP';
 const DEVICE_STATE_ACTIVE = 'ACTIVE';
 const DEVICE_STATE_INACTIVE = 'INACTIVE';
 
+const MQTTMSG_NOT_SENT = 'NOT_SENT';
+const MQTTMSG_SENT = 'SENT';
+const MQTTMSG_EXPIRED = 'EXPIRED';
+
+const STATUS_FREE = 'free';
+const STATUS_BUSY = 'busy';
+const STATUS_AWAY = 'away';
+const STATUS_ERROR = 'error';
+
 const TEMP_DEVICE_VALIDY_MINS = 10;
+const MQTTMSG_VALIDY_MINS = 2;
 
 
 ?>

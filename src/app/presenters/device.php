@@ -26,7 +26,7 @@ class Device {
 				$provider = \Services\Teams::getProvider('/device/login/teams');
 				$provider->urlAPI = 'https://graph.microsoft.com/beta/';
 				$me = $provider->get("me", $token);
-				$this->l->debug($this->tr . " - " . __METHOD__ . " - me: " . print_r($me, true));
+#				$this->l->debug($this->tr . " - " . __METHOD__ . " - me: " . print_r($me, true));
 
 				$userId = $me['id'];
 				$provider = PROVIDER_AZURE;
@@ -40,7 +40,7 @@ class Device {
 				$f3->set('SESSION.name', $me['displayName']);
 
 				$sessionModel = new \Models\Session();
-				$sessionModel->saveSession(PROVIDER_AZURE, $userId, $token->getToken(), $token);
+				$sessionModel->saveSession(PROVIDER_AZURE, $userId, $token);
 			} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
 				$this->l->error($this->tr . " - " . __METHOD__ . " - Caught exception " . $e->getMessage() . ' - ' . $e->getTraceAsString());
 			}
