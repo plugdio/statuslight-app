@@ -58,6 +58,7 @@ class SessionManager {
 
 			} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
 				$this->l->error($this->tr . " - " . __METHOD__ . " - Caught exception " . $e->getMessage() . ' - ' . $e->getTraceAsString());
+				$this->l->error($this->tr . " - " . __METHOD__ . " - token: " . print_r($token, true));
 				$providerResponse = array(
 					'exception' => $e->getMessage()
 				);
@@ -78,7 +79,7 @@ class SessionManager {
 			} elseif (array_key_exists('exception', $providerResponse)) {
 				$newState = SESSION_STATE_ERROR;
 				$this->session->state = SESSION_STATE_ERROR;
-				$closedReason = $response["exception"];
+				$closedReason = $providerResponse["exception"];
 				$statusMessage = STATUS_ERROR;
 			} else {
 				$newState = SESSION_STATE_INACTIVE;
