@@ -78,7 +78,6 @@ class SessionManager {
 				}
 			} elseif (array_key_exists('exception', $providerResponse)) {
 				$newState = SESSION_STATE_ERROR;
-				$this->session->state = SESSION_STATE_ERROR;
 				$closedReason = $providerResponse["exception"];
 				$statusMessage = STATUS_ERROR;
 			} else {
