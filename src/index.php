@@ -106,8 +106,6 @@ $f3->route('GET /slack/login', '\Services\Slack->login');
 $f3->route('GET /slack', '\Services\Slack->status');
 $f3->route('GET /slack/token', '\Services\Slack->getToken');
 
-$f3->route('GET /mqttconnect', '\Backend\MqttComm->subscribe');
-
 $f3->route('GET /device', '\Presenters\Device->main');
 $f3->route('GET /device/login/teams', '\Presenters\Device->loginWithTeams');
 
@@ -118,6 +116,7 @@ $f3->route('GET /device/login/teams', '\Presenters\Device->loginWithTeams');
     );
 */
 
+$f3->route('GET /backend/mqttconnect', '\Backend\MqttComm->subscribe');
 $f3->route('POST /backend/mqtt/auth', '\Backend\MqttAuth->auth');
 $f3->route('POST /backend/mqtt/superuser', '\Backend\MqttAuth->superuser');
 $f3->route('POST /backend/mqtt/acl', '\Backend\MqttAuth->acl');

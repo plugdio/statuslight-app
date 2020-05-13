@@ -14,6 +14,11 @@ class MqttComm {
 		$this->tr = $f3->get('tr');
 		$this->l = $f3->get('log');
 
+		if (!$f3->get('CLI')) {
+			$this->l->error($this->tr . " - " . __METHOD__ . " - Request is not comming from CLI");
+			$f3->error(401);
+		}
+
 		if ($f3->get('ENV') == 'DEV') {
 			$mqttHost = 'test.statuslight.online';
 		} else {
@@ -72,12 +77,10 @@ class MqttComm {
 		$i = 0;
 		while ($this->broker->proc(true) && ($i < 1500000)) {
 			$i++;
-#			$this->l->debug($this->tr . " - " . __METHOD__ . " - Proc: " . $i);
-
 			$messageResponse = $mqttMessageModel->getFromQueue();
 			if ($messageResponse->success) {
 				foreach ($messageResponse->result as $message) {
-					$this->l->debug($this->tr . " - " . __METHOD__ . " - message: " . print_r($message, true));
+					$this->l->trace($this->tr . " - " . __METHOD__ . " - message: " . print_r($message, true));
 					$this->broker->publish($message['topic'], $message['content']);
 					$mqttMessageModel->updateMessage($message['_id'], MQTTMSG_SENT);
 					$i = 0;

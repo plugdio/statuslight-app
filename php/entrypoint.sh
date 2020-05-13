@@ -9,7 +9,7 @@ sed -i.bak "s/XXX/${STATUSLIGHT_ENV}/" /crontab.txt
 /usr/sbin/crond -f -d 8 &
 
 # Start MQTT connection
-nohup php /var/www/html/index.php "/mqttconnect" &
+nohup php /var/www/html/index.php "/backend/mqttconnect" &
 
 # Start nginx
 docker-php-entrypoint php-fpm
