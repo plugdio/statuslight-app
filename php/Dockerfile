@@ -3,7 +3,7 @@ FROM php:7.3-fpm-alpine3.10
 #    apk upgrade;
 #RUN docker-php-ext-install mysqli
 RUN apk add supervisor
-COPY supervisord.conf /etc/supervisord.conf
+COPY supervisord.conf /etc/supervisor/supervisord.conf
 #COPY crontab.txt /crontab.txt
 #RUN /usr/bin/crontab /crontab.txt
 
