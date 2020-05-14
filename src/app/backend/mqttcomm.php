@@ -88,6 +88,7 @@ class MqttComm {
 			}
 
 			if ($i == 120) {
+				$this->l->debug($this->tr . " - " . __METHOD__ . " - PING");
 				$this->broker->ping();
 				$i = 0;
 			}

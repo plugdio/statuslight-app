@@ -9,10 +9,24 @@ class SessionManager {
 		$f3=\Base::instance();
 		$this->tr = $f3->get('tr');
 		$this->l = $f3->get('log');
+
+		if (!$f3->get('CLI')) {
+			$this->l->error($this->tr . " - " . __METHOD__ . " - Request is not comming from CLI");
+			$f3->error(401);
+		}
 	}
 
+	function run($f3, $args) {
 
-	function refreshSessions($f3, $args) {
+		while (true) {
+			$this->refreshSessions();
+			sleep(60);
+		}
+
+	}
+
+	function refreshSessions() { #($f3, $args) {
+		$f3=\Base::instance();
 		$this->l->debug($this->tr . " - " . __METHOD__ . " - START - " . $f3->get('GET.env'));
 		$env = $f3->get('GET.env');
 		if (strtoupper($env) != $f3->get('ENV')) {
@@ -26,7 +40,7 @@ class SessionManager {
 		$sessionResponse = $sessionModel->getActiveSessions();
 
 		if (!$sessionResponse->success) {
-			$this->l->debug($this->tr . " - " . __METHOD__ . " - No sessions - " . $sessionResponse->message);
+			$this->l->debug($this->tr . " - " . __METHOD__ . " - No active sessions");
 			return;
 		}
 

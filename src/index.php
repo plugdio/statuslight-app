@@ -116,12 +116,14 @@ $f3->route('GET /device/login/teams', '\Presenters\Device->loginWithTeams');
     );
 */
 
-$f3->route('GET /backend/mqttconnect', '\Backend\MqttComm->subscribe');
+$f3->route('GET /backend/mqttconnector', '\Backend\MqttComm->subscribe');
+$f3->route('GET /backend/sessionmanager', '\Backend\SessionManager->run');
+
 $f3->route('POST /backend/mqtt/auth', '\Backend\MqttAuth->auth');
 $f3->route('POST /backend/mqtt/superuser', '\Backend\MqttAuth->superuser');
 $f3->route('POST /backend/mqtt/acl', '\Backend\MqttAuth->acl');
 
-$f3->route('GET /backend/jobs/getstatus', '\Backend\SessionManager->refreshSessions');
+#$f3->route('GET /backend/jobs/getstatus', '\Backend\SessionManager->refreshSessions');
 
 
 try {

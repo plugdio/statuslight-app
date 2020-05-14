@@ -1,1 +1,0 @@
-php index.php "/backend/jobs/getstatus?env=TEST"

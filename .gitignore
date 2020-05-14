@@ -7,5 +7,6 @@
 /src/composer.phar
 /src/start.sh
 /src/mqttconnect.sh
+/src/sessionmanager.sh
 *.log
 /mosquitto/data/*
