@@ -6,6 +6,7 @@
         "monolog/monolog": "^1.25",
         "bramus/monolog-colored-line-formatter": "^2.0",
         "adam-paterson/oauth2-slack": "^1.1",
-        "thenetworg/oauth2-azure": "^1.4"
+        "thenetworg/oauth2-azure": "^1.4",
+        "ihor/supervisor-xml-rpc": "^0.2.1"
     }
 }

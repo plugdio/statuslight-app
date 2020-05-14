@@ -109,12 +109,7 @@ $f3->route('GET /slack/token', '\Services\Slack->getToken');
 $f3->route('GET /device', '\Presenters\Device->main');
 $f3->route('GET /device/login/teams', '\Presenters\Device->loginWithTeams');
 
-/*
-        function($f3) {
-            echo "getstatus - " . php_sapi_name();
-        }
-    );
-*/
+$f3->route('GET /status', '\Presenters\Status->main');
 
 $f3->route('GET /backend/mqttconnector', '\Backend\MqttComm->subscribe');
 $f3->route('GET /backend/sessionmanager', '\Backend\SessionManager->run');

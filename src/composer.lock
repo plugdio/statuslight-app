@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8eaf4a6b4027a0c37c19c3d497e65827",
+    "content-hash": "4a272deaacdffc2e9f0c1a9bbee11206",
     "packages": [
         {
             "name": "adam-paterson/oauth2-slack",
@@ -411,6 +411,54 @@
                 "url"
             ],
             "time": "2019-07-01T23:21:34+00:00"
+        },
+        {
+            "name": "ihor/supervisor-xml-rpc",
+            "version": "0.2.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ihor/SupervisorXMLRPC.git",
+                "reference": "a569ecc340e119df360c51b0af28488e75566421"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ihor/SupervisorXMLRPC/zipball/a569ecc340e119df360c51b0af28488e75566421",
+                "reference": "a569ecc340e119df360c51b0af28488e75566421",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "0.2-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Supervisor\\": "."
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ihor Burlachenko",
+                    "email": "burlachenko.ihor@gmail.com"
+                }
+            ],
+            "description": "Simple Supervisor XML RPC Client in PHP (http://supervisord.org)",
+            "keywords": [
+                "api",
+                "supervisor",
+                "supervisorctl",
+                "supervisord",
+                "xml-rpc"
+            ],
+            "time": "2019-05-03T09:44:37+00:00"
         },
         {
             "name": "league/oauth2-client",
