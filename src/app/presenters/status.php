@@ -24,7 +24,7 @@ class Status {
 #		$status->states = array();
 		$status->processes = array();
 		$status->supervisord = $svApi->getState()["statename"];
-		foreach (array('php-fpm:php-fpm_00', 'mqtt-connector', 'sessionmanager') as $name) {
+		foreach (array('php-fpm', 'mqtt-connector', 'sessionmanager') as $name) {
 #			$status->states[$name] = $svApi->getProcessInfo($name)["statename"];
 			$status->processes[] = $svApi->getProcessInfo($name);
 		}
