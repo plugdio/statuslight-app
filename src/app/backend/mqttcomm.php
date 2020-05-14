@@ -6,7 +6,6 @@ require_once "lib/phpMQTT.php";
 
 class MqttComm {
 
-#	private static $dbInstance = null;
 	private $broker = null;
 
 	function __construct() {
@@ -46,23 +45,6 @@ class MqttComm {
 		}
 
 	}
-/*
-	public static function getDbInstance() {
-
-		$f3=\Base::instance();
-		$tr = $f3->get('tr');
-		$l = $f3->get('log');
-
-		$l->tracce($tr . " - " . __METHOD__ . " - Start");
-
-		if (self::$dbInstance == null) {
-			$l->info($tr . " - " . __METHOD__ . " - New dbInstance instance created");
-			$db = new \DB\Jig($f3->get('dbdir'), \DB\Jig::FORMAT_JSON);
-			self::$dbInstance = new \DB\Jig\Mapper($db, 'mqttclients.json');
-		}
-		return self::$dbInstance;
-	}
-*/
 
 	public function subscribe() {
 		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
@@ -83,7 +65,7 @@ class MqttComm {
 			if ($messageResponse->success) {
 				foreach ($messageResponse->result as $message) {
 					$messagesSent++;
-					$this->l->trace($this->tr . " - " . __METHOD__ . " - message: " . print_r($message, true));
+					$this->l->debug($this->tr . " - " . __METHOD__ . " - message: " . print_r($message, true));
 					$this->broker->publish($message['topic'], $message['content']);
 					$this->mqttMessageModel->updateMessage($message['_id'], MQTTMSG_SENT);
 					$i = 0;
@@ -109,17 +91,6 @@ class MqttComm {
 #		$l->debug($tr . " - " . __METHOD__ . " - Message received - Topic: " . $topic . ', msg: ' . $msg);
 
 		if (preg_match('/SL\/([^\/]*)\/\$(.*)/', $topic, $matches)) {
-/*
-			$mqttClient = \Backend\MqttComm::getDbInstance();
-			$mqttClient->load(array('@id=?', $matches[1]));
-			if ($mqttClient->dry()) {
-				$mqttClient->reset();
-				$mqttClient->id = $matches[1];
-			}
-			$mqttClient->updated = time();
-			$mqttClient->{$matches[2]} = $msg;
-			$mqttClient->save();
-*/
 			$mqttClientModel = new \Models\MqttClient();
 			$mqttClientModel->updateClient($matches[1], $matches[2], $msg);
 		} elseif (preg_match('/SL\/[^\/]*\/statuslight\/.*/', $topic)) {
