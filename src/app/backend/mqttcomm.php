@@ -29,11 +29,12 @@ class MqttComm {
 		$mqttPass = 'sladmin123';
 
 		$this->l->info($this->tr . " - " . __METHOD__ . " - Connecting to: " . $mqttHost);
-		$a = 1;
+		$a = 0;
 		while (($this->broker == null) && $a < 100) {
 			$this->broker = new \phpMQTT($mqttHost, $mqttPort, 'statuslightapp'); 
 			if ($this->broker->connect(true, NULL, $mqttUser, $mqttPass)) {
 				$this->l->debug($this->tr . " - " . __METHOD__ . " - Conected to the broker");
+				$a = 0;
 			} else {
 				$this->l->error($this->tr . " - " . __METHOD__ . " - Connection to broker failed with user " . $mqttUser);
 				$this->broker = null;
@@ -50,7 +51,7 @@ class MqttComm {
 		$tr = $f3->get('tr');
 		$l = $f3->get('log');
 
-#		$l->debug($tr . " - " . __METHOD__ . " - Start");
+		$l->debug($tr . " - " . __METHOD__ . " - Start");
 
 		if (self::$dbInstance == null) {
 			$l->info($tr . " - " . __METHOD__ . " - New dbInstance instance created");
