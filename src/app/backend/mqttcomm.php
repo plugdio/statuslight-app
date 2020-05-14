@@ -6,7 +6,7 @@ require_once "lib/phpMQTT.php";
 
 class MqttComm {
 
-	private static $dbInstance = null;
+#	private static $dbInstance = null;
 	private $broker = null;
 
 	function __construct() {
@@ -18,6 +18,10 @@ class MqttComm {
 			$this->l->error($this->tr . " - " . __METHOD__ . " - Request is not comming from CLI");
 			$f3->error(401);
 		}
+
+		$this->mqttMessageModel = new \Models\MqttMessage();
+		$this->mqttClientModel = new \Models\MqttClient();
+
 
 		if ($f3->get('ENV') == 'DEV') {
 			$mqttHost = 'test.statuslight.online';
@@ -44,14 +48,14 @@ class MqttComm {
 		}
 
 	}
-
+/*
 	public static function getDbInstance() {
 
 		$f3=\Base::instance();
 		$tr = $f3->get('tr');
 		$l = $f3->get('log');
 
-		$l->debug($tr . " - " . __METHOD__ . " - Start");
+		$l->tracce($tr . " - " . __METHOD__ . " - Start");
 
 		if (self::$dbInstance == null) {
 			$l->info($tr . " - " . __METHOD__ . " - New dbInstance instance created");
@@ -60,7 +64,7 @@ class MqttComm {
 		}
 		return self::$dbInstance;
 	}
-
+*/
 
 	public function subscribe() {
 		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
@@ -73,25 +77,26 @@ class MqttComm {
 		$topics['SL/#'] = array("qos"=>0, "function"=>'\Backend\MqttComm::procMqttMessage');
 		$this->broker->subscribe($topics, 0);
 
-		$mqttMessageModel = new \Models\MqttMessage();
-
 		$i = 0;
+		$messagesSent = 0;
 		while ($this->broker->proc(true) && ($i < 1500000)) {
 			$i++;
-			$messageResponse = $mqttMessageModel->getFromQueue();
+			$messageResponse = $this->mqttMessageModel->getFromQueue();
 			if ($messageResponse->success) {
 				foreach ($messageResponse->result as $message) {
+					$messagesSent++;
 					$this->l->trace($this->tr . " - " . __METHOD__ . " - message: " . print_r($message, true));
 					$this->broker->publish($message['topic'], $message['content']);
-					$mqttMessageModel->updateMessage($message['_id'], MQTTMSG_SENT);
+					$this->mqttMessageModel->updateMessage($message['_id'], MQTTMSG_SENT);
 					$i = 0;
 				}
 			}
 
-			if ($i == 120) {
-				$this->l->debug($this->tr . " - " . __METHOD__ . " - PING");
+			if ($i == 420) {
+				$this->l->debug($this->tr . " - " . __METHOD__ . " - PING - messages sent: " . $messagesSent);
 				$this->broker->ping();
 				$i = 0;
+				$messagesSent = 0;
 			}
 
 		}
@@ -106,6 +111,7 @@ class MqttComm {
 #		$l->debug($tr . " - " . __METHOD__ . " - Message received - Topic: " . $topic . ', msg: ' . $msg);
 
 		if (preg_match('/SL\/([^\/]*)\/\$(.*)/', $topic, $matches)) {
+/*
 			$mqttClient = \Backend\MqttComm::getDbInstance();
 			$mqttClient->load(array('@id=?', $matches[1]));
 			if ($mqttClient->dry()) {
@@ -115,6 +121,8 @@ class MqttComm {
 			$mqttClient->updated = time();
 			$mqttClient->{$matches[2]} = $msg;
 			$mqttClient->save();
+*/
+			$this->mqttClientModel->updateClient($matches[1], $matches[2], $msg);
 		} elseif (preg_match('/SL\/[^\/]*\/statuslight\/.*/', $topic)) {
 			# code...
 		} else {
