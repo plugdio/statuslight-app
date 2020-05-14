@@ -1,7 +1,14 @@
 FROM php:7.3-fpm-alpine3.10
-#RUN apk update; \
-#    apk upgrade;
+RUN apk update && apk --no-cache add \
+	libxml2-dev \
+	&& RUN docker-php-source extract \
+	&& docker-php-ext-install -j$(nproc) xmlrpc \
+	&& docker-php-source delete
+
+#apk add libxml2-dev
+#RUN docker-php-source extract
 #RUN docker-php-ext-install -j$(nproc) xmlrpc
+
 RUN apk add supervisor
 COPY supervisord.conf /etc/supervisor/supervisord.conf
 #COPY crontab.txt /crontab.txt
