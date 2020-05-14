@@ -20,8 +20,6 @@ class MqttComm {
 		}
 
 		$this->mqttMessageModel = new \Models\MqttMessage();
-		$this->mqttClientModel = new \Models\MqttClient();
-
 
 		if ($f3->get('ENV') == 'DEV') {
 			$mqttHost = 'test.statuslight.online';
@@ -122,7 +120,8 @@ class MqttComm {
 			$mqttClient->{$matches[2]} = $msg;
 			$mqttClient->save();
 */
-			$this->mqttClientModel->updateClient($matches[1], $matches[2], $msg);
+			$mqttClientModel = new \Models\MqttClient();
+			$mqttClientModel->updateClient($matches[1], $matches[2], $msg);
 		} elseif (preg_match('/SL\/[^\/]*\/statuslight\/.*/', $topic)) {
 			# code...
 		} else {
