@@ -81,26 +81,34 @@ class SessionManager {
 
 			if (array_key_exists('availability', $providerResponse)) {
 				$newState = SESSION_STATE_ACTIVE;
-				if ($providerResponse["availability"] == 'Available') {
-					$statusMessage = STATUS_FREE;
-				} elseif (($providerResponse["availability"] == 'Busy') || ($providerResponse["availability"] == 'DoNotDisturb')) {
-					$statusMessage = STATUS_BUSY;
-				} elseif (($providerResponse["availability"] == 'Away') || ($providerResponse["availability"] == 'BeRightBack')) {
-					$statusMessage = STATUS_AWAY;
+				if (array_key_exists('activity', $providerResponse)) {
+					$subStatus = $providerResponse["availability"] . ':' . $providerResponse["activity"];
+				}
+				if (in_array($providerResponse["availability"], array('Available', 'AvailableIdle'))) {
+					$status = STATUS_FREE;
+				} elseif (in_array($providerResponse["availability"], array('Busy', 'BusyIdle', 'DoNotDisturb'))) {
+					$status = STATUS_BUSY;
+				} elseif (in_array($providerResponse["availability"], array('Away', 'BeRightBack'))) {
+					$status = STATUS_AWAY;
+				} elseif (in_array($providerResponse["availability"], array('Offline'))) {
+					$status = STATUS_OFFLINE;
+				} elseif (in_array($providerResponse["availability"], array('PresenceUnknown'))) {
+					$status = STATUS_UNKNOWN;
 				} else {
-					$statusMessage = STATUS_ERROR;
+					$this->l->error($this->tr . " - " . __METHOD__ . " - Unknown availability: " . $providerResponse["availability"]);
+					$status = STATUS_ERROR;
 				}
 			} elseif (array_key_exists('exception', $providerResponse)) {
 				$newState = SESSION_STATE_ERROR;
 				$closedReason = $providerResponse["exception"];
-				$statusMessage = STATUS_ERROR;
+				$status = STATUS_ERROR;
 			} else {
 				$newState = SESSION_STATE_INACTIVE;
 				$closedReason = "Presence coudn't be retreived";
-				$statusMessage = STATUS_ERROR;
+				$status = STATUS_ERROR;
 			}
 	        
-			$sessionModel->updateSession($session['_id'], $token, $newState, $closedReason);
+			$sessionModel->updateSession($session['_id'], $token, $newState, $closedReason, $status, $subStatus);
 
 			$mqttMessageModel = new \Models\MqttMessage();
 			$deviceModel = new \Models\Device();
@@ -108,7 +116,7 @@ class SessionManager {
 
 			if ($deviceResponse->success && count($deviceResponse->result) > 0) {
 				foreach ($deviceResponse->result as $device) {
-					$mqttMessageModel->putInQueue('SL/' . $device['clientId'] . '/statuslight/status/set', $statusMessage);
+					$mqttMessageModel->putInQueue('SL/' . $device['clientId'] . '/statuslight/status/set', $status);
 				}
 			}
 			

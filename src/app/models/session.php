@@ -70,7 +70,7 @@ class Session {
 		return $response;
 	}
 
-	function updateSession($sessionId, $token, $newState, $closedReason = null) {
+	function updateSession($sessionId, $token, $newState, $closedReason = null, $status = null, $subStatus = null) {
 		$response = new \Response($this->tr);
 		
 		$this->session->load(array('@_id=?', $sessionId));
@@ -83,6 +83,8 @@ class Session {
     	$this->session->lastUpdatedTime = time();
     	$this->session->state = $newState;
     	$this->session->closedReason = $closedReason;
+		$this->session->status = $status;
+		$this->session->subStatus = $subStatus;
     	$this->session->save();
 	}
 

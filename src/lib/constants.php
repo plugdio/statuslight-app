@@ -1,6 +1,8 @@
 <?php
 
 const PROVIDER_AZURE = 'azure';
+const PROVIDER_GOOGLE = 'google';
+const PROVIDER_SLACK = 'slack';
 
 const SESSION_STATE_ACTIVE = 'ACTIVE';
 const SESSION_STATE_INACTIVE = 'INACTIVE';
@@ -17,6 +19,8 @@ const MQTTMSG_EXPIRED = 'EXPIRED';
 const STATUS_FREE = 'free';
 const STATUS_BUSY = 'busy';
 const STATUS_AWAY = 'away';
+const STATUS_OFFLINE = 'offline';
+const STATUS_UNKNOWN = 'unknown';
 const STATUS_ERROR = 'error';
 
 const TEMP_DEVICE_VALIDY_MINS = 10;
