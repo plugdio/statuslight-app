@@ -105,7 +105,7 @@ class GCal extends \Services\ServiceBase {
 			$client = new \GuzzleHttp\Client();
 			$res = $client->request('GET', 'https://www.googleapis.com/calendar/v3/users/me/calendarList?minAccessRole=freeBusyReader', [
 			    'headers' => [
-			        'Accept'     => 'application/json',
+			        'content-type'     => 'application/json',
 			        'authorization'  => "Bearer " . $token->getToken(),
 			    ]
 			]);
@@ -127,29 +127,71 @@ class GCal extends \Services\ServiceBase {
 				$endTime = date(DATE_RFC3339, time() + 1 * 60);
 
 				$request = new \stdClass();
-				$request->timeMin = date(DATE_RFC3339);
-				$request->timeMax = date(DATE_RFC3339, time() + 1 * 60);
+				$request->timeMin = gmdate("Y-m-d\TH:i:s") . '.000Z';
+				$request->timeMax = gmdate("Y-m-d\TH:i:s", time() + 1 * 60) . '.000Z';
 				$request->items = [
-					"item" => (object) ['id' => primaryCalendareId]
+					(object) ['id' => $primaryCalendareId]
 				];
 
+$l->debug($tr . " - " . __METHOD__ . " - request: " . json_encode($request));
+
+				$res = $client->request('POST', 'https://www.googleapis.com/calendar/v3/freeBusy', [
+    				'headers' => [
+			     		'content-type'     => 'application/json',
+			        	'authorization'  => "Bearer " . $token->getToken(),
+			    	],
+    				'body' => json_encode($request),
+    				'http_errors' => false
+				]);
+				#{  "kind": "calendar#freeBusy",  "timeMin": "2020-05-15T23:15:30.000Z",  "timeMax": "2020-05-15T23:16:30.000Z",  "calendars": {   "x@gmail.com": {    "busy": []   }  } }
+				$l->debug($tr . " - " . __METHOD__ . " - body: " . $res->getBody());
+
+				$providerResponse = json_decode($res->getBody());
+				if (!empty($providerResponse->error)) {
+					$newState = SESSION_STATE_ERROR;
+					$closedReason = $providerResponse->message;
+					$status = STATUS_ERROR;
+					$subStatus = STATUS_ERROR;
+				} else {
+					$newState = SESSION_STATE_ACTIVE;
+					$closedReason = null;
+					if (count($providerResponse->calendars->{$primaryCalendareId}->busy) > 1) {
+						$status = STATUS_BUSY;
+						$subStatus = STATUS_BUSY;
+					} elseif (count($providerResponse->calendars->{$primaryCalendareId}->busy) == 0) {
+						$status = STATUS_FREE;
+						$subStatus = STATUS_FREE;
+					}
+				}
 
 			} else {
-
+				$newState = SESSION_STATE_ERROR;
+				$closedReason = 'error getting calendarList';
+				$status = STATUS_ERROR;
+				$subStatus = STATUS_ERROR;
 			}
+
+		} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
+			$l->error($tr . " - " . __METHOD__ . " - Caught exception1 " . $e->getMessage() . ' - ' . $e->getTraceAsString());
+#			$l->error($tr . " - " . __METHOD__ . " - token: " . print_r($token, true));
+			$newState = SESSION_STATE_ERROR;
+			$closedReason = $e->getMessage();
+			$status = STATUS_ERROR;
+			$subStatus = STATUS_ERROR;
+		} catch (\GuzzleHttp\Exception\ClientException $e) {
+			$l->error($tr . " - " . __METHOD__ . " - Caught exception2 " . $e->getMessage() . ' - ' . $e->getTraceAsString());
+#			$l->error($tr . " - " . __METHOD__ . " - token: " . print_r($token, true));
+			$newState = SESSION_STATE_ERROR;
+			$closedReason = $e->getMessage();
+			$status = STATUS_ERROR;
+			$subStatus = STATUS_ERROR;
+		}
 
 $newState = SESSION_STATE_ACTIVE;
 $status = STATUS_FREE;
 $subStatus = STATUS_FREE;
 $closedReason = null;
 
-		} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
-			$l->error($tr . " - " . __METHOD__ . " - Caught exception " . $e->getMessage() . ' - ' . $e->getTraceAsString());
-			$l->error($tr . " - " . __METHOD__ . " - token: " . print_r($token, true));
-			$providerResponse = array(
-				'exception' => $e->getMessage()
-			);
-		}
 
 		$response->result->sessionState = $newState;
 		$response->result->status = $status;

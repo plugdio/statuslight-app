@@ -83,13 +83,23 @@ class SessionManager {
 				$closedReason = $newSession->closedReason;
 
 			} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
-				$this->l->error($this->tr . " - " . __METHOD__ . " - Caught exception " . $e->getMessage() . ' - ' . $e->getTraceAsString());
+				$this->l->error($this->tr . " - " . __METHOD__ . " - Caught exception1 " . $e->getMessage() . ' - ' . $e->getTraceAsString());
+#				$this->l->error($this->tr . " - " . __METHOD__ . " - token: " . print_r($token, true));
+				$status = STATUS_ERROR;
+				$subStatus = STATUS_ERROR;
+				$sessionState = SESSION_STATE_ERROR;
+				$closedReason = $e->getMessage();
+			} catch (\BadMethodCallException $e) {
+				$this->l->error($this->tr . " - " . __METHOD__ . " - Caught exception2 " . $e->getMessage() . ' - ' . $e->getTraceAsString());
 #				$this->l->error($this->tr . " - " . __METHOD__ . " - token: " . print_r($token, true));
 				$status = STATUS_ERROR;
 				$subStatus = STATUS_ERROR;
 				$sessionState = SESSION_STATE_ERROR;
 				$closedReason = $e->getMessage();
 			}
+
+
+			// BadMethodCallException
 
 			$sessionModel->updateSession($session['_id'], $token, $sessionState, $closedReason, $status, $subStatus);
 

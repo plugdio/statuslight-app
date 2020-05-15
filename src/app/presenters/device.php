@@ -108,7 +108,8 @@ class Device {
 		$sessionResponse = $sessionModel->getActiveSessionForUser($userId);
 
 		if (!$sessionResponse->success) {
-			//TODO
+			$this->l->error($this->tr . " - " . __METHOD__ . " - no session - " . $sessionResponse->message);
+			$f3->reroute($f3->get('baseStaticPath'));
 		}
 
 		$mySession = $sessionResponse->result;

@@ -127,7 +127,7 @@ try {
     $f3->run();
 } catch (Exception $e) {
     $log->debug($tr . " - " . 'run' . " - Caught exception: " . $e->getMessage());
-#    $log->debug($tr . " - " . 'run' . " - Caught exception: " . print_r($e, true));
+    $log->debug($tr . " - " . 'run' . " - Caught exception: " . print_r($e, true));
 	$f3->set('error_text', "Caught exception: " . $e->getMessage() . ' - ' . $e->getTraceAsString());
     echo \Template::instance()->render('index.html');
 }
