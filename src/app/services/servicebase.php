@@ -11,18 +11,6 @@ class ServiceBase {
 		$this->tr = $f3->get('tr');
 		$this->l = $f3->get('log');
 
-		
-		// login link: https://developers.google.com/identity/protocols/oauth2/web-server
-		// https://github.com/thephpleague/oauth2-client
-		$this->gcalProvider = new Google([
-		    'clientId'     => $f3->get('gcal_client_id'),
-		    'clientSecret' => $f3->get('gcal_client_secret'),
-		    'redirectUri'  => $f3->get('baseAppPath') . '/gcal/login',
-		    'accessType'   => 'offline',
-		    'prompt'       => 'consent'
-//		    'proxy'                   => 'localhost:8888',
-//    		'verify'                  => false
-		]);
 
 		//https://github.com/adam-paterson/oauth2-slack
 		$this->slackProvider = new \AdamPaterson\OAuth2\Client\Provider\Slack([
@@ -39,17 +27,11 @@ class ServiceBase {
 
 		$response = new \Response($this->tr);
 
-#		$teamsLoginUrl = self::getTeamsProvider('/teams/login')->getAuthorizationUrl();
-#		$teamsLoginUrlDevice = self::getTeamsProvider('/device/login/teams')->getAuthorizationUrl();
-
 		$teamsLoginUrl = \Services\Teams::getLoginUrl('phone');
 		$teamsLoginUrlDevice = \Services\Teams::getLoginUrl('device');
 
-		$gcalLoginUrl = $this->gcalProvider->getAuthorizationUrl([
-		    'scope' => [
-		        'https://www.googleapis.com/auth/calendar.readonly'
-		    ],
-		]);
+		$gcalLoginUrl = \Services\GCal::getLoginUrl('phone');
+		$gcalLoginUrlDevice = \Services\GCal::getLoginUrl('device');
 
 		$slackLoginUrl = $this->slackProvider->getAuthorizationUrl([
 			'scope' => 'users:read'
@@ -60,6 +42,7 @@ class ServiceBase {
 		$response->result->slackLoginUrl = $slackLoginUrl;
 		
 		$response->result->teamsLoginUrlDevice = $teamsLoginUrlDevice;
+		$response->result->gcalLoginUrlDevice = $gcalLoginUrlDevice;
 
 		$response->success = true;
 		$f3->set('page_type', 'AJAX');

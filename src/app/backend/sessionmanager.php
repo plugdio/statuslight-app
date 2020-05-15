@@ -48,11 +48,7 @@ class SessionManager {
 
 			$this->l->debug($this->tr . " - " . __METHOD__ . " - working with " . $session['_id']);
 
-			if ($session['type'] == PROVIDER_AZURE) {
-				$provider = \Services\Teams::getProvider('/device/login/teams');
-				$provider->urlAPI = 'https://graph.microsoft.com/beta/';
-				$ref = 'me/presence';
-			} else {
+			if (!in_array($session['type'], array(PROVIDER_AZURE, PROVIDER_GOOGLE))) {
 				$this->l->error($this->tr . " - " . __METHOD__ . " - Provider not supported " . $session['type']);
 				continue;
 			}
@@ -61,54 +57,41 @@ class SessionManager {
 			try {
 				if ($token->hasExpired()) {
 					$this->l->debug($this->tr . " - " . __METHOD__ . " - token needs to be refreshed");
+					if ($session['type'] == PROVIDER_AZURE) {
+						$provider = \Services\Teams::getProvider('/device/login/teams');
+					} elseif ($session['type'] == PROVIDER_GOOGLE) {
+						$provider = \Services\GCal::getProvider('/device/login/gcal');
+					} elseif ($session['type'] == PROVIDER_SLACK) {
+						$provider = \Services\Slack::getProvider('/device/login/slack');
+					}
 	            	$token = $provider->getAccessToken('refresh_token', [
 	                	'refresh_token' => $token->getRefreshToken(),
 	            	]);
 	        	}
 
-				$providerResponse = $provider->request('get', $ref, $token, []);
+				if ($session['type'] == PROVIDER_AZURE) {
+					$presenceResponse = \Services\Teams::getPresenceStatus('/device/login/teams', $token);
+				} elseif ($session['type'] == PROVIDER_GOOGLE) {
+					$presenceResponse = \Services\GCal::getPresenceStatus('/device/login/gcal', $token);
+				}
 
-				$this->l->debug($this->tr . " - " . __METHOD__ . " - providerResponse: " . print_r($providerResponse, true));
+				$newSession = $presenceResponse->result;
+
+				$status = $newSession->status;
+				$subStatus = $newSession->subStatus;
+				$sessionState = $newSession->sessionState;
+				$closedReason = $newSession->closedReason;
 
 			} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
 				$this->l->error($this->tr . " - " . __METHOD__ . " - Caught exception " . $e->getMessage() . ' - ' . $e->getTraceAsString());
-				$this->l->error($this->tr . " - " . __METHOD__ . " - token: " . print_r($token, true));
-				$providerResponse = array(
-					'exception' => $e->getMessage()
-				);
+#				$this->l->error($this->tr . " - " . __METHOD__ . " - token: " . print_r($token, true));
+				$status = STATUS_ERROR;
+				$subStatus = STATUS_ERROR;
+				$sessionState = SESSION_STATE_ERROR;
+				$closedReason = $e->getMessage();
 			}
 
-
-			if (array_key_exists('availability', $providerResponse)) {
-				$newState = SESSION_STATE_ACTIVE;
-				if (array_key_exists('activity', $providerResponse)) {
-					$subStatus = $providerResponse["availability"] . ':' . $providerResponse["activity"];
-				}
-				if (in_array($providerResponse["availability"], array('Available', 'AvailableIdle'))) {
-					$status = STATUS_FREE;
-				} elseif (in_array($providerResponse["availability"], array('Busy', 'BusyIdle', 'DoNotDisturb'))) {
-					$status = STATUS_BUSY;
-				} elseif (in_array($providerResponse["availability"], array('Away', 'BeRightBack'))) {
-					$status = STATUS_AWAY;
-				} elseif (in_array($providerResponse["availability"], array('Offline'))) {
-					$status = STATUS_OFFLINE;
-				} elseif (in_array($providerResponse["availability"], array('PresenceUnknown'))) {
-					$status = STATUS_UNKNOWN;
-				} else {
-					$this->l->error($this->tr . " - " . __METHOD__ . " - Unknown availability: " . $providerResponse["availability"]);
-					$status = STATUS_ERROR;
-				}
-			} elseif (array_key_exists('exception', $providerResponse)) {
-				$newState = SESSION_STATE_ERROR;
-				$closedReason = $providerResponse["exception"];
-				$status = STATUS_ERROR;
-			} else {
-				$newState = SESSION_STATE_INACTIVE;
-				$closedReason = "Presence coudn't be retreived";
-				$status = STATUS_ERROR;
-			}
-	        
-			$sessionModel->updateSession($session['_id'], $token, $newState, $closedReason, $status, $subStatus);
+			$sessionModel->updateSession($session['_id'], $token, $sessionState, $closedReason, $status, $subStatus);
 
 			$mqttMessageModel = new \Models\MqttMessage();
 			$deviceModel = new \Models\Device();

@@ -27,10 +27,11 @@
         <hr>
         <h3>Device</h3>
         <a id="teamsLoginDevice" href="#">Login with Teams</a>
-<!--        <br>
-        <a id="gcalLogin" href="#">Login with Google</a>
         <br>
-        <a id="slackLogin" href="#">Login with Slack</a>
+        <a id="gcalLoginDevice" href="#">Login with Google</a>
+        <br>
+<!--
+        <a id="slackLoginDevice" href="#">Login with Slack</a>
 -->
 			</check>
 		</div>
@@ -79,6 +80,7 @@
               $('#slackLogin').attr("href", data.result.slackLoginUrl);
 
               $('#teamsLoginDevice').attr("href", data.result.teamsLoginUrlDevice);
+              $('#gcalLoginDevice').attr("href", data.result.gcalLoginUrlDevice);
             } else {
               console.log('Something went wrong #2: ' + data.message);
             }

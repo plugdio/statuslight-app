@@ -2,7 +2,6 @@
 
 namespace Services;
 
-#use League\OAuth2\Client\Provider\Google;
 use League\OAuth2\Client\Grant\RefreshToken;
 
 class GCal extends \Services\ServiceBase {
@@ -11,13 +10,53 @@ class GCal extends \Services\ServiceBase {
 		parent::__construct();
 	}
 
-	function login() {
+
+	public static function getProvider($redirectUri) {
 		$f3=\Base::instance();
-		$this->l->debug($this->tr . " - " . __METHOD__ . " - START - " . print_r($f3->get('REQUEST'), true));
 
-#http://localhost:8000/gcal/login?state=094e7b&code=4/yQHVmBpfPA8eyklVB-PK8rdFCV7i1K9Uv88W00pT3CWP_1dWgqRrJlNF4eisSA6zvAeaG1EwlqKfSN6TPIUc2oQ&scope=https://www.googleapis.com/auth/calendar.readonly
+		// login link: https://developers.google.com/identity/protocols/oauth2/web-server
+		// https://github.com/thephpleague/oauth2-client
+		$gcalProvider = new \League\OAuth2\Client\Provider\Google([
+		    'clientId'     => $f3->get('gcal_client_id'),
+		    'clientSecret' => $f3->get('gcal_client_secret'),
+		    'redirectUri'  => $f3->get('baseAppPath') . $redirectUri,
+		    'accessType'   => 'offline',
+		    'prompt'       => 'consent'
+//		    'proxy'                   => 'localhost:8888',
+//    		'verify'                  => false
+		]);
+
+		return $gcalProvider;
+
+	} 
+
+	public static function getLoginUrl($loginType) {
+
+		if ($loginType == 'phone') {
+			return self::getProvider('/gcal/login')->getAuthorizationUrl([
+				    'scope' => [
+				        'https://www.googleapis.com/auth/calendar.readonly'
+				    ],
+				]);
+		} elseif ($loginType == 'device') {
+				return self::getProvider('/device/login/gcal')->getAuthorizationUrl([
+			    	'scope' => [
+			        	'https://www.googleapis.com/auth/calendar.readonly'
+			    	],
+				]);
+		} else {
+			return null;
+		}
+	} 
+
+	public static function getTokens($redirectUri) {
+		$f3=\Base::instance();
+		
+		$tr = $f3->get('tr');
+		$l = $f3->get('log');
 
 
+		#http://localhost:8000/gcal/login?state=094e7b&code=4/yQHVmBpfPA8eyklVB-PK8rdFCV7i1K9Uv88W00pT3CWP_1dWgqRrJlNF4eisSA6zvAeaG1EwlqKfSN6TPIUc2oQ&scope=https://www.googleapis.com/auth/calendar.readonly
 
 		if ( !empty($f3->get('REQUEST.error')) ) {
 			$this->l->error($this->tr . " - " . __METHOD__ . " - Error authenticating: " . $f3->get('REQUEST.error'));
@@ -34,53 +73,112 @@ class GCal extends \Services\ServiceBase {
 #    		exit('Invalid state');
 		} elseif ( !empty($f3->get('REQUEST.code')) ) {
 			$authCode = $f3->get('REQUEST.code');
-			$this->l->debug($this->tr . " - " . __METHOD__ . " - logged in");
+			$l->debug($tr . " - " . __METHOD__ . " - logged in");
 		}
 
-		// Try to get an access token (using the authorization code grant)
-    	$token = $this->gcalProvider->getAccessToken('authorization_code', [
-        	'code' => $authCode
-    	]);
+		try {
+		    $token = self::getProvider($redirectUri)->getAccessToken('authorization_code', [
+		        'code' => $authCode,
+		    ]);
 
-    	try {
-    		$this->l->debug($this->tr . " - " . __METHOD__ . " - token: " . print_r($token, true));
-    	} catch (Exception $e) {
-    		$this->l->error($this->tr . " - " . __METHOD__ . " - Exception: " . print_r($e, true));
-    	}
-    	
-
-		$f3->set('SESSION.accessToken', $token->getToken());
-		$f3->set('SESSION.refreshToken', $token->getRefreshToken());
-		$f3->set('SESSION.accessTokenExpiresOn', $token->getExpires());
-
-/*
-		$userProfileResponse = $this->graph->getSignedInUser();
-
-		if (!$userProfileResponse->success) {
-			$this->l->error($this->tr . " - " . __METHOD__ . " - error getting the user: " . print_r($userProfileResponse, true)); 
-#			$f3->set('SESSION.accessToken', null);
-#			$f3->set('SESSION.refreshToken', null);
-			$f3->error(401, "Error getting user details");
+#	   		$l->debug($tr . " - " . __METHOD__ . " - token: " . print_r($token, true));
+		} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
+			$l->error($tr . " - " . __METHOD__ . " - Caught exception " . $e->getMessage() . ' - ' . $e->getTraceAsString());
+			return null;
 		}
 
-		$userModel = new \Models\UserModel();
-		$userResponse = $userModel->saveUser($userProfileResponse->result, $authResponse->accessToken, $authResponse->refreshToken);
+	    return $token;
+		
+	}
 
-		$this->l->error($this->tr . " - " . __METHOD__ . " - user: " . print_r($userResponse->result['id'], true)); 
+	public static function getPresenceStatus($redirectUri, $token) {
+		$f3=\Base::instance();
+		
+		$tr = $f3->get('tr');
+		$l = $f3->get('log');
 
-		$f3->set('SESSION.userId', $userResponse->result['id']);
-		$f3->set('SESSION.signed_in_user', $userProfileResponse->result->displayName);
-*/
+		$response = new \Response($tr);
+
+		try {
+
+#			$provider = self::getProvider($redirectUri);
+			$client = new \GuzzleHttp\Client();
+			$res = $client->request('GET', 'https://www.googleapis.com/calendar/v3/users/me/calendarList?minAccessRole=freeBusyReader', [
+			    'headers' => [
+			        'Accept'     => 'application/json',
+			        'authorization'  => "Bearer " . $token->getToken(),
+			    ]
+			]);
+
+#			$l->debug($tr . " - " . __METHOD__ . " - body: " . $res->getBody());
+
+			if ($res->getStatusCode() == 200) {
+				$calendarList = json_decode($res->getBody() . '');
+
+				$primaryCalendareId = null;
+				foreach ($calendarList->items as $calendar) {
+					if ($calendar->primary) {
+						$primaryCalendareId = $calendar->id;
+						break;
+					}
+				}
+
+				$startTime = date(DATE_RFC3339);
+				$endTime = date(DATE_RFC3339, time() + 1 * 60);
+
+				$request = new \stdClass();
+				$request->timeMin = date(DATE_RFC3339);
+				$request->timeMax = date(DATE_RFC3339, time() + 1 * 60);
+				$request->items = [
+					"item" => (object) ['id' => primaryCalendareId]
+				];
+
+
+			} else {
+
+			}
+
+$newState = SESSION_STATE_ACTIVE;
+$status = STATUS_FREE;
+$subStatus = STATUS_FREE;
+$closedReason = null;
+
+		} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
+			$l->error($tr . " - " . __METHOD__ . " - Caught exception " . $e->getMessage() . ' - ' . $e->getTraceAsString());
+			$l->error($tr . " - " . __METHOD__ . " - token: " . print_r($token, true));
+			$providerResponse = array(
+				'exception' => $e->getMessage()
+			);
+		}
+
+		$response->result->sessionState = $newState;
+		$response->result->status = $status;
+		$response->result->subStatus = $subStatus;
+		$response->result->closedReason = $closedReason;
+		$response->success = true;
+
+		return $response;
+
+	}
+
+	function login() {
+		$f3=\Base::instance();
+		$token = self::getTokens('/gcal/login');
+		
+		if (!empty($token)) {
+			$f3->set('SESSION.accessToken', $token->getToken());
+			$f3->set('SESSION.refreshToken', $token->getRefreshToken());
+			$f3->set('SESSION.accessTokenExpiresOn', $token->getExpires());
+		}
 
 		$f3->reroute('/gcal');
-
 	}
 
 	function status($f3, $args) {
 
 		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
-		$this->amIAuthenticated();
 
+		$this->amIAuthenticated();
 	}
 
 
@@ -98,7 +196,7 @@ class GCal extends \Services\ServiceBase {
 
 
 			$grant = new RefreshToken();
-			$token = $this->gcalProvider->getAccessToken($grant, ['refresh_token' => $f3->get('SESSION.refreshToken')]);
+			$token = self::getProvider('/gcal/login')->getAccessToken($grant, ['refresh_token' => $f3->get('SESSION.refreshToken')]);
 
 			$f3->set('SESSION.accessToken', $token->getToken());
 			$f3->set('SESSION.refreshToken', $token->getRefreshToken());

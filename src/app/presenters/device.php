@@ -36,13 +36,60 @@ class Device {
 				$userModel = new \Models\User();
 				$userModel->saveUser($userId, $provider, $name, $email);
 
-				$f3->set('SESSION.userId', $me['id']);
-				$f3->set('SESSION.name', $me['displayName']);
+				$f3->set('SESSION.userId', $userId);
+				$f3->set('SESSION.name', $name);
 
 				$sessionModel = new \Models\Session();
 				$sessionModel->saveSession(PROVIDER_AZURE, $userId, $token);
 			} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
 				$this->l->error($this->tr . " - " . __METHOD__ . " - Caught exception " . $e->getMessage() . ' - ' . $e->getTraceAsString());
+				$f3->set('SESSION.userId', null);
+				$f3->set('SESSION.accessToken', null);
+				$f3->set('SESSION.refreshToken', null);
+				$f3->set('SESSION.accessTokenExpiresOn', null);
+			}
+		}
+
+		$f3->reroute('/device');
+	}
+
+	function loginWithGoogle($f3, $args) {
+		
+		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
+
+		$token = \Services\GCal::getTokens('/device/login/gcal');
+		if (!empty($token)) {
+			try {
+				$f3->set('SESSION.accessToken', $token->getToken());
+				$f3->set('SESSION.refreshToken', $token->getRefreshToken());
+				$f3->set('SESSION.accessTokenExpiresOn', $token->getExpires());
+
+				$provider = \Services\GCal::getProvider('/device/login/gcal');
+
+		        // We got an access token, let's now get the owner details
+        		$ownerDetails = $provider->getResourceOwner($token);
+
+#				$this->l->debug($this->tr . " - " . __METHOD__ . " - ownerDetails: " . print_r($ownerDetails, true));
+
+				$userId = $ownerDetails->getId();
+				$provider = PROVIDER_GOOGLE;
+				$name = $ownerDetails->getName();
+				$email = $ownerDetails->getEmail();
+
+				$userModel = new \Models\User();
+				$userModel->saveUser($userId, $provider, $name, $email);
+
+				$f3->set('SESSION.userId', $userId);
+				$f3->set('SESSION.name', $name);
+
+				$sessionModel = new \Models\Session();
+				$sessionModel->saveSession(PROVIDER_GOOGLE, $userId, $token);
+			} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
+				$this->l->error($this->tr . " - " . __METHOD__ . " - Caught exception " . $e->getMessage() . ' - ' . $e->getTraceAsString());
+				$f3->set('SESSION.userId', null);
+				$f3->set('SESSION.accessToken', null);
+				$f3->set('SESSION.refreshToken', null);
+				$f3->set('SESSION.accessTokenExpiresOn', null);
 			}
 		}
 
@@ -51,7 +98,7 @@ class Device {
 
 	function main($f3, $args) {
 
-		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
+		$this->l->debug($this->tr . " - " . __METHOD__ . " - START - " . $f3->get('SESSION.userId'));
 
 		$this->amIAuthenticated();
 
@@ -112,8 +159,8 @@ class Device {
 						if (($config != null) && !empty($config->wifi->ssid)) {
 							$myDevice["network"] = $config->wifi->ssid;
 						}
-						if (!empty($myDevice["statuslight/color"])) {
-							$myDevice["color"] = $myDevice["statuslight/color"];
+						if (!empty($myClient["statuslight/color"])) {
+							$myDevice["color"] = $myClient["statuslight/color"];
 						} else {
 							$myDevice["color"] = 'white';
 						}

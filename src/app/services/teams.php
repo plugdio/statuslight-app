@@ -80,7 +80,73 @@ class Teams extends \Services\ServiceBase {
 		
 	}
 
+	public static function getPresenceStatus($redirectUri, $token) {
+		$f3=\Base::instance();
+		
+		$tr = $f3->get('tr');
+		$l = $f3->get('log');
+
+		$response = new \Response($tr);
+
+		try {
+
+			$provider = self::getProvider($redirectUri);
+			$provider->urlAPI = 'https://graph.microsoft.com/beta/';
+			$ref = 'me/presence';
+
+			$providerResponse = $provider->request('get', $ref, $token, []);
+
+			$l->debug($tr . " - " . __METHOD__ . " - providerResponse: " . print_r($providerResponse, true));
+
+		} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
+			$l->error($tr . " - " . __METHOD__ . " - Caught exception " . $e->getMessage() . ' - ' . $e->getTraceAsString());
+			$l->error($tr . " - " . __METHOD__ . " - token: " . print_r($token, true));
+			$providerResponse = array(
+				'exception' => $e->getMessage()
+			);
+		}
+
+		if (array_key_exists('availability', $providerResponse)) {
+			$newState = SESSION_STATE_ACTIVE;
+			if (array_key_exists('activity', $providerResponse)) {
+				$subStatus = $providerResponse["availability"] . ':' . $providerResponse["activity"];
+			}
+			if (in_array($providerResponse["availability"], array('Available', 'AvailableIdle'))) {
+				$status = STATUS_FREE;
+			} elseif (in_array($providerResponse["availability"], array('Busy', 'BusyIdle', 'DoNotDisturb'))) {
+				$status = STATUS_BUSY;
+			} elseif (in_array($providerResponse["availability"], array('Away', 'BeRightBack'))) {
+				$status = STATUS_AWAY;
+			} elseif (in_array($providerResponse["availability"], array('Offline'))) {
+				$status = STATUS_OFFLINE;
+			} elseif (in_array($providerResponse["availability"], array('PresenceUnknown'))) {
+				$status = STATUS_UNKNOWN;
+			} else {
+				$this->l->error($this->tr . " - " . __METHOD__ . " - Unknown availability: " . $providerResponse["availability"]);
+				$status = STATUS_ERROR;
+			}
+		} elseif (array_key_exists('exception', $providerResponse)) {
+			$newState = SESSION_STATE_ERROR;
+			$closedReason = $providerResponse["exception"];
+			$status = STATUS_ERROR;
+		} else {
+			$newState = SESSION_STATE_INACTIVE;
+			$closedReason = "Presence coudn't be retreived";
+			$status = STATUS_ERROR;
+		}
+
+		$response->result->sessionState = $newState;
+		$response->result->status = $status;
+		$response->result->subStatus = $subStatus;
+		$response->result->closedReason = $closedReason;
+		$response->success = true;
+
+		return $response;
+
+	}
+
 	function login() {
+		$f3=\Base::instance();
 		$token = self::getTokens('/teams/login');
 		
 		if (!empty($token)) {
@@ -112,6 +178,7 @@ class Teams extends \Services\ServiceBase {
 		if ($f3->get('SESSION.accessTokenExpiresOn') < time() + 600) {
 			$this->l->debug($this->tr . " - " . __METHOD__ . " - Token needs to be refreshed");
 
+/*
 			$this->graph = new \GraphAPI($f3->get('scope'), $f3->get('redirectUriTeams'), $this->tr, $this->l);
 			$this->graph->setAuthParams($f3->get('client_id'), $f3->get('client_secret'), $authCode);
 			$this->graph->setTokens($f3->get('SESSION.accessToken'), $f3->get('SESSION.refreshToken'));
@@ -122,10 +189,15 @@ class Teams extends \Services\ServiceBase {
 				$this->l->error($this->tr . " - " . __METHOD__ . " - Error geting new token: " . $authResponse->message); 
 				$f3->error(401, "Error authenticating: " . $authResponse->message);
 			}
+*/
 
-			$f3->set('SESSION.accessToken', $tokenResponse->accessToken);
-			$f3->set('SESSION.refreshToken', $tokenResponse->refreshToken);
-			$f3->set('SESSION.accessTokenExpiresOn', $tokenResponse->accessTokenExpiresOn);
+			$token = self::getProvider('/teams/login')->getAccessToken('refresh_token', [
+	                	'refresh_token' => $f3->get('SESSION.refreshToken'),
+	            	]);
+
+			$f3->set('SESSION.accessToken', $token->getToken());
+			$f3->set('SESSION.refreshToken', $token->getRefreshToken());
+			$f3->set('SESSION.accessTokenExpiresOn', $token->getExpires());
 
 		}
 		$this->l->debug($this->tr . " - " . __METHOD__ . " - Using current token");
