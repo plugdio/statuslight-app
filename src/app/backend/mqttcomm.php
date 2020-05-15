@@ -92,7 +92,7 @@ class MqttComm {
 		$mqttClientModel = new \Models\MqttClient();
 		if (preg_match('/SL\/([^\/]*)\/\$(.*)/', $topic, $matches)) {
 			$mqttClientModel->updateClient($matches[1], $matches[2], $msg);
-		} elseif (preg_match('/SL\/([^\/]*)\/(statuslight\/.*)/', $topic)) {
+		} elseif (preg_match('/SL\/([^\/]*)\/(statuslight\/.*)/', $topic, $matches)) {
 			$mqttClientModel->updateClient($matches[1], $matches[2], $msg);
 		} else {
 			$l->error($tr . " - " . __METHOD__ . " - Unknown message received - Topic: " . $topic . ', msg: ' . $msg);			
