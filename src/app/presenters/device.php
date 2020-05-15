@@ -105,8 +105,18 @@ class Device {
 					$myDevice["id"] = $device['clientId'];
 					$clientResponse = $mqttClientModel->getClientById($device["clientId"]);
 					if ($clientResponse->success) {
-						$myDevice["clientState"] = $clientResponse->result["state"];
-						$myDevice["lastSeen"] = date('Y-m-d H:i:s', $clientResponse->result["updated"]);
+						$myClient = $clientResponse->result;
+						$myDevice["clientState"] = $myClient["state"];
+						$myDevice["lastSeen"] = date('Y-m-d H:i:s', $myClient["updated"]);
+						$config = json_decode($myClient['implementation/config']);
+						if (($config != null) && !empty($config->wifi->ssid)) {
+							$myDevice["network"] = $config->wifi->ssid;
+						}
+						if (!empty($myDevice["statuslight/color"])) {
+							$myDevice["color"] = $myDevice["statuslight/color"];
+						} else {
+							$myDevice["color"] = 'white';
+						}
 					} else {
 						$myDevice["state"] = '-';
 						$myDevice["updated"] = '-';

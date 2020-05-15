@@ -31,25 +31,24 @@
       		<check if="{{ @no_devices_yet }}">
 				<true>
 					<p>To make your status visible, you need to register a device. If you have one already, click on the link bellow and follow the steps.</p>
-					<li><a href="{{ @BASE }}/device/add">Add a new device</a></li>
 				</true>
 				<false>
 					<check if="{{ count(@active_devices) > 0 }}">
 						<p>Your active devices:</p>
 						<repeat group="{{ @active_devices }}" value="{{ @device }}">
-						    <p>{{ trim(@device.id) }} - {{ trim(@device.clientState) }} - {{ trim(@device.lastSeen) }} <span style="background-color: green;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></p>
+						    <p><span style="background-color: {{ trim(@device.color) }};">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> {{ trim(@device.id) }} - {{ trim(@device.clientState) }} - {{ trim(@device.network) }}  - {{ trim(@device.lastSeen) }}</p>
 						</repeat>
-						<p><a href="{{ @BASE }}/device/add">Add a new device</a></p>
 					</check>
 					<check if="{{ count(@pending_devices) > 0 }}">
-						<p>Your can activate your device with the bellow PIN code(s)lastSeen:</p>
+						<p>Your can activate your new device with the bellow PIN code(s):</p>
 						<repeat group="{{ @pending_devices }}" value="{{ @device }}">
 						    <li><b>{{ trim(@device.pin) }}</b> - valid til: {{ trim(@device.validity) }}</li>
 						</repeat>
 					</check>
 				</false>
 			</check>
-
+			<br>
+			<p><a href="{{ @BASE }}/device/add">Add a new device</a></p>
 
 
 		</div>
