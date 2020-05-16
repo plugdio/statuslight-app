@@ -176,6 +176,8 @@ $l->debug($tr . " - " . __METHOD__ . " - request: " . json_encode($request));
 		$f3=\Base::instance();
 		$token = self::getTokens('/slack/login');
 
+$this->l->debug($this->tr . " - " . __METHOD__ . " - token: " . print_r($token, true));
+
 		$f3->set('SESSION.accessToken', $token->getToken());
 		$userId = $provider->getAuthorizedUser($token)->getId();
 		$f3->set('SESSION.user_id', $userId);
