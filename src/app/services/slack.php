@@ -175,12 +175,21 @@ $l->debug($tr . " - " . __METHOD__ . " - request: " . json_encode($request));
 	function login() {
 		$f3=\Base::instance();
 		$token = self::getTokens('/slack/login');
-		
+
+		$f3->set('SESSION.accessToken', $token->getToken());
+		$userId = $this->slackProvider->getAuthorizedUser($token)->getId();
+		$f3->set('SESSION.user_id', $userId);
+
+		$this->l->debug($this->tr . " - " . __METHOD__ . " - userId: " . print_r($userId, true));
+
+/*		
 		if (!empty($token)) {
 			$f3->set('SESSION.accessToken', $token->getToken());
 			$f3->set('SESSION.refreshToken', $token->getRefreshToken());
 			$f3->set('SESSION.accessTokenExpiresOn', $token->getExpires());
 		}
+*/
+
 
 		$f3->reroute('/slack');
 	}
