@@ -58,7 +58,9 @@ class Slack extends \Services\ServiceBase {
 	        		'code' => $f3->get('REQUEST.code')
 	    		]);
 			} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
-				$l->error($tr . " - " . __METHOD__ . " - Caught exception " . $e->getMessage() . ' - ' . $e->getTraceAsString());
+				$l->error($tr . " - " . __METHOD__ . " - Caught exception1 " . $e->getMessage() . ' - ' . $e->getTraceAsString());
+			} catch (\InvalidArgumentException $e) {
+				$l->error($tr . " - " . __METHOD__ . " - Caught exception2 " . $e->getMessage() . ' - ' . $e->getTraceAsString());
 			}
 		}
 	    
