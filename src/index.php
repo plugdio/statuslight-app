@@ -109,6 +109,7 @@ $f3->route('GET /slack/token', '\Services\Slack->getToken');
 $f3->route('GET /device', '\Presenters\Device->main');
 $f3->route('GET /device/login/teams', '\Presenters\Device->loginWithTeams');
 $f3->route('GET /device/login/gcal', '\Presenters\Device->loginWithGoogle');
+$f3->route('GET /device/login/slack', '\Presenters\Device->loginWithSlack');
 $f3->route('GET /device/add', '\Presenters\Device->addDevice');
 
 $f3->route('GET /status', '\Presenters\Status->main');

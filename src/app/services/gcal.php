@@ -2,8 +2,6 @@
 
 namespace Services;
 
-use League\OAuth2\Client\Grant\RefreshToken;
-
 class GCal extends \Services\ServiceBase {
 
 	function __construct() {
@@ -187,12 +185,6 @@ $l->debug($tr . " - " . __METHOD__ . " - request: " . json_encode($request));
 			$subStatus = STATUS_ERROR;
 		}
 
-$newState = SESSION_STATE_ACTIVE;
-$status = STATUS_FREE;
-$subStatus = STATUS_FREE;
-$closedReason = null;
-
-
 		$response->result->sessionState = $newState;
 		$response->result->status = $status;
 		$response->result->subStatus = $subStatus;
@@ -237,7 +229,7 @@ $closedReason = null;
 			$this->l->debug($this->tr . " - " . __METHOD__ . " - Token needs to be refreshed");
 
 
-			$grant = new RefreshToken();
+			$grant = new \League\OAuth2\Client\Grant\RefreshToken();
 			$token = self::getProvider('/gcal/login')->getAccessToken($grant, ['refresh_token' => $f3->get('SESSION.refreshToken')]);
 
 			$f3->set('SESSION.accessToken', $token->getToken());

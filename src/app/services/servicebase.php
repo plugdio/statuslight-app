@@ -11,14 +11,6 @@ class ServiceBase {
 		$this->tr = $f3->get('tr');
 		$this->l = $f3->get('log');
 
-
-		//https://github.com/adam-paterson/oauth2-slack
-		$this->slackProvider = new \AdamPaterson\OAuth2\Client\Provider\Slack([
-		    'clientId'          => $f3->get('slack_client_id'),
-		    'clientSecret'      => $f3->get('slack_client_secret'),
-		    'redirectUri'       => $f3->get('baseAppPath') . '/slack/login',
-		]);
-
 	}
 
 	function getConfig($f3, $args) {
@@ -33,9 +25,9 @@ class ServiceBase {
 		$gcalLoginUrl = \Services\GCal::getLoginUrl('phone');
 		$gcalLoginUrlDevice = \Services\GCal::getLoginUrl('device');
 
-		$slackLoginUrl = $this->slackProvider->getAuthorizationUrl([
-			'scope' => 'users:read'
-		]);
+
+		$slackLoginUrl = \Services\Slack::getLoginUrl('phone');
+		$slackLoginUrlDevice = \Services\Slack::getLoginUrl('device');
 
 		$response->result->teamsLoginUrl = $teamsLoginUrl;
 		$response->result->gcalLoginUrl = $gcalLoginUrl;
@@ -43,6 +35,7 @@ class ServiceBase {
 		
 		$response->result->teamsLoginUrlDevice = $teamsLoginUrlDevice;
 		$response->result->gcalLoginUrlDevice = $gcalLoginUrlDevice;
+		$response->result->slackLoginUrlDevice = $slackLoginUrlDevice;
 
 		$response->success = true;
 		$f3->set('page_type', 'AJAX');

@@ -96,6 +96,52 @@ class Device {
 		$f3->reroute('/device');
 	}
 
+	function loginWithSlack($f3, $args) {
+		
+		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
+
+		$token = \Services\Slack::getTokens('/device/login/slack');
+		if (!empty($token)) {
+			try {
+				$f3->set('SESSION.accessToken', $token->getToken());
+				$f3->set('SESSION.refreshToken', $token->getRefreshToken());
+				$f3->set('SESSION.accessTokenExpiresOn', $token->getExpires());
+
+				$provider = \Services\Slack::getProvider('/device/login/slack');
+
+        		$userId = $provider->getAuthorizedUser($token)->getId();
+        		$team = $provider->getResourceOwner($token);
+				
+				$this->l->debug($this->tr . " - " . __METHOD__ . " - userId: " . print_r($userId, true));
+				$this->l->debug($this->tr . " - " . __METHOD__ . " - team: " . print_r($team, true));
+/*
+				$userId = $ownerDetails->getId();
+				$provider = PROVIDER_GOOGLE;
+				$name = $ownerDetails->getName();
+				$email = $ownerDetails->getEmail();
+
+				$userModel = new \Models\User();
+				$userModel->saveUser($userId, $provider, $name, $email);
+
+				$f3->set('SESSION.userId', $userId);
+				$f3->set('SESSION.name', $name);
+
+				$sessionModel = new \Models\Session();
+				$sessionModel->saveSession(PROVIDER_GOOGLE, $userId, $token);
+*/
+			} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
+				$this->l->error($this->tr . " - " . __METHOD__ . " - Caught exception " . $e->getMessage() . ' - ' . $e->getTraceAsString());
+				$f3->set('SESSION.userId', null);
+				$f3->set('SESSION.accessToken', null);
+				$f3->set('SESSION.refreshToken', null);
+				$f3->set('SESSION.accessTokenExpiresOn', null);
+			}
+		}
+
+		$f3->reroute('/device');
+	}
+
+
 	function main($f3, $args) {
 
 		$this->l->debug($this->tr . " - " . __METHOD__ . " - START - " . $f3->get('SESSION.userId'));
