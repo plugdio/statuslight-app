@@ -53,6 +53,7 @@ class Slack extends \Services\ServiceBase {
 # 			$f3->set('SESSION.oauth2state', null);		
 # 			$f3->reroute($f3->get('baseStaticPath') . '?error=' . urlencode('Invalid state'));
 		} else {
+
 			try {
 				$token = self::getProvider($redirectUri)->getAccessToken('authorization_code', [
 	        		'code' => $f3->get('REQUEST.code')
@@ -61,6 +62,10 @@ class Slack extends \Services\ServiceBase {
 				$l->error($tr . " - " . __METHOD__ . " - Caught exception1 " . $e->getMessage() . ' - ' . $e->getTraceAsString());
 			} catch (\InvalidArgumentException $e) {
 				$l->error($tr . " - " . __METHOD__ . " - Caught exception2 " . $e->getMessage() . ' - ' . $e->getTraceAsString());
+				$l->error($tr . " - " . __METHOD__ . " - code " . $f3->get('REQUEST.code'));
+			} catch (\RuntimeException $e) {
+				$l->error($tr . " - " . __METHOD__ . " - Caught exception3 " . $e->getMessage() . ' - ' . $e->getTraceAsString());
+				$l->error($tr . " - " . __METHOD__ . " - code " . $f3->get('REQUEST.code'));
 			}
 		}
 	    
@@ -68,7 +73,7 @@ class Slack extends \Services\ServiceBase {
 		
 	}
 
-	public static function getPresenceStatus($redirectUri, $token) {
+	public static function getPresenceStatus($redirectUri, $token, $userId) {
 		$f3=\Base::instance();
 		
 		$tr = $f3->get('tr');
@@ -78,88 +83,49 @@ class Slack extends \Services\ServiceBase {
 
 		try {
 
-#			$provider = self::getProvider($redirectUri);
 			$client = new \GuzzleHttp\Client();
-			$res = $client->request('GET', 'https://www.googleapis.com/calendar/v3/users/me/calendarList?minAccessRole=freeBusyReader', [
-			    'headers' => [
-			        'content-type'     => 'application/json',
-			        'authorization'  => "Bearer " . $token->getToken(),
-			    ]
-			]);
+			$res = $client->request('POST', 'https://slack.com/api/users.info', [
+    				'headers' => [
+			     		'content-type'     => 'application/x-www-form-urlencoded'
+			    	],
+    				'body' => 'token=' . $token . '&user=' . $userId,
+    				'http_errors' => false
+				]);
 
 #			$l->debug($tr . " - " . __METHOD__ . " - body: " . $res->getBody());
 
-			if ($res->getStatusCode() == 200) {
-				$calendarList = json_decode($res->getBody() . '');
-
-				$primaryCalendareId = null;
-				foreach ($calendarList->items as $calendar) {
-					if ($calendar->primary) {
-						$primaryCalendareId = $calendar->id;
-						break;
-					}
-				}
-
-				$startTime = date(DATE_RFC3339);
-				$endTime = date(DATE_RFC3339, time() + 1 * 60);
-
-				$request = new \stdClass();
-				$request->timeMin = gmdate("Y-m-d\TH:i:s") . '.000Z';
-				$request->timeMax = gmdate("Y-m-d\TH:i:s", time() + 1 * 60) . '.000Z';
-				$request->items = [
-					(object) ['id' => $primaryCalendareId]
-				];
-
-$l->debug($tr . " - " . __METHOD__ . " - request: " . json_encode($request));
-
-				$res = $client->request('POST', 'https://www.googleapis.com/calendar/v3/freeBusy', [
-    				'headers' => [
-			     		'content-type'     => 'application/json',
-			        	'authorization'  => "Bearer " . $token->getToken(),
-			    	],
-    				'body' => json_encode($request),
-    				'http_errors' => false
-				]);
-				#{  "kind": "calendar#freeBusy",  "timeMin": "2020-05-15T23:15:30.000Z",  "timeMax": "2020-05-15T23:16:30.000Z",  "calendars": {   "x@gmail.com": {    "busy": []   }  } }
-				$l->debug($tr . " - " . __METHOD__ . " - body: " . $res->getBody());
-
-				$providerResponse = json_decode($res->getBody());
-				if (!empty($providerResponse->error)) {
-					$newState = SESSION_STATE_ERROR;
-					$closedReason = $providerResponse->message;
-					$status = STATUS_ERROR;
-					$subStatus = STATUS_ERROR;
-				} else {
-					$newState = SESSION_STATE_ACTIVE;
-					$closedReason = null;
-					if (count($providerResponse->calendars->{$primaryCalendareId}->busy) > 1) {
-						$status = STATUS_BUSY;
-						$subStatus = STATUS_BUSY;
-					} elseif (count($providerResponse->calendars->{$primaryCalendareId}->busy) == 0) {
-						$status = STATUS_FREE;
-						$subStatus = STATUS_FREE;
-					}
-				}
-
-			} else {
+			$providerResponse = json_decode($res->getBody());
+			if (empty($providerResponse) || !$providerResponse->ok) {
 				$newState = SESSION_STATE_ERROR;
-				$closedReason = 'error getting calendarList';
+				$closedReason = $tr . ' - ' . $providerResponse->error;
 				$status = STATUS_ERROR;
 				$subStatus = STATUS_ERROR;
+			} else {
+				$newState = SESSION_STATE_ACTIVE;
+				$closedReason = null;
+				if ($providerResponse->user->profile->status_text == '') {
+					$status = STATUS_FREE;
+					$subStatus = STATUS_FREE;
+				} elseif ($providerResponse->user->profile->status_text == 'In a meeting') {
+					$status = STATUS_BUSY;
+					$subStatus = 'In a meeting';
+				} else {
+					$status = STATUS_FREE;
+					$subStatus = $providerResponse->user->profile->status_text;
+				}
 			}
-
 		} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
 			$l->error($tr . " - " . __METHOD__ . " - Caught exception1 " . $e->getMessage() . ' - ' . $e->getTraceAsString());
 #			$l->error($tr . " - " . __METHOD__ . " - token: " . print_r($token, true));
 			$newState = SESSION_STATE_ERROR;
-			$closedReason = $e->getMessage();
+			$closedReason = $tr . ' - ' . $e->getMessage();
 			$status = STATUS_ERROR;
 			$subStatus = STATUS_ERROR;
 		} catch (\GuzzleHttp\Exception\ClientException $e) {
 			$l->error($tr . " - " . __METHOD__ . " - Caught exception2 " . $e->getMessage() . ' - ' . $e->getTraceAsString());
 #			$l->error($tr . " - " . __METHOD__ . " - token: " . print_r($token, true));
 			$newState = SESSION_STATE_ERROR;
-			$closedReason = $e->getMessage();
+			$closedReason = $tr . ' - ' . $e->getMessage();
 			$status = STATUS_ERROR;
 			$subStatus = STATUS_ERROR;
 		}
@@ -178,22 +144,16 @@ $l->debug($tr . " - " . __METHOD__ . " - request: " . json_encode($request));
 		$f3=\Base::instance();
 		$token = self::getTokens('/slack/login');
 
-$this->l->debug($this->tr . " - " . __METHOD__ . " - token: " . print_r($token, true));
+		if (empty($token)) {
+			$f3->reroute($f3->get('baseStaticPath'));
+		}
 
 		$f3->set('SESSION.accessToken', $token->getToken());
+		$provider = self::getProvider('/slack/login');
 		$userId = $provider->getAuthorizedUser($token)->getId();
 		$f3->set('SESSION.user_id', $userId);
 
 		$this->l->debug($this->tr . " - " . __METHOD__ . " - userId: " . print_r($userId, true));
-
-/*		
-		if (!empty($token)) {
-			$f3->set('SESSION.accessToken', $token->getToken());
-			$f3->set('SESSION.refreshToken', $token->getRefreshToken());
-			$f3->set('SESSION.accessTokenExpiresOn', $token->getExpires());
-		}
-*/
-
 
 		$f3->reroute('/slack');
 	}

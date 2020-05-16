@@ -48,14 +48,14 @@ class SessionManager {
 
 			$this->l->debug($this->tr . " - " . __METHOD__ . " - working with " . $session['_id']);
 
-			if (!in_array($session['type'], array(PROVIDER_AZURE, PROVIDER_GOOGLE))) {
+			if (!in_array($session['type'], array(PROVIDER_AZURE, PROVIDER_GOOGLE, PROVIDER_SLACK))) {
 				$this->l->error($this->tr . " - " . __METHOD__ . " - Provider not supported " . $session['type']);
 				continue;
 			}
 
 			$token = unserialize($session['token']);
 			try {
-				if ($token->hasExpired()) {
+				if (($session['type'] != PROVIDER_SLACK) && ($token->hasExpired())) {
 					$this->l->debug($this->tr . " - " . __METHOD__ . " - token needs to be refreshed");
 					if ($session['type'] == PROVIDER_AZURE) {
 						$provider = \Services\Teams::getProvider('/device/login/teams');
@@ -73,6 +73,8 @@ class SessionManager {
 					$presenceResponse = \Services\Teams::getPresenceStatus('/device/login/teams', $token);
 				} elseif ($session['type'] == PROVIDER_GOOGLE) {
 					$presenceResponse = \Services\GCal::getPresenceStatus('/device/login/gcal', $token);
+				} elseif ($session['type'] == PROVIDER_SLACK) {
+					$presenceResponse = \Services\Slack::getPresenceStatus('/device/login/slack', $token, $session['userId']);
 				}
 
 				$newSession = $presenceResponse->result;
@@ -88,15 +90,22 @@ class SessionManager {
 				$status = STATUS_ERROR;
 				$subStatus = STATUS_ERROR;
 				$sessionState = SESSION_STATE_ERROR;
-				$closedReason = $e->getMessage();
+				$closedReason = $this->tr . ' - ' . $e->getMessage();
 			} catch (\BadMethodCallException $e) {
 				$this->l->error($this->tr . " - " . __METHOD__ . " - Caught exception2 " . $e->getMessage() . ' - ' . $e->getTraceAsString());
 #				$this->l->error($this->tr . " - " . __METHOD__ . " - token: " . print_r($token, true));
 				$status = STATUS_ERROR;
 				$subStatus = STATUS_ERROR;
 				$sessionState = SESSION_STATE_ERROR;
-				$closedReason = $e->getMessage();
+				$closedReason = $this->tr . ' - ' . $e->getMessage();
+			} catch (\RuntimeException $e) {
+				$this->l->error($this->tr . " - " . __METHOD__ . " - Caught exception3 " . $e->getMessage() . ' - ' . $e->getTraceAsString());
+				$status = STATUS_ERROR;
+				$subStatus = STATUS_ERROR;
+				$sessionState = SESSION_STATE_ERROR;
+				$closedReason = $this->tr . ' - ' . $e->getMessage();
 			}
+
 
 
 			// BadMethodCallException

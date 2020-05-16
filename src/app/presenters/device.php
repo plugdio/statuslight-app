@@ -29,12 +29,11 @@ class Device {
 #				$this->l->debug($this->tr . " - " . __METHOD__ . " - me: " . print_r($me, true));
 
 				$userId = $me['id'];
-				$provider = PROVIDER_AZURE;
 				$name = $me['displayName'];
 				$email = $me['mail'];
 
 				$userModel = new \Models\User();
-				$userModel->saveUser($userId, $provider, $name, $email);
+				$userModel->saveUser($userId, PROVIDER_AZURE, $name, $email);
 
 				$f3->set('SESSION.userId', $userId);
 				$f3->set('SESSION.name', $name);
@@ -44,6 +43,7 @@ class Device {
 			} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
 				$this->l->error($this->tr . " - " . __METHOD__ . " - Caught exception " . $e->getMessage() . ' - ' . $e->getTraceAsString());
 				$f3->set('SESSION.userId', null);
+				$f3->set('SESSION.name', null);
 				$f3->set('SESSION.accessToken', null);
 				$f3->set('SESSION.refreshToken', null);
 				$f3->set('SESSION.accessTokenExpiresOn', null);
@@ -72,12 +72,11 @@ class Device {
 #				$this->l->debug($this->tr . " - " . __METHOD__ . " - ownerDetails: " . print_r($ownerDetails, true));
 
 				$userId = $ownerDetails->getId();
-				$provider = PROVIDER_GOOGLE;
 				$name = $ownerDetails->getName();
 				$email = $ownerDetails->getEmail();
 
 				$userModel = new \Models\User();
-				$userModel->saveUser($userId, $provider, $name, $email);
+				$userModel->saveUser($userId, PROVIDER_GOOGLE, $name, $email);
 
 				$f3->set('SESSION.userId', $userId);
 				$f3->set('SESSION.name', $name);
@@ -87,6 +86,7 @@ class Device {
 			} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
 				$this->l->error($this->tr . " - " . __METHOD__ . " - Caught exception " . $e->getMessage() . ' - ' . $e->getTraceAsString());
 				$f3->set('SESSION.userId', null);
+				$f3->set('SESSION.name', null);
 				$f3->set('SESSION.accessToken', null);
 				$f3->set('SESSION.refreshToken', null);
 				$f3->set('SESSION.accessTokenExpiresOn', null);
@@ -112,26 +112,25 @@ class Device {
         		$userId = $provider->getAuthorizedUser($token)->getId();
         		$team = $provider->getResourceOwner($token);
 				
-				$this->l->debug($this->tr . " - " . __METHOD__ . " - userId: " . print_r($userId, true));
-				$this->l->debug($this->tr . " - " . __METHOD__ . " - team: " . print_r($team, true));
-/*
-				$userId = $ownerDetails->getId();
-				$provider = PROVIDER_GOOGLE;
-				$name = $ownerDetails->getName();
-				$email = $ownerDetails->getEmail();
+#				$this->l->debug($this->tr . " - " . __METHOD__ . " - userId: " . print_r($userId, true));
+#				$this->l->debug($this->tr . " - " . __METHOD__ . " - team: " . print_r($team, true));
+
+				$name = $team->getRealName();
+				$email = $team->getEmail();
 
 				$userModel = new \Models\User();
-				$userModel->saveUser($userId, $provider, $name, $email);
+				$userModel->saveUser($userId, PROVIDER_SLACK, $name, $email);
 
 				$f3->set('SESSION.userId', $userId);
 				$f3->set('SESSION.name', $name);
 
 				$sessionModel = new \Models\Session();
-				$sessionModel->saveSession(PROVIDER_GOOGLE, $userId, $token);
-*/
+				$sessionModel->saveSession(PROVIDER_SLACK, $userId, $token);
+
 			} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
 				$this->l->error($this->tr . " - " . __METHOD__ . " - Caught exception " . $e->getMessage() . ' - ' . $e->getTraceAsString());
 				$f3->set('SESSION.userId', null);
+				$f3->set('SESSION.name', null);
 				$f3->set('SESSION.accessToken', null);
 				$f3->set('SESSION.refreshToken', null);
 				$f3->set('SESSION.accessTokenExpiresOn', null);

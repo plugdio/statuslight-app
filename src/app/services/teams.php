@@ -127,11 +127,11 @@ class Teams extends \Services\ServiceBase {
 			}
 		} elseif (array_key_exists('exception', $providerResponse)) {
 			$newState = SESSION_STATE_ERROR;
-			$closedReason = $providerResponse["exception"];
+			$closedReason = $tr . ' - ' . $providerResponse["exception"];
 			$status = STATUS_ERROR;
 		} else {
 			$newState = SESSION_STATE_INACTIVE;
-			$closedReason = "Presence coudn't be retreived";
+			$closedReason = $tr . ' - ' . "Presence coudn't be retreived";
 			$status = STATUS_ERROR;
 		}
 

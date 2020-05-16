@@ -131,7 +131,6 @@ class GCal extends \Services\ServiceBase {
 					(object) ['id' => $primaryCalendareId]
 				];
 
-$l->debug($tr . " - " . __METHOD__ . " - request: " . json_encode($request));
 
 				$res = $client->request('POST', 'https://www.googleapis.com/calendar/v3/freeBusy', [
     				'headers' => [
@@ -142,12 +141,12 @@ $l->debug($tr . " - " . __METHOD__ . " - request: " . json_encode($request));
     				'http_errors' => false
 				]);
 				#{  "kind": "calendar#freeBusy",  "timeMin": "2020-05-15T23:15:30.000Z",  "timeMax": "2020-05-15T23:16:30.000Z",  "calendars": {   "x@gmail.com": {    "busy": []   }  } }
-				$l->debug($tr . " - " . __METHOD__ . " - body: " . $res->getBody());
+#				$l->debug($tr . " - " . __METHOD__ . " - body: " . $res->getBody());
 
 				$providerResponse = json_decode($res->getBody());
 				if (!empty($providerResponse->error)) {
 					$newState = SESSION_STATE_ERROR;
-					$closedReason = $providerResponse->message;
+					$closedReason = $tr . ' - ' . $providerResponse->message;
 					$status = STATUS_ERROR;
 					$subStatus = STATUS_ERROR;
 				} else {
@@ -164,7 +163,7 @@ $l->debug($tr . " - " . __METHOD__ . " - request: " . json_encode($request));
 
 			} else {
 				$newState = SESSION_STATE_ERROR;
-				$closedReason = 'error getting calendarList';
+				$closedReason = $tr . ' - ' . 'error getting calendarList';
 				$status = STATUS_ERROR;
 				$subStatus = STATUS_ERROR;
 			}
@@ -173,14 +172,14 @@ $l->debug($tr . " - " . __METHOD__ . " - request: " . json_encode($request));
 			$l->error($tr . " - " . __METHOD__ . " - Caught exception1 " . $e->getMessage() . ' - ' . $e->getTraceAsString());
 #			$l->error($tr . " - " . __METHOD__ . " - token: " . print_r($token, true));
 			$newState = SESSION_STATE_ERROR;
-			$closedReason = $e->getMessage();
+			$closedReason = $tr . ' - ' . $e->getMessage();
 			$status = STATUS_ERROR;
 			$subStatus = STATUS_ERROR;
 		} catch (\GuzzleHttp\Exception\ClientException $e) {
 			$l->error($tr . " - " . __METHOD__ . " - Caught exception2 " . $e->getMessage() . ' - ' . $e->getTraceAsString());
 #			$l->error($tr . " - " . __METHOD__ . " - token: " . print_r($token, true));
 			$newState = SESSION_STATE_ERROR;
-			$closedReason = $e->getMessage();
+			$closedReason = $tr . ' - ' . $e->getMessage();
 			$status = STATUS_ERROR;
 			$subStatus = STATUS_ERROR;
 		}
