@@ -148,16 +148,16 @@ class GCal extends \Services\ServiceBase {
 					$newState = SESSION_STATE_ERROR;
 					$closedReason = $tr . ' - ' . $providerResponse->message;
 					$status = STATUS_ERROR;
-					$subStatus = STATUS_ERROR;
+					$statusDetail = STATUS_ERROR;
 				} else {
 					$newState = SESSION_STATE_ACTIVE;
 					$closedReason = null;
 					if (count($providerResponse->calendars->{$primaryCalendareId}->busy) > 1) {
 						$status = STATUS_BUSY;
-						$subStatus = STATUS_BUSY;
+						$statusDetail = STATUS_BUSY;
 					} elseif (count($providerResponse->calendars->{$primaryCalendareId}->busy) == 0) {
 						$status = STATUS_FREE;
-						$subStatus = STATUS_FREE;
+						$statusDetail = STATUS_FREE;
 					}
 				}
 
@@ -165,7 +165,7 @@ class GCal extends \Services\ServiceBase {
 				$newState = SESSION_STATE_ERROR;
 				$closedReason = $tr . ' - ' . 'error getting calendarList';
 				$status = STATUS_ERROR;
-				$subStatus = STATUS_ERROR;
+				$statusDetail = STATUS_ERROR;
 			}
 
 		} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
@@ -174,19 +174,19 @@ class GCal extends \Services\ServiceBase {
 			$newState = SESSION_STATE_ERROR;
 			$closedReason = $tr . ' - ' . $e->getMessage();
 			$status = STATUS_ERROR;
-			$subStatus = STATUS_ERROR;
+			$statusDetail = STATUS_ERROR;
 		} catch (\GuzzleHttp\Exception\ClientException $e) {
 			$l->error($tr . " - " . __METHOD__ . " - Caught exception2 " . $e->getMessage() . ' - ' . $e->getTraceAsString());
 #			$l->error($tr . " - " . __METHOD__ . " - token: " . print_r($token, true));
 			$newState = SESSION_STATE_ERROR;
 			$closedReason = $tr . ' - ' . $e->getMessage();
 			$status = STATUS_ERROR;
-			$subStatus = STATUS_ERROR;
+			$statusDetail = STATUS_ERROR;
 		}
 
 		$response->result->sessionState = $newState;
 		$response->result->status = $status;
-		$response->result->subStatus = $subStatus;
+		$response->result->statusDetail = $statusDetail;
 		$response->result->closedReason = $closedReason;
 		$response->success = true;
 

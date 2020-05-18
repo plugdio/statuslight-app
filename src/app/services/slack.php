@@ -99,19 +99,19 @@ class Slack extends \Services\ServiceBase {
 				$newState = SESSION_STATE_ERROR;
 				$closedReason = $tr . ' - ' . $providerResponse->error;
 				$status = STATUS_ERROR;
-				$subStatus = STATUS_ERROR;
+				$statusDetail = STATUS_ERROR;
 			} else {
 				$newState = SESSION_STATE_ACTIVE;
 				$closedReason = null;
 				if ($providerResponse->user->profile->status_text == '') {
 					$status = STATUS_FREE;
-					$subStatus = STATUS_FREE;
+					$statusDetail = STATUS_FREE;
 				} elseif ($providerResponse->user->profile->status_text == 'In a meeting') {
 					$status = STATUS_BUSY;
-					$subStatus = 'In a meeting';
+					$statusDetail = 'In a meeting';
 				} else {
 					$status = STATUS_FREE;
-					$subStatus = $providerResponse->user->profile->status_text;
+					$statusDetail = $providerResponse->user->profile->status_text;
 				}
 			}
 		} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
@@ -120,19 +120,19 @@ class Slack extends \Services\ServiceBase {
 			$newState = SESSION_STATE_ERROR;
 			$closedReason = $tr . ' - ' . $e->getMessage();
 			$status = STATUS_ERROR;
-			$subStatus = STATUS_ERROR;
+			$statusDetail = STATUS_ERROR;
 		} catch (\GuzzleHttp\Exception\ClientException $e) {
 			$l->error($tr . " - " . __METHOD__ . " - Caught exception2 " . $e->getMessage() . ' - ' . $e->getTraceAsString());
 #			$l->error($tr . " - " . __METHOD__ . " - token: " . print_r($token, true));
 			$newState = SESSION_STATE_ERROR;
 			$closedReason = $tr . ' - ' . $e->getMessage();
 			$status = STATUS_ERROR;
-			$subStatus = STATUS_ERROR;
+			$statusDetail = STATUS_ERROR;
 		}
 
 		$response->result->sessionState = $newState;
 		$response->result->status = $status;
-		$response->result->subStatus = $subStatus;
+		$response->result->statusDetail = $statusDetail;
 		$response->result->closedReason = $closedReason;
 		$response->success = true;
 

@@ -80,7 +80,7 @@ class SessionManager {
 				$newSession = $presenceResponse->result;
 
 				$status = $newSession->status;
-				$subStatus = $newSession->subStatus;
+				$statusDetail = $newSession->statusDetail;
 				$sessionState = $newSession->sessionState;
 				$closedReason = $newSession->closedReason;
 
@@ -88,20 +88,20 @@ class SessionManager {
 				$this->l->error($this->tr . " - " . __METHOD__ . " - Caught exception1 " . $e->getMessage() . ' - ' . $e->getTraceAsString());
 #				$this->l->error($this->tr . " - " . __METHOD__ . " - token: " . print_r($token, true));
 				$status = STATUS_ERROR;
-				$subStatus = STATUS_ERROR;
+				$statusDetail = STATUS_ERROR;
 				$sessionState = SESSION_STATE_ERROR;
 				$closedReason = $this->tr . ' - ' . $e->getMessage();
 			} catch (\BadMethodCallException $e) {
 				$this->l->error($this->tr . " - " . __METHOD__ . " - Caught exception2 " . $e->getMessage() . ' - ' . $e->getTraceAsString());
 #				$this->l->error($this->tr . " - " . __METHOD__ . " - token: " . print_r($token, true));
 				$status = STATUS_ERROR;
-				$subStatus = STATUS_ERROR;
+				$statusDetail = STATUS_ERROR;
 				$sessionState = SESSION_STATE_ERROR;
 				$closedReason = $this->tr . ' - ' . $e->getMessage();
 			} catch (\RuntimeException $e) {
 				$this->l->error($this->tr . " - " . __METHOD__ . " - Caught exception3 " . $e->getMessage() . ' - ' . $e->getTraceAsString());
 				$status = STATUS_ERROR;
-				$subStatus = STATUS_ERROR;
+				$statusDetail = STATUS_ERROR;
 				$sessionState = SESSION_STATE_ERROR;
 				$closedReason = $this->tr . ' - ' . $e->getMessage();
 			}
@@ -110,7 +110,7 @@ class SessionManager {
 
 			// BadMethodCallException
 
-			$sessionModel->updateSession($session['_id'], $token, $sessionState, $closedReason, $status, $subStatus);
+			$sessionModel->updateSession($session['_id'], $token, $sessionState, $closedReason, $status, $statusDetail);
 
 			$mqttMessageModel = new \Models\MqttMessage();
 			$deviceModel = new \Models\Device();
@@ -119,6 +119,7 @@ class SessionManager {
 			if ($deviceResponse->success && count($deviceResponse->result) > 0) {
 				foreach ($deviceResponse->result as $device) {
 					$mqttMessageModel->putInQueue('SL/' . $device['clientId'] . '/statuslight/status/set', $status);
+					$mqttMessageModel->putInQueue('SL/' . $device['clientId'] . '/statuslight/statusdetail/set', $statusDetail);
 				}
 			}
 			
