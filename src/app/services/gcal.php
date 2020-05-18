@@ -186,7 +186,7 @@ class GCal extends \Services\ServiceBase {
 
 		$response->result->sessionState = $newState;
 		$response->result->status = $status;
-		$response->result->statusDetail = $statusDetail;
+		$response->result->statusDetail = 'Google: ' . $statusDetail;
 		$response->result->closedReason = $closedReason;
 		$response->success = true;
 

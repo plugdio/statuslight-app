@@ -132,7 +132,7 @@ class Slack extends \Services\ServiceBase {
 
 		$response->result->sessionState = $newState;
 		$response->result->status = $status;
-		$response->result->statusDetail = $statusDetail;
+		$response->result->statusDetail = 'Slack: ' . $statusDetail;
 		$response->result->closedReason = $closedReason;
 		$response->success = true;
 

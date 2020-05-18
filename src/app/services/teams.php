@@ -109,7 +109,7 @@ class Teams extends \Services\ServiceBase {
 		if (array_key_exists('availability', $providerResponse)) {
 			$newState = SESSION_STATE_ACTIVE;
 			if (array_key_exists('activity', $providerResponse)) {
-				$statusDetail = $providerResponse["availability"] . ':' . $providerResponse["activity"];
+				$statusDetail = $providerResponse["availability"] . '/' . $providerResponse["activity"];
 			}
 			if (in_array($providerResponse["availability"], array('Available', 'AvailableIdle'))) {
 				$status = STATUS_FREE;
@@ -137,7 +137,7 @@ class Teams extends \Services\ServiceBase {
 
 		$response->result->sessionState = $newState;
 		$response->result->status = $status;
-		$response->result->statusDetail = $statusDetail;
+		$response->result->statusDetail = 'Teams: ' . $statusDetail;
 		$response->result->closedReason = $closedReason;
 		$response->success = true;
 
