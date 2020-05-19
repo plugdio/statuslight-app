@@ -24,18 +24,22 @@ class Slack extends \Services\ServiceBase {
 	} 
 
 	public static function getLoginUrl($loginType) {
-
+		$f3=\Base::instance();
+		
 		if ($loginType == 'phone') {
-			return self::getProvider('/slack/login')->getAuthorizationUrl([
-				    'scope' => 'users:read'
-				]);
+			$provider = self::getProvider('/slack/login');
 		} elseif ($loginType == 'device') {
-				return self::getProvider('/device/login/slack')->getAuthorizationUrl([
-			    	'scope' => 'users:read'
-				]);
+			$provider = self::getProvider('/device/login/slack');
 		} else {
 			return null;
 		}
+
+		$loginUrl = $provider->getAuthorizationUrl([
+				    'scope' => 'users:read',
+				    'state' => $f3->get('tr')
+				]);
+		$f3->set('SESSION.state', $provider->getState());
+		return $loginUrl;
 	} 
 
 	public static function getTokens($redirectUri) {
@@ -49,9 +53,10 @@ class Slack extends \Services\ServiceBase {
 		if ( empty($f3->get('REQUEST.code')) ) {
 			$f3->reroute($f3->get('baseStaticPath'));
  		// Check given state against previously stored one to mitigate CSRF attack
-#		} elseif (empty($f3->get('REQUEST.state')) || ($f3->get('REQUEST.state') !== $f3->get('SESSION.oauth2state'))) {
-# 			$f3->set('SESSION.oauth2state', null);		
-# 			$f3->reroute($f3->get('baseStaticPath') . '?error=' . urlencode('Invalid state'));
+		} elseif (empty($f3->get('REQUEST.state')) || ($f3->get('REQUEST.state') !== $f3->get('SESSION.state'))) {
+		    $l->error($tr . " - " . __METHOD__ . " - Invalid state: " . $f3->get('REQUEST.state') . " vs " . $f3->get('SESSION.state'));
+			$f3->reroute($f3->get('baseStaticPath') . '?error=' . urlencode('Invalid state'));
+			return;
 		} else {
 
 			try {

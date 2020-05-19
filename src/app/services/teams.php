@@ -11,12 +11,14 @@ class Teams extends \Services\ServiceBase {
 
 	public static function getProvider($redirectUri) {
 		$f3=\Base::instance();
+		$tr = $f3->get('tr');
 		// https://github.com/thenetworg/oauth2-azure
 		$teamsProvider = new \TheNetworg\OAuth2\Client\Provider\Azure([
 		    'clientId'          => $f3->get('teams_client_id'),
 		    'clientSecret'      => $f3->get('teams_client_secret'),
 		    'redirectUri'		=> $f3->get('baseAppPath') . $redirectUri,
 		    'authWithResource' 	=> false,
+		    'state'				=> $tr,
 //		    'proxy'                   => 'localhost:8888',
 //    		'verify'                  => false
 		]);
@@ -29,14 +31,18 @@ class Teams extends \Services\ServiceBase {
 	} 
 
 	public static function getLoginUrl($loginType) {
+		$f3=\Base::instance();
 
 		if ($loginType == 'phone') {
-			return self::getProvider('/teams/login')->getAuthorizationUrl();
+			$provider = self::getProvider('/teams/login');
 		} elseif ($loginType == 'device') {
-			return self::getProvider('/device/login/teams')->getAuthorizationUrl();
+			$provider = self::getProvider('/teams/login');
 		} else {
 			return null;
 		}
+		$loginUrl = $provider->getAuthorizationUrl(['state' => $f3->get('tr')]);
+		$f3->set('SESSION.state', $provider->getState());
+		return $loginUrl;
 	} 
 
 	public static function getTokens($redirectUri) {
@@ -55,14 +61,17 @@ class Teams extends \Services\ServiceBase {
 			$f3->reroute($f3->get('baseStaticPath'));
 		} elseif ( !empty($f3->get('REQUEST.code')) ) {
 			$authCode = $f3->get('REQUEST.code');
+
+			// Check given state against previously stored one to mitigate CSRF attack
+			if (empty($f3->get('REQUEST.state')) || ($f3->get('REQUEST.state') !== $f3->get('SESSION.state'))) {
+		    	$l->error($tr . " - " . __METHOD__ . " - Invalid state: " . $f3->get('REQUEST.state') . " vs " . $f3->get('SESSION.state'));
+				$f3->reroute($f3->get('baseStaticPath') . '?error=' . urlencode('Invalid state'));
+				return;
+			}
+
 			$l->debug($tr . " - " . __METHOD__ . " - logged in");
 		}
 
-		// Check given state against previously stored one to mitigate CSRF attack
-#		} elseif (empty($_GET['state']) || ($_GET['state'] !== $_SESSION['oauth2state'])) {
-#		    unset($_SESSION['oauth2state']);
-#		    exit('Invalid state');
-#		}
 
 		try {
 		    $token = self::getProvider($redirectUri)->getAccessToken('authorization_code', [

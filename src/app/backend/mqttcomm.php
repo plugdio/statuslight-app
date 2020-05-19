@@ -21,13 +21,13 @@ class MqttComm {
 		$this->mqttMessageModel = new \Models\MqttMessage();
 
 		if ($f3->get('ENV') == 'DEV') {
-			$mqttHost = 'test.statuslight.online';
+			$mqttHost = $f3->get('mqtt_host_dev');
 		} else {
-			$mqttHost = 'sl_mosquitto.statuslight-app_backend';
+			$mqttHost = $f3->get('mqtt_host');
 		}
-		$mqttPort = 1883;
-		$mqttUser = 'adm_app_' . $f3->get('ENV');
-		$mqttPass = 'sladmin123';
+		$mqttPort = $f3->get('mqtt_port');
+		$mqttUser = $f3->get('mqtt_user_prefix') . $f3->get('ENV');
+		$mqttPass = $f3->get('mqtt_password');
 
 		$this->l->info($this->tr . " - " . __METHOD__ . " - Connecting to: " . $mqttHost);
 		$a = 0;

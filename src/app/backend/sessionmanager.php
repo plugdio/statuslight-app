@@ -25,7 +25,7 @@ class SessionManager {
 
 	}
 
-	function refreshSessions() { #($f3, $args) {
+	function refreshSessions() {
 		$f3=\Base::instance();
 		$this->l->debug($this->tr . " - " . __METHOD__ . " - START - " . $f3->get('GET.env'));
 		$env = $f3->get('GET.env');

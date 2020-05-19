@@ -29,22 +29,25 @@ class GCal extends \Services\ServiceBase {
 	} 
 
 	public static function getLoginUrl($loginType) {
-
+		$f3=\Base::instance();
+		
 		if ($loginType == 'phone') {
-			return self::getProvider('/gcal/login')->getAuthorizationUrl([
-				    'scope' => [
-				        'https://www.googleapis.com/auth/calendar.readonly'
-				    ],
-				]);
+			$provider = self::getProvider('/gcal/login');
 		} elseif ($loginType == 'device') {
-				return self::getProvider('/device/login/gcal')->getAuthorizationUrl([
-			    	'scope' => [
-			        	'https://www.googleapis.com/auth/calendar.readonly'
-			    	],
-				]);
+			$provider = self::getProvider('/device/login/gcal');
 		} else {
 			return null;
 		}
+
+		$loginUrl = $provider->getAuthorizationUrl([
+				    'scope' => [
+				        'https://www.googleapis.com/auth/calendar.readonly'
+				    ],
+				    'state' => $f3->get('tr')
+				]);
+		$f3->set('SESSION.state', $provider->getState());
+		return $loginUrl;
+
 	} 
 
 	public static function getTokens($redirectUri) {
@@ -65,10 +68,11 @@ class GCal extends \Services\ServiceBase {
 
 		if ( empty($f3->get('REQUEST.code')) ) {
 			$f3->reroute($f3->get('baseStaticPath'));
-#		} elseif ( empty($f3->get('REQUEST.state')) || ($f3->get('REQUEST.state') !== $f3->get('SESSION.oauth2state')) ) {
-#			// State is invalid, possible CSRF attack in progress
-#    		unset($_SESSION['oauth2state']);
-#    		exit('Invalid state');
+		} elseif ( empty($f3->get('REQUEST.state')) || ($f3->get('REQUEST.state') !== $f3->get('SESSION.state')) ) {
+			// State is invalid, possible CSRF attack in progress
+    		$l->error($tr . " - " . __METHOD__ . " - Invalid state: " . $f3->get('REQUEST.state') . " vs " . $f3->get('SESSION.state'));
+			$f3->reroute($f3->get('baseStaticPath') . '?error=' . urlencode('Invalid state'));
+			return;
 		} elseif ( !empty($f3->get('REQUEST.code')) ) {
 			$authCode = $f3->get('REQUEST.code');
 			$l->debug($tr . " - " . __METHOD__ . " - logged in");
