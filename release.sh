@@ -1,7 +1,4 @@
 #!/bin/bash
-
-export STATUSLIGHT_ENV="TEST"
-
 git pull origin master
 #git fetch
 #git reset --hard origin/master
