@@ -3,19 +3,21 @@ version: "2.4"
 services:
   php:
     container_name: sl_php
-    build: './php/'
+    build:
+      context: './php/'
+      args:
+        DOMAIN: ${DOMAIN}
+        STATICURL: ${STATICURL}
+        MQTTADMINUSER: ${MQTTADMINUSER}
+        MQTTADMINPASS: ${MQTTADMINPASS}
+        TEAMSCLIENTID: ${TEAMSCLIENTID}
+        TEAMSCLIENTSECRET: ${TEAMSCLIENTSECRET}
+        GCALCLIENTID: ${GCALCLIENTID}
+        GCALCLIENTSECRET: ${GCALCLIENTSECRET}
+        SLACKCLIENTID: ${SLACKCLIENTID}
+        SLACKCLIENTSECRET: ${SLACKCLIENTSECRET}
     environment:
       - STATUSLIGHT_ENV
-      - DOMAIN
-      - STATICURL
-      - MQTTADMINUSER
-      - MQTTADMINPASS
-      - TEAMSCLIENTID
-      - TEAMSCLIENTSECRET
-      - GCALCLIENTID
-      - GCALCLIENTSECRET
-      - SLACKCLIENTID
-      - SLACKCLIENTSECRET
     networks:
       backend:
         ipv4_address: 172.20.0.3
@@ -44,10 +46,11 @@ services:
     depends_on:
       - php
   mosquitto:
-    build: './mosquitto/'
+    build:
+      context: './mosquitto/'
+      args:
+        DOMAIN: ${DOMAIN}
     container_name: sl_mosquitto
-    environment:
-      - DOMAIN
     ports:
       - "1883:1883"
     volumes:

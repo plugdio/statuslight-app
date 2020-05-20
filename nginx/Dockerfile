@@ -5,8 +5,6 @@ ARG EMAIL
 ENV DOMAIN ${DOMAIN}
 ENV EMAIL ${EMAIL}
 
-RUN printenv
-
 RUN apk update; \
     apk upgrade; \
     apk add --no-cache certbot;
