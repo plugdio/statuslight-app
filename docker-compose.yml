@@ -25,10 +25,11 @@ services:
       - mosquitto
   nginx:
     container_name: sl_nginx
-    build: './nginx/'
-    environment:
-      - DOMAIN
-      - EMAIL
+    build:
+      context: './nginx/'
+      args:
+        DOMAIN: ${DOMAIN}
+        EMAIL: ${EMAIL}
     networks:
       frontend:
         ipv4_address: 172.10.0.2

@@ -1,9 +1,11 @@
 FROM nginx:1.17-alpine
 
-ARG $DOMAIN
-ARG $EMAIL
+ARG DOMAIN
+ARG EMAIL
 ENV DOMAIN ${DOMAIN}
 ENV EMAIL ${EMAIL}
+
+RUN printenv
 
 RUN apk update; \
     apk upgrade; \
