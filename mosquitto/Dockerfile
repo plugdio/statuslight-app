@@ -2,6 +2,7 @@
 FROM alpine:3.10
 
 ARG $DOMAIN
+ENV DOMAIN "$DOMAIN"
 
 RUN addgroup -S mosquitto && \
     adduser -S -H -h /var/empty -s /sbin/nologin -D -G mosquitto mosquitto
