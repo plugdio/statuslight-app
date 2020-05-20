@@ -10,3 +10,5 @@
 /src/sessionmanager.sh
 *.log
 /mosquitto/data/*
+src/config_dev.ini
+.env_test

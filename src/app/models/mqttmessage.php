@@ -63,6 +63,20 @@ class MqttMessage {
     	$this->mqttMessage->save();
 	}
 
+	function deleteMessage($messageId) {
+		$response = new \Response($this->tr);
+		
+		$this->mqttMessage->load(array('@_id=?', $messageId));
+		if ($this->mqttMessage->dry()) {
+			$response->message = 'mqttMessage not found';
+			return $response;
+		}
+		
+    	$this->mqttMessage->erase();
+    	$response->success = true;
+		return $response;
+	}
+
 }
 
 ?>

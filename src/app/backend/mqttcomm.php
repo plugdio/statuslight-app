@@ -20,13 +20,9 @@ class MqttComm {
 
 		$this->mqttMessageModel = new \Models\MqttMessage();
 
-		if ($f3->get('ENV') == 'DEV') {
-			$mqttHost = $f3->get('mqtt_host_dev');
-		} else {
-			$mqttHost = $f3->get('mqtt_host');
-		}
+		$mqttHost = $f3->get('mqtt_host');
 		$mqttPort = $f3->get('mqtt_port');
-		$mqttUser = $f3->get('mqtt_user_prefix') . $f3->get('ENV');
+		$mqttUser = $f3->get('mqtt_user');
 		$mqttPass = $f3->get('mqtt_password');
 
 		$this->l->info($this->tr . " - " . __METHOD__ . " - Connecting to: " . $mqttHost);
@@ -67,7 +63,8 @@ class MqttComm {
 					$messagesSent++;
 					$this->l->debug($this->tr . " - " . __METHOD__ . " - message: " . print_r($message, true));
 					$this->broker->publish($message['topic'], $message['content'], 0, 1);
-					$this->mqttMessageModel->updateMessage($message['_id'], MQTTMSG_SENT);
+//					$this->mqttMessageModel->updateMessage($message['_id'], MQTTMSG_SENT);
+					$this->mqttMessageModel->deleteMessage($message['_id']);
 					$i = 0;
 				}
 			}

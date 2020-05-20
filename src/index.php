@@ -26,22 +26,18 @@ $f3 = \Base::instance();
 
 $f3->set('CORS.origin', '*'); 
 
-if (empty(getenv('STATUSLIGHT_ENV')) || (rtrim(strtoupper(getenv('STATUSLIGHT_ENV'))) == 'DEV')) {
+if (rtrim(strtoupper(getenv('STATUSLIGHT_ENV'))) == 'DEV') {
+    $f3->config($path . 'config_dev.ini');
     $f3->set('DEBUG',3);
     $f3->set('ENV', 'DEV');
-    $f3->set('baseStaticPath', 'http://localhost:8000');
-    $f3->set('baseAppPath', 'http://localhost:8000');    
 } elseif ( (strtoupper(getenv('STATUSLIGHT_ENV')) == 'TEST') ) {
+    $f3->config($path . 'config.ini');
     $f3->set('ENV', 'TEST');
-    $f3->set('baseStaticPath', 'https://test.statuslight.online');
-    $f3->set('baseAppPath', 'https://test.statuslight.online');
 } elseif ( (strtoupper(getenv('STATUSLIGHT_ENV')) == 'PROD') ) {
+    $f3->config($path . 'config.ini');
     $f3->set('ENV', 'PROD');
-    $f3->set('baseStaticPath', 'https://statuslight.online');
-    $f3->set('baseAppPath', 'https://my.statuslight.online');
 } else {
     $f3->error(500, "Unknown environment: " . strtoupper(getenv('STATUSLIGHT_ENV')));
-
 }
 
 $f3->set('path', $path);
@@ -51,7 +47,6 @@ $f3->set('dbdir', $path . 'data/');
 $f3->set('log', $log);
 $tr = substr(md5(uniqid(rand(), true)),0,6);
 $f3->set('tr', $tr);
-$f3->config($path . 'config.ini');
 
 /*
 $f3->set('ONERROR',
