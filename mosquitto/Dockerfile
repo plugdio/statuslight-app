@@ -1,6 +1,8 @@
 #https://hub.docker.com/r/jllopis/mosquitto/dockerfile
 FROM alpine:3.10
 
+ARG $DOMAIN
+
 RUN addgroup -S mosquitto && \
     adduser -S -H -h /var/empty -s /sbin/nologin -D -G mosquitto mosquitto
 

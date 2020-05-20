@@ -1,4 +1,8 @@
 FROM nginx:1.17-alpine
+
+ARG $DOMAIN
+ARG $EMAIL
+
 RUN apk update; \
     apk upgrade; \
     apk add --no-cache certbot;
