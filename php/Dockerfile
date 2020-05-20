@@ -8,7 +8,7 @@ RUN apk add supervisor
 COPY supervisord.conf /etc/supervisor/supervisord.conf
 COPY listener.php /listener.php
 
-COPY ../src/config_tpl.ini /var/www/html/config.ini
+COPY config_tpl.ini /var/www/html/config.ini
 
 RUN sed -i "s/MYDOMAIN/$DOMAIN/" /var/www/html/config.ini && \
 	sed -i "s/STATICURL/$STATICURL/" /var/www/html/config.ini && \
