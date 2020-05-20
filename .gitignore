@@ -11,4 +11,5 @@
 *.log
 /mosquitto/data/*
 src/config_dev.ini
+.env_local
 .env_test

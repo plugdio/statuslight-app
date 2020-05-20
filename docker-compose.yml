@@ -51,7 +51,7 @@ services:
       - "1883:1883"
     volumes:
       - ./mosquitto/mosquitto.conf:/etc/mosquitto/mosquitto.conf
-      - ./mosquitto/conf/:/etc/mosquitto.d/
+#      - ./mosquitto/conf/:/etc/mosquitto.d/
 #      - ./mosquitto/data/:/var/lib/mosquitto/
     networks:
       frontend:
