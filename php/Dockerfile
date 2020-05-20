@@ -8,6 +8,8 @@ RUN apk add supervisor
 COPY supervisord.conf /etc/supervisor/supervisord.conf
 COPY listener.php /listener.php
 
+COPY ../src/config_tpl.ini /var/www/html/config.ini
+
 RUN sed -i "s/MYDOMAIN/$DOMAIN/" /var/www/html/config.ini && \
 	sed -i "s/STATICURL/$STATICURL/" /var/www/html/config.ini && \
 	sed -i "s/TEAMSCLIENTID/$TEAMSCLIENTID/" /var/www/html/config.ini && \
@@ -18,6 +20,6 @@ RUN sed -i "s/MYDOMAIN/$DOMAIN/" /var/www/html/config.ini && \
 	sed -i "s/SLACKCLIENTSECRET/$SLACKCLIENTSECRET/" /var/www/html/config.ini && \
 	sed -i "s/MQTTADMINUSER/$MQTTADMINUSER/" /var/www/html/config.ini && \
 	sed -i "s/MYDOMAIN/$DOMAIN/" /var/www/html/config.ini && \
-	sed -i "s/MQTTADMINPASS/$MQTTADMINPASS/" /var/www/html/config.ini && \
+	sed -i "s/MQTTADMINPASS/$MQTTADMINPASS/" /var/www/html/config.ini
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
