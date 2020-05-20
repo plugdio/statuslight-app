@@ -2,7 +2,7 @@
 FROM alpine:3.10
 
 ARG DOMAIN
-ENV DOMAIN ${DOMAIN}
+#ENV DOMAIN ${DOMAIN}
 
 RUN addgroup -S mosquitto && \
     adduser -S -H -h /var/empty -s /sbin/nologin -D -G mosquitto mosquitto
@@ -60,7 +60,7 @@ RUN apk --no-cache add --virtual buildDeps git cmake build-base openssl-dev c-ar
     apk del buildDeps && rm -rf /var/cache/apk/*
 
 COPY conf/auth-plugin.conf /etc/mosquitto.d/auth-plugin.conf
-RUN sed -i "s/MYDOMAIN/$DOMAIN/" /etc/mosquitto.d/auth-plugin.conf
+RUN sed -i "s/MYDOMAIN/${DOMAIN}/" /etc/mosquitto.d/auth-plugin.conf
 
 # MQTT default port and default port over TLS
 EXPOSE 1883 8883
