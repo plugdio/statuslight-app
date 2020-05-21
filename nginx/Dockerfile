@@ -2,8 +2,6 @@ FROM nginx:1.17-alpine
 
 ARG DOMAIN
 ARG EMAIL
-#ENV DOMAIN ${DOMAIN}
-#ENV EMAIL ${EMAIL}
 
 RUN apk update; \
     apk upgrade; \
