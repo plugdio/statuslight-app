@@ -42,7 +42,22 @@ if (rtrim(strtoupper(getenv('STATUSLIGHT_ENV'))) == 'DEV') {
 
 $f3->set('path', $path);
 $f3->set('AUTOLOAD', $path . 'app/');
+$f3->set('UI', $path . 'ui/');
 $f3->set('dbdir', $path . 'data/');
+
+$f3->set('baseStaticPath', getenv('STATICURL'));
+$f3->set('baseAppPath', getenv('DOMAIN'));
+
+$f3->set('teams_client_id', getenv('TEAMSCLIENTID'));
+$f3->set('teams_client_secret', getenv('TEAMSCLIENTSECRET'));
+$f3->set('gcal_client_id', getenv('GCALCLIENTID'));
+$f3->set('gcal_client_secret', getenv('gcal_client_secret'));
+$f3->set('slack_client_id', getenv('SLACKCLIENTID'));
+$f3->set('slack_client_secret', getenv('SLACKCLIENTSECRET'));
+$f3->set('mqtt_host', getenv('MQTTHOST'));
+$f3->set('mqtt_port', getenv('MQTTPORT'));
+$f3->set('mqtt_user', getenv('MQTTADMINUSER'));
+$f3->set('mqtt_password', getenv('MQTTADMINPASS'));
 
 $f3->set('log', $log);
 $tr = substr(md5(uniqid(rand(), true)),0,6);
