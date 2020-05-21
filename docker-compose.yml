@@ -1,21 +1,28 @@
 # https://www.cloudreach.com/en/resources/blog/containerize-this-how-to-use-php-apache-mysql-within-docker-containers/
 version: "2.4"
 services:
+  composer:
+    container_name: sl_composer
+    image: composer:latest
+    command: ["composer", "install", "--ignore-platform-reqs"]
+    volumes:
+      - ./src/:/app
+  mysql:
+    container_name: sl_mysql
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+    networks:
+      backend:
+        ipv4_address: 172.20.0.5
+    depends_on:
+      - composer
   php:
     container_name: sl_php
     build:
       context: './php/'
-#      args:
-#        DOMAIN: ${DOMAIN}
-#        STATICURL: ${STATICURL}
-#        MQTTADMINUSER: ${MQTTADMINUSER}
-#        MQTTADMINPASS: ${MQTTADMINPASS}
-#        TEAMSCLIENTID: ${TEAMSCLIENTID}
-#        TEAMSCLIENTSECRET: ${TEAMSCLIENTSECRET}
-#        GCALCLIENTID: ${GCALCLIENTID}
-#        GCALCLIENTSECRET: ${GCALCLIENTSECRET}
-#        SLACKCLIENTID: ${SLACKCLIENTID}
-#        SLACKCLIENTSECRET: ${SLACKCLIENTSECRET}
     environment:
       - STATUSLIGHT_ENV
       - DOMAIN
@@ -36,7 +43,7 @@ services:
     volumes:
       - ./src/:/var/www/html
     depends_on:
-      - mosquitto
+      - mysql
   nginx:
     container_name: sl_nginx
     build:
@@ -75,14 +82,7 @@ services:
       backend:
         ipv4_address: 172.20.0.4
     depends_on:
-      - composer
-  composer:
-    container_name: sl_composer
-    image: composer:latest
-    command: ["composer", "install", "--ignore-platform-reqs"]
-    volumes:
-      - ./src/:/app
-
+      - nginx
 networks:
   frontend:
     ipam:
