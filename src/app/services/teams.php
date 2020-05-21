@@ -36,7 +36,7 @@ class Teams extends \Services\ServiceBase {
 		if ($loginType == 'phone') {
 			$provider = self::getProvider('/teams/login');
 		} elseif ($loginType == 'device') {
-			$provider = self::getProvider('/teams/login');
+			$provider = self::getProvider('/device/login/teams');
 		} else {
 			return null;
 		}
