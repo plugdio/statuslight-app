@@ -28,13 +28,15 @@ class MqttClient {
 
 	}
 
-	function updateClient($clientId, $topic, $msg) {
+	function updateClient($clientId, $topic, $msg, $updateTime = false) {
 		$this->client->load(array('@id=?', $clientId));
 		if ($this->client->dry()) {
 			$this->client->reset();
 			$this->client->id = $clientId;
 		}
-		$this->client->updated = time();
+		if ($updateTime) {
+			$this->client->updated = time();
+		}
 		$this->client->{$topic} = $msg;
 		$this->client->save();
 	}
