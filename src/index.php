@@ -31,7 +31,7 @@ if (rtrim(strtoupper(getenv('STATUSLIGHT_ENV'))) == 'DEV') {
     $f3->set('ENV', 'DEV');
     $f3->set('baseStaticPath', 'http://' . getenv('STATICURL'));
     $f3->set('baseAppPath', 'http://' . getenv('DOMAIN'));
-} else ( (strtoupper(getenv('STATUSLIGHT_ENV')) == 'TEST') ) {
+} else {
     $f3->set('ENV', strtoupper(getenv('STATUSLIGHT_ENV')));
     $f3->set('baseStaticPath', 'https://' . getenv('STATICURL'));
     $f3->set('baseAppPath', 'https://' . getenv('DOMAIN'));
