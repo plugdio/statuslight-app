@@ -27,26 +27,20 @@ $f3 = \Base::instance();
 $f3->set('CORS.origin', '*'); 
 
 if (rtrim(strtoupper(getenv('STATUSLIGHT_ENV'))) == 'DEV') {
-    $f3->config($path . 'config_dev.ini');
     $f3->set('DEBUG',3);
     $f3->set('ENV', 'DEV');
-} elseif ( (strtoupper(getenv('STATUSLIGHT_ENV')) == 'TEST') ) {
-    $f3->config($path . 'config.ini');
-    $f3->set('ENV', 'TEST');
-} elseif ( (strtoupper(getenv('STATUSLIGHT_ENV')) == 'PROD') ) {
-    $f3->config($path . 'config.ini');
-    $f3->set('ENV', 'PROD');
-} else {
-    $f3->error(500, "Unknown environment: " . strtoupper(getenv('STATUSLIGHT_ENV')));
+    $f3->set('baseStaticPath', 'http://' . getenv('STATICURL'));
+    $f3->set('baseAppPath', 'http://' . getenv('DOMAIN'));
+} else ( (strtoupper(getenv('STATUSLIGHT_ENV')) == 'TEST') ) {
+    $f3->set('ENV', strtoupper(getenv('STATUSLIGHT_ENV')));
+    $f3->set('baseStaticPath', 'https://' . getenv('STATICURL'));
+    $f3->set('baseAppPath', 'https://' . getenv('DOMAIN'));
 }
 
 $f3->set('path', $path);
 $f3->set('AUTOLOAD', $path . 'app/');
 $f3->set('UI', $path . 'ui/');
 $f3->set('dbdir', $path . 'data/');
-
-$f3->set('baseStaticPath', getenv('STATICURL'));
-$f3->set('baseAppPath', getenv('DOMAIN'));
 
 $f3->set('teams_client_id', getenv('TEAMSCLIENTID'));
 $f3->set('teams_client_secret', getenv('TEAMSCLIENTSECRET'));

@@ -69,7 +69,7 @@
       var getConfig = function() {
         console.log('Getting the config ... ');
 
-        getJSON('https://{{ @base_app_path }}/config', null, function(err, data) {
+        getJSON('{{ @base_app_path }}/config', null, function(err, data) {
           if (err !== null) {
             console.log('Something went wrong #1: ' + err);
           } else {
