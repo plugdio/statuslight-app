@@ -2,10 +2,12 @@ FROM nginx:1.17-alpine
 
 ARG DOMAIN
 ARG EMAIL
+ARG ADMINUSER
+ARG ADMINPASS
 
 RUN apk update; \
     apk upgrade; \
-    apk add --no-cache certbot;
+    apk add --no-cache certbot openssl;
 
 # Copy renew cron script
 COPY renew /etc/periodic/daily/renew
@@ -17,6 +19,8 @@ RUN mkdir /var/www/certbot
 # Copy entrypoint
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
+
+RUN printf "${ADMINUSER}:$(openssl passwd -5 ${ADMINPASS})\n" >> /etc/nginx/.htpasswd
 
 # nginx config
 COPY app.conf /etc/nginx/conf.d/app.conf
