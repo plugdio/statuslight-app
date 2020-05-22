@@ -13,3 +13,4 @@
 src/config_dev.ini
 .env_local
 .env_test
+src/start.bat

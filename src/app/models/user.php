@@ -9,16 +9,16 @@ class User {
 		$this->tr = $f3->get('tr');
 		$this->l = $f3->get('log');
 		
-        $db = new \DB\Jig($f3->get('dbdir'), \DB\Jig::FORMAT_JSON);
-        $this->user = new \DB\Jig\Mapper($db, 'users.json');
+		$this->user = new \DB\SQL\Mapper($f3->get('db'), 'users');
+
 	}
 
-	function saveUser($id, $provider, $name, $email) {
+	function saveUser($userId, $provider, $name, $email) {
 
 		$response = new \Response($this->tr);
-		$this->user->load(array('@id=?', $id));
+		$this->user->load(array('userId=?', $userId));
 		if ($this->user->dry()) {
-			$this->user->id = $id;
+			$this->user->userId = $userId;
 			$this->user->provider = $provider;
 			$this->user->name = $name;
 			$this->user->email = $email;
@@ -33,7 +33,7 @@ class User {
 	function getUser($id) {
 
 		$response = new \Response($this->tr);
-		$this->user->load(array('@id=?', $id));
+		$this->user->load(array('id=?', $id));
 		if ($this->user->dry()) {
 			$response->message = 'User not found';
 			return $response;

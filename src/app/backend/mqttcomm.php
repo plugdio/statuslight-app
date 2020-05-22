@@ -63,8 +63,8 @@ class MqttComm {
 					$messagesSent++;
 					$this->l->debug($this->tr . " - " . __METHOD__ . " - message: " . print_r($message, true));
 					$this->broker->publish($message['topic'], $message['content'], 0, 1);
-//					$this->mqttMessageModel->updateMessage($message['_id'], MQTTMSG_SENT);
-					$this->mqttMessageModel->deleteMessage($message['_id']);
+//					$this->mqttMessageModel->updateMessage($message['id'], MQTTMSG_SENT);
+					$this->mqttMessageModel->deleteMessage($message['id']);
 					$i = 0;
 				}
 			}

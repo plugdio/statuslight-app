@@ -8,9 +8,8 @@ class MqttMessage {
 		$f3=\Base::instance();
 		$this->tr = $f3->get('tr');
 		$this->l = $f3->get('log');
-		
-        $db = new \DB\Jig($f3->get('dbdir'), \DB\Jig::FORMAT_JSON);
-        $this->mqttMessage = new \DB\Jig\Mapper($db, 'mqttmessages.json');
+
+        $this->mqttMessage = new \DB\SQL\Mapper($f3->get('db'), 'mqttmessages');
 	}
 
 	function putInQueue($topic, $content) {
@@ -18,15 +17,13 @@ class MqttMessage {
 		$this->mqttMessage->reset();
     	$this->mqttMessage->topic = $topic;
     	$this->mqttMessage->content = $content;
-    	$this->mqttMessage->queue_in = time();
-    	$this->mqttMessage->queue_out = null;
     	$this->mqttMessage->state = MQTTMSG_NOT_SENT;
     	$this->mqttMessage->save();
 	}
 
 	function getFromQueue() {
 		$response = new \Response($this->tr);
-		$this->mqttMessage->load(array('@state=?', MQTTMSG_NOT_SENT));
+		$this->mqttMessage->load(array('state=?', MQTTMSG_NOT_SENT));
 		if ($this->mqttMessage->dry()) {
 			$response->message = 'mqttMessage not found';
 			return $response;
@@ -34,9 +31,12 @@ class MqttMessage {
 		$response->result = array();
 
 		while (!$this->mqttMessage->dry()) {
-			if ($this->mqttMessage->queue_in < time() - MQTTMSG_VALIDY_MINS * 60) {
+			if (strtotime($this->mqttMessage->queueIn) < time() - MQTTMSG_VALIDY_MINS * 60) {
+/*
 				$this->mqttMessage->state = MQTTMSG_EXPIRED;
 				$this->mqttMessage->save();
+*/
+				$this->mqttMessage->erase();				
 			} else {
 				$response->result[] = $this->mqttMessage->cast();
 			}
@@ -50,14 +50,14 @@ class MqttMessage {
 	function updateMessage($messageId, $newState) {
 		$response = new \Response($this->tr);
 		
-		$this->mqttMessage->load(array('@_id=?', $messageId));
+		$this->mqttMessage->load(array('id=?', $messageId));
 		if ($this->mqttMessage->dry()) {
 			$response->message = 'mqttMessage not found';
 			return $response;
 		}
 		
     	if ($newState == MQTTMSG_SENT) {
-    		$this->mqttMessage->queue_out = time();
+    		$this->mqttMessage->queueOut = date('Y-m-d H:i:s');
     	}
     	$this->mqttMessage->state = $newState;
     	$this->mqttMessage->save();
@@ -66,7 +66,7 @@ class MqttMessage {
 	function deleteMessage($messageId) {
 		$response = new \Response($this->tr);
 		
-		$this->mqttMessage->load(array('@_id=?', $messageId));
+		$this->mqttMessage->load(array('id=?', $messageId));
 		if ($this->mqttMessage->dry()) {
 			$response->message = 'mqttMessage not found';
 			return $response;

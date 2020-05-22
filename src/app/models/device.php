@@ -9,8 +9,7 @@ class Device {
 		$this->tr = $f3->get('tr');
 		$this->l = $f3->get('log');
 		
-        $db = new \DB\Jig($f3->get('dbdir'), \DB\Jig::FORMAT_JSON);
-        $this->device = new \DB\Jig\Mapper($db, 'devices.json');
+		$this->device = new \DB\SQL\Mapper($f3->get('db'), 'devices');
 	}
 
 	function addTempDevice($userId, $pin) {
@@ -18,10 +17,10 @@ class Device {
 		$response = new \Response($this->tr);
 		$this->device->reset();
 		$this->device->userId = $userId;
-		$this->device->clientId = null;
 		$this->device->state = DEVICE_STATE_TEMP;
 		$this->device->pin = $pin;
-		$this->device->validity = time() + TEMP_DEVICE_VALIDY_MINS * 60;
+		$this->device->mqttClientId = '';
+		$this->device->validity = date('Y-m-d H:i:s', time() + TEMP_DEVICE_VALIDY_MINS * 60);
 		$this->device->save();
 		
 		$response->result = $this->device->cast();
@@ -33,7 +32,7 @@ class Device {
 	function getDeviceByUserId($userId) {
 
 		$response = new \Response($this->tr);
-		$this->device->load(array('@userId=? AND @state!=?', $userId, DEVICE_STATE_INACTIVE));
+		$this->device->load(array('userId=? AND state!=?', $userId, DEVICE_STATE_INACTIVE));
 		if ($this->device->dry()) {
 			$response->message = 'Device not found';
 			return $response;
@@ -43,11 +42,12 @@ class Device {
 
 		while (!$this->device->dry()) {
 			if ($this->device->state == DEVICE_STATE_TEMP) {
-				if ($this->device->validity < time()) {
+				if (strtotime($this->device->validity) < time()) {
+/*
 					$this->device->state = DEVICE_STATE_INACTIVE;
 					$this->device->save();
-					$response->message = 'Device not found';
-					return $response;		
+*/
+					$this->device->erase();					
 				} else {
 					$response->result[] = $this->device->cast();
 				}
@@ -65,7 +65,7 @@ class Device {
 	function getDeviceByClientId($clientId, $pin) {
 
 		$response = new \Response($this->tr);
-		$this->device->load(array('@clientId=? AND @pin=? AND @state=?', $clientId, $pin, DEVICE_STATE_ACTIVE));
+		$this->device->load(array('mqttClientId=? AND pin=? AND state=?', $clientId, md5($pin), DEVICE_STATE_ACTIVE));
 		if ($this->device->dry()) {
 			$response->message = 'Device not found';
 			return $response;
@@ -80,20 +80,24 @@ class Device {
 	function getDeviceByClientPin($clientId, $pin) {
 
 		$response = new \Response($this->tr);
-		$this->device->load(array('@clientId=? AND @pin=? AND @state=?', null, $pin, DEVICE_STATE_TEMP));
+		$this->device->load(array('mqttClientId = ? AND pin=? AND state=?', '', $pin, DEVICE_STATE_TEMP));
 		if ($this->device->dry()) {
 			$response->message = 'Device not found';
 			return $response;
 		}
 
-		if ($this->device->validity < time()) {
+		if (strtotime($this->device->validity) < time()) {
+/*
 			$this->device->state = DEVICE_STATE_INACTIVE;
 			$this->device->save();
-			$response->message = 'Device not found';
+*/
+			$this->device->erase();
+			$response->message = 'Device not found - validity';
 			return $response;		
 		}
 
-		$this->device->clientId = $clientId;
+		$this->device->mqttClientId = $clientId;
+		$this->device->pin = md5($pin);
 		$this->device->state = DEVICE_STATE_ACTIVE;
 		$this->device->save();
 
@@ -104,7 +108,7 @@ class Device {
 	}
 
 	function isPinUnique($pin) {
-		$this->device->load(array('@pin=? AND @state=?', $pin, DEVICE_STATE_TEMP));
+		$this->device->load(array('pin=? AND state=?', $pin, DEVICE_STATE_TEMP));
 		if ($this->device->dry()) {
 			return true;
 		}

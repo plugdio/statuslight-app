@@ -5,9 +5,6 @@ RUN apk update && apk --no-cache add libxml2-dev && \
 	docker-php-ext-install -j$(nproc) xmlrpc mysqli pdo pdo_mysql && \
 	docker-php-source delete
 
-#RUN docker-php-ext-install mysqli pdo pdo_mysql
-#docker-php-ext-enable pdo_mysql
-
 RUN apk add supervisor
 COPY supervisord.conf /etc/supervisor/supervisord.conf
 COPY listener.php /listener.php

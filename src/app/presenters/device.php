@@ -28,15 +28,18 @@ class Device {
 				$me = $provider->get("me", $token);
 #				$this->l->debug($this->tr . " - " . __METHOD__ . " - me: " . print_r($me, true));
 
-				$userId = $me['id'];
+				$teamsUserId = $me['id'];
 				$name = $me['displayName'];
 				$email = $me['mail'];
 
 				$userModel = new \Models\User();
-				$userModel->saveUser($userId, PROVIDER_AZURE, $name, $email);
+				$userResult = $userModel->saveUser($teamsUserId, PROVIDER_AZURE, $name, $email);
 
-				$f3->set('SESSION.userId', $userId);
-				$f3->set('SESSION.name', $name);
+				if ($userResult->success) {
+					$userId = $userResult->result['id'];
+					$f3->set('SESSION.userId', $userId);
+					$f3->set('SESSION.name', $name);
+				}
 
 				$sessionModel = new \Models\Session();
 				$sessionModel->saveSession(PROVIDER_AZURE, $userId, $token);
@@ -71,15 +74,18 @@ class Device {
 
 #				$this->l->debug($this->tr . " - " . __METHOD__ . " - ownerDetails: " . print_r($ownerDetails, true));
 
-				$userId = $ownerDetails->getId();
+				$googleUserId = $ownerDetails->getId();
 				$name = $ownerDetails->getName();
 				$email = $ownerDetails->getEmail();
 
 				$userModel = new \Models\User();
-				$userModel->saveUser($userId, PROVIDER_GOOGLE, $name, $email);
+				$userResult = $userModel->saveUser($googleUserId, PROVIDER_GOOGLE, $name, $email);
 
-				$f3->set('SESSION.userId', $userId);
-				$f3->set('SESSION.name', $name);
+				if ($userResult->success) {
+					$userId = $userResult->result['id'];
+					$f3->set('SESSION.userId', $userResult->result['id']);
+					$f3->set('SESSION.name', $name);
+				}
 
 				$sessionModel = new \Models\Session();
 				$sessionModel->saveSession(PROVIDER_GOOGLE, $userId, $token);
@@ -109,7 +115,7 @@ class Device {
 
 				$provider = \Services\Slack::getProvider('/device/login/slack');
 
-        		$userId = $provider->getAuthorizedUser($token)->getId();
+        		$slackUserId = $provider->getAuthorizedUser($token)->getId();
         		$team = $provider->getResourceOwner($token);
 				
 #				$this->l->debug($this->tr . " - " . __METHOD__ . " - userId: " . print_r($userId, true));
@@ -119,7 +125,13 @@ class Device {
 				$email = $team->getEmail();
 
 				$userModel = new \Models\User();
-				$userModel->saveUser($userId, PROVIDER_SLACK, $name, $email);
+				$userResult = $userModel->saveUser($slackUserId, PROVIDER_SLACK, $name, $email);
+
+				if ($userResult->success) {
+					$userId = $userResult->result['id'];
+					$f3->set('SESSION.userId', $userResult->result['id']);
+					$f3->set('SESSION.name', $name);
+				}
 
 				$f3->set('SESSION.userId', $userId);
 				$f3->set('SESSION.name', $name);
@@ -163,13 +175,13 @@ class Device {
 
 		if ($mySession['type'] == PROVIDER_AZURE) {
 			$f3->set('service', 'Teams');
-			$f3->set('status', $mySession['status'] . ' (' . $mySession['subStatus'] . ')');
+			$f3->set('status', $mySession['presenceStatus']);
 		} elseif ($mySession['type'] == PROVIDER_GOOGLE) {
 			$f3->set('service', 'Google Calendar');
-			$f3->set('status', $mySession['status']);
+			$f3->set('status', $mySession['presenceStatus']);
 		} elseif ($mySession['type'] == PROVIDER_SLACK) {
 			$f3->set('service', 'Slack');
-			$f3->set('status', $mySession['status']);
+			$f3->set('status', $mySession['presenceStatus']);
 		}
 
 		$deviceModel = new \Models\Device();
@@ -191,7 +203,7 @@ class Device {
 				if ($device["state"] == DEVICE_STATE_TEMP) {
 					$myDevice["id"] = '-';
 					$myDevice["state"] = 'Pending activation';
-					$myDevice["validity"] = date('Y-m-d H:i:s', $device['validity']);
+					$myDevice["validity"] = $device['validity'];
 					$myDevice["pin"] = $device['pin'];
 					$myPendingDevices[] = $myDevice;
 				} elseif ($device["state"] == DEVICE_STATE_ACTIVE) {
@@ -233,7 +245,6 @@ class Device {
 		$userId = $f3->get('SESSION.userId');
 
 		$deviceModel = new \Models\Device();
-		$deviceResponse = $deviceModel->getDeviceByUserId($userId);
 
 		$pin = mt_rand(100000, 999999);
 		while (!$deviceModel->isPinUnique($pin)) {

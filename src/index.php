@@ -29,12 +29,12 @@ $f3->set('CORS.origin', '*');
 if (rtrim(strtoupper(getenv('STATUSLIGHT_ENV'))) == 'DEV') {
     $f3->set('DEBUG',3);
     $f3->set('ENV', 'DEV');
-    $f3->set('baseStaticPath', 'http://' . getenv('STATICURL'));
-    $f3->set('baseAppPath', 'http://' . getenv('DOMAIN'));
+    $f3->set('baseStaticPath', 'http://' . trim(getenv('STATICURL')));
+    $f3->set('baseAppPath', 'http://' . trim(getenv('DOMAIN')));
 } else {
     $f3->set('ENV', strtoupper(getenv('STATUSLIGHT_ENV')));
-    $f3->set('baseStaticPath', 'https://' . getenv('STATICURL'));
-    $f3->set('baseAppPath', 'https://' . getenv('DOMAIN'));
+    $f3->set('baseStaticPath', 'https://' . trim(getenv('STATICURL')));
+    $f3->set('baseAppPath', 'https://' . trim(getenv('DOMAIN')));
 }
 
 $f3->set('path', $path);
@@ -42,16 +42,27 @@ $f3->set('AUTOLOAD', $path . 'app/');
 $f3->set('UI', $path . 'ui/');
 $f3->set('dbdir', $path . 'data/');
 
-$f3->set('teams_client_id', getenv('TEAMSCLIENTID'));
-$f3->set('teams_client_secret', getenv('TEAMSCLIENTSECRET'));
-$f3->set('gcal_client_id', getenv('GCALCLIENTID'));
-$f3->set('gcal_client_secret', getenv('gcal_client_secret'));
-$f3->set('slack_client_id', getenv('SLACKCLIENTID'));
-$f3->set('slack_client_secret', getenv('SLACKCLIENTSECRET'));
-$f3->set('mqtt_host', getenv('MQTTHOST'));
-$f3->set('mqtt_port', getenv('MQTTPORT'));
-$f3->set('mqtt_user', getenv('MQTTADMINUSER'));
-$f3->set('mqtt_password', getenv('MQTTADMINPASS'));
+$f3->set('teams_client_id', trim(getenv('TEAMSCLIENTID')));
+$f3->set('teams_client_secret', trim(getenv('TEAMSCLIENTSECRET')));
+$f3->set('gcal_client_id', trim(getenv('GCALCLIENTID')));
+$f3->set('gcal_client_secret', trim(getenv('gcal_client_secret')));
+$f3->set('slack_client_id', trim(getenv('SLACKCLIENTID')));
+$f3->set('slack_client_secret', trim(getenv('SLACKCLIENTSECRET')));
+$f3->set('mqtt_host', trim(getenv('MQTTHOST')));
+$f3->set('mqtt_port', trim(getenv('MQTTPORT')));
+$f3->set('mqtt_user', trim(getenv('MQTTADMINUSER')));
+$f3->set('mqtt_password', trim(getenv('MQTTADMINPASS')));
+
+#$f3->set('db_host', trim(getenv('DBHOST')));
+#$f3->set('db_user', trim(getenv('DBUSER')));
+#$f3->set('db_pass', trim(getenv('DBPASS')));
+
+$db = new \DB\SQL(
+    'mysql:host=' . trim(getenv('DBHOST')) . ';port=3306;dbname=statuslight',
+    trim(getenv('DBUSER')),
+    trim(getenv('DBPASS'))
+);
+$f3->set('db', $db);
 
 $f3->set('log', $log);
 $tr = substr(md5(uniqid(rand(), true)),0,6);
