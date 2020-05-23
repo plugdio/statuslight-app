@@ -58,9 +58,9 @@ $f3->set('mqtt_password', trim(getenv('MQTTADMINPASS')));
 #$f3->set('db_pass', trim(getenv('DBPASS')));
 
 $db = new \DB\SQL(
-    'mysql:host=' . trim(getenv('DBHOST')) . ';port=3306;dbname=statuslight',
-    trim(getenv('DBUSER')),
-    trim(getenv('DBPASS'))
+    'mysql:host=' . trim(getenv('MYSQL_HOST')) . ';port=3306;dbname=statuslight',
+    trim(getenv('MYSQL_USER')),
+    trim(getenv('MYSQL_PASSWORD'))
 );
 $f3->set('db', $db);
 
