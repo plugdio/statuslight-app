@@ -1,4 +1,3 @@
-# https://www.cloudreach.com/en/resources/blog/containerize-this-how-to-use-php-apache-mysql-within-docker-containers/
 version: "2.4"
 services:
   composer:
@@ -13,9 +12,9 @@ services:
     command: --default-authentication-plugin=mysql_native_password
     restart: always
     environment:
-      - MYSQL_RANDOM_ROOT_PASSWORD: yes
-      - MYSQL_DATABASE: statuslight
-      - MYSQL_USER: statuslight
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+      - MYSQL_DATABASE=statuslight
+      - MYSQL_USER=statuslight
       - MYSQL_PASSWORD
     volumes:
       - ./data/:/var/lib/mysql
@@ -43,6 +42,9 @@ services:
       - GCALCLIENTSECRET
       - SLACKCLIENTID
       - SLACKCLIENTSECRET
+      - MYSQL_HOST=172.20.0.5
+      - MYSQL_USER=statuslight
+      - MYSQL_PASSWORD
     networks:
       backend:
         ipv4_address: 172.20.0.3
