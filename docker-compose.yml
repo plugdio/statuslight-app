@@ -13,7 +13,13 @@ services:
     command: --default-authentication-plugin=mysql_native_password
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: example
+      - MYSQL_RANDOM_ROOT_PASSWORD: yes
+      - MYSQL_DATABASE: statuslight
+      - MYSQL_USER: statuslight
+      - MYSQL_PASSWORD
+    volumes:
+      - ./data/:/var/lib/mysql
+      - ./mysql/:/docker-entrypoint-initdb.d
     networks:
       backend:
         ipv4_address: 172.20.0.5
