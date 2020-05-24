@@ -113,8 +113,8 @@ class SessionManager {
 
 			if ($deviceResponse->success && count($deviceResponse->result) > 0) {
 				foreach ($deviceResponse->result as $device) {
-					$mqttMessageModel->putInQueue('SL/' . $device['clientId'] . '/statuslight/status/set', $status);
-					$mqttMessageModel->putInQueue('SL/' . $device['clientId'] . '/statuslight/statusdetail/set', $statusDetail);
+					$mqttMessageModel->putInQueue('SL/' . $device['mqttClientId'] . '/statuslight/status/set', $status);
+					$mqttMessageModel->putInQueue('SL/' . $device['mqttClientId'] . '/statuslight/statusdetail/set', $statusDetail);
 				}
 			}
 			
