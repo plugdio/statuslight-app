@@ -133,8 +133,7 @@ class Device {
 	function updateClient($clientId, $topic, $msg, $updateTime = false) {
 		$this->device->load(array('mqttClientId=?', $clientId));
 		if ($this->device->dry()) {
-			$this->device->reset();
-			$this->device->mqttClientId = $clientId;
+			return;
 		}
 		if ($updateTime) {
 			$this->device->mqttUpdated = date('Y-m-d H:i:s', time());
