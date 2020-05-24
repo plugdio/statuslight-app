@@ -20,6 +20,7 @@ class SessionManager {
 
 		while (true) {
 			$this->refreshSessions();
+			$this->l->debug($this->tr . " - " . __METHOD__ . " - Sleeping");
 			sleep(60);
 		}
 
@@ -29,12 +30,6 @@ class SessionManager {
 		$f3=\Base::instance();
 		$this->l->debug($this->tr . " - " . __METHOD__ . " - START - " . $f3->get('GET.env'));
 		$env = $f3->get('GET.env');
-		if (strtoupper($env) != $f3->get('ENV')) {
-			$f3->set('ENV', $env);
-			if ($env != 'DEV') {
-				$f3->set('DEBUG', 0);
-			}
-		}
 
 		$sessionModel = new \Models\Session();
 		$sessionResponse = $sessionModel->getActiveSessions();
@@ -46,7 +41,7 @@ class SessionManager {
 
 		foreach ($sessionResponse->result as $session) {
 
-			$this->l->debug($this->tr . " - " . __METHOD__ . " - working with " . $session['_id']);
+			$this->l->debug($this->tr . " - " . __METHOD__ . " - working with " . $session['id']);
 
 			if (!in_array($session['type'], array(PROVIDER_AZURE, PROVIDER_GOOGLE, PROVIDER_SLACK))) {
 				$this->l->error($this->tr . " - " . __METHOD__ . " - Provider not supported " . $session['type']);
@@ -110,7 +105,7 @@ class SessionManager {
 
 			// BadMethodCallException
 
-			$sessionModel->updateSession($session['_id'], $token, $sessionState, $closedReason, $status, $statusDetail);
+			$sessionModel->updateSession($session['id'], $token, $sessionState, $closedReason, $status, $statusDetail);
 
 			$mqttMessageModel = new \Models\MqttMessage();
 			$deviceModel = new \Models\Device();
