@@ -17,6 +17,7 @@ class MqttMessage {
 		$this->mqttMessage->reset();
     	$this->mqttMessage->topic = $topic;
     	$this->mqttMessage->content = $content;
+		$this->mqttMessage->queueIn = date('Y-m-d H:i:s');
     	$this->mqttMessage->state = MQTTMSG_NOT_SENT;
     	$this->mqttMessage->save();
 	}
