@@ -62,7 +62,7 @@ class Device {
 
 	}
 
-	function getDeviceByClientId($clientId, $pin) {
+	function getDeviceByClientIdAndPin($clientId, $pin) {
 
 		$response = new \Response($this->tr);
 		$this->device->load(array('mqttClientId=? AND pin=? AND state=?', $clientId, md5($pin), DEVICE_STATE_ACTIVE));
@@ -114,6 +114,44 @@ class Device {
 		}
 		return false;
 	}
+
+	function getDeviceByClientId($clientId) {
+
+		$response = new \Response($this->tr);
+		$this->device->load(array('mqttClientId=?', $clientId));
+		if ($this->device->dry()) {
+			$response->message = 'Client not found';
+			return $response;
+		}
+
+		$response->result = $this->device->cast();
+		$response->success = true;
+		return $response;
+
+	}
+
+	function updateClient($clientId, $topic, $msg, $updateTime = false) {
+		$this->device->load(array('mqttClientId=?', $clientId));
+		if ($this->device->dry()) {
+			$this->device->reset();
+			$this->device->mqttClientId = $clientId;
+		}
+		if ($updateTime) {
+			$this->device->mqttUpdated = date('Y-m-d H:i:s', time());
+		}
+
+		$mqttContent = json_decode($this->device->mqttContent);
+		if (empty($this->device->mqttContent) || empty($mqttContent) || !is_object($mqttContent)) {
+			$mqttContent = new \stdClass();
+		}
+
+		$mqttContent->{$topic} = $msg;
+
+		$this->device->mqttContent = json_encode($mqttContent);
+
+		$this->device->save();
+	}
+
 
 }
 

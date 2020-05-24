@@ -185,7 +185,6 @@ class Device {
 		}
 
 		$deviceModel = new \Models\Device();
-		$mqttClientModel = new \Models\MqttClient();
 		$deviceResponse = $deviceModel->getDeviceByUserId($userId);
 
 		if (!$deviceResponse->success) {
@@ -208,7 +207,7 @@ class Device {
 					$myPendingDevices[] = $myDevice;
 				} elseif ($device["state"] == DEVICE_STATE_ACTIVE) {
 					$myDevice["id"] = $device['clientId'];
-					$clientResponse = $mqttClientModel->getClientById($device["clientId"]);
+					$clientResponse = $deviceModel->getDeviceByClientId($device["clientId"]);
 					if ($clientResponse->success) {
 						$myClient = $clientResponse->result;
 						$myDevice["clientState"] = $myClient["state"];

@@ -37,7 +37,7 @@ class MqttAuth {
 		}
 
 		$deviceModel = new \Models\Device();
-		$deviceResponse = $deviceModel->getDeviceByClientId($clientId, $password);
+		$deviceResponse = $deviceModel->getDeviceByClientIdAndPin($clientId, $password);
 		if ($deviceResponse->success) {
 			$this->l->debug($this->tr . " - " . __METHOD__ . " - Device authenticated with clientId: " . $clientId);
 			echo "ok";
