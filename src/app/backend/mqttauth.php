@@ -31,6 +31,7 @@ class MqttAuth {
 				$this->l->debug($this->tr . " - " . __METHOD__ . " - MQTT auth failed: admin credentials don't match - " . $clientId . "/" . $password);
 				$f3->error(403);
 			}
+			$this->l->debug($this->tr . " - " . __METHOD__ . " - MQTT auth ok for " . $clientId);
 			echo "ok";
 			return;
 		}

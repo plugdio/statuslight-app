@@ -31,6 +31,7 @@ class MqttComm {
 			$this->broker = new \phpMQTT($mqttHost, $mqttPort, 'statuslightapp'); 
 			if ($this->broker->connect(true, NULL, $mqttUser, $mqttPass)) {
 				$this->l->debug($this->tr . " - " . __METHOD__ . " - Conected to the broker");
+				$this->startTime = time();
 				$a = 0;
 			} else {
 				$this->l->error($this->tr . " - " . __METHOD__ . " - Connection to broker failed with user " . $mqttUser);
@@ -43,6 +44,7 @@ class MqttComm {
 	}
 
 	public function subscribe() {
+		$f3=\Base::instance();
 		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
 
 		if (empty($this->broker)) {
@@ -71,6 +73,10 @@ class MqttComm {
 
 			if ($i == 420) {
 				$this->l->debug($this->tr . " - " . __METHOD__ . " - PING - messages sent: " . $messagesSent);
+				$uptime = time() - $this->startTime;
+				$this->broker->publish('SL/APP_' . $f3->get('ENV') . '/$name', $this->tr, 0, 0);
+				$this->broker->publish('SL/APP_' . $f3->get('ENV') . '/$stats/uptime', $uptime, 0, 0);
+				
 				$this->broker->ping();
 				$i = 0;
 				$messagesSent = 0;
@@ -81,7 +87,6 @@ class MqttComm {
 	}
 
 	public static function procMqttMessage($topic, $msg) {
-		$f3=\Base::instance();
 		$tr = $f3->get('tr');
 		$l = $f3->get('log');
 

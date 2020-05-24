@@ -9,14 +9,13 @@ class MqttClient {
 		$this->tr = $f3->get('tr');
 		$this->l = $f3->get('log');
 		
-        $db = new \DB\Jig($f3->get('dbdir'), \DB\Jig::FORMAT_JSON);
-        $this->client = new \DB\Jig\Mapper($db, 'mqttclients.json');
+		$this->client = new \DB\SQL\Mapper($f3->get('db'), 'devices');
 	}
 
 	function getClientById($clientId) {
 
 		$response = new \Response($this->tr);
-		$this->client->load(array('@id=?', $clientId));
+		$this->client->load(array('mqttClientId=?', $clientId));
 		if ($this->client->dry()) {
 			$response->message = 'Client not found';
 			return $response;
@@ -29,15 +28,15 @@ class MqttClient {
 	}
 
 	function updateClient($clientId, $topic, $msg, $updateTime = false) {
-		$this->client->load(array('@id=?', $clientId));
+		$this->client->load(array('mqttClientId=?', $clientId));
 		if ($this->client->dry()) {
 			$this->client->reset();
-			$this->client->id = $clientId;
+			$this->client->mqttClientId = $clientId;
 		}
 		if ($updateTime) {
-			$this->client->updated = time();
+			$this->client->mqttUpdated = date('Y-m-d H:i:s', time());
 		}
-		$this->client->{$topic} = $msg;
+		$this->client->mqttContent = $msg;
 		$this->client->save();
 	}
 }
