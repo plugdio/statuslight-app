@@ -87,6 +87,7 @@ class MqttComm {
 	}
 
 	public static function procMqttMessage($topic, $msg) {
+		$f3=\Base::instance();
 		$tr = $f3->get('tr');
 		$l = $f3->get('log');
 
