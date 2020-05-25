@@ -14,6 +14,7 @@ class GCal extends \Services\ServiceBase {
 
 		// login link: https://developers.google.com/identity/protocols/oauth2/web-server
 		// https://github.com/thephpleague/oauth2-client
+		// https://github.com/thephpleague/oauth2-google
 		$gcalProvider = new \League\OAuth2\Client\Provider\Google([
 		    'clientId'     => $f3->get('gcal_client_id'),
 		    'clientSecret' => $f3->get('gcal_client_secret'),
@@ -82,8 +83,9 @@ class GCal extends \Services\ServiceBase {
 		    $token = self::getProvider($redirectUri)->getAccessToken('authorization_code', [
 		        'code' => $authCode,
 		    ]);
+#		    $refreshToken = $token->getRefreshToken();
 
-#	   		$l->debug($tr . " - " . __METHOD__ . " - token: " . print_r($token, true));
+#	   		$l->debug($tr . " - " . __METHOD__ . " - refreshToken: " . print_r($refreshToken, true));
 		} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
 			$l->error($tr . " - " . __METHOD__ . " - Caught exception " . $e->getMessage() . ' - ' . $e->getTraceAsString());
 			return null;

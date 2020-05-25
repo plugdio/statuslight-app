@@ -50,18 +50,18 @@ class SessionManager {
 
 			$token = unserialize($session['token']);
 			try {
-				if (($session['type'] != PROVIDER_SLACK) && ($token->hasExpired())) {
-					$this->l->debug($this->tr . " - " . __METHOD__ . " - token needs to be refreshed");
-					if ($session['type'] == PROVIDER_AZURE) {
-						$provider = \Services\Teams::getProvider('/device/login/teams');
-					} elseif ($session['type'] == PROVIDER_GOOGLE) {
-						$provider = \Services\GCal::getProvider('/device/login/gcal');
-					} elseif ($session['type'] == PROVIDER_SLACK) {
-						$provider = \Services\Slack::getProvider('/device/login/slack');
-					}
+				if (($session['type'] != PROVIDER_AZURE) && ($token->hasExpired())) {
+					$this->l->debug($this->tr . " - " . __METHOD__ . " - Azure token needs to be refreshed");
+					$provider = \Services\Teams::getProvider('/device/login/teams');
 	            	$token = $provider->getAccessToken('refresh_token', [
 	                	'refresh_token' => $token->getRefreshToken(),
 	            	]);
+	            }
+				if ( ($session['type'] == PROVIDER_GOOGLE) && ( ($token->getExpires() - time()) < 2000 ) ) {
+					$this->l->debug($this->tr . " - " . __METHOD__ . " - Google token needs to be refreshed");
+					$provider = \Services\GCal::getProvider('/device/login/gcal');
+					$grant = new \League\OAuth2\Client\Grant\RefreshToken();
+					$token = $provider->getAccessToken($grant, ['refresh_token' => $token->getRefreshToken()]);
 	        	}
 
 				if ($session['type'] == PROVIDER_AZURE) {
