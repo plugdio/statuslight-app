@@ -69,7 +69,10 @@ class SessionManager {
 				} elseif ($session['type'] == PROVIDER_GOOGLE) {
 					$presenceResponse = \Services\GCal::getPresenceStatus('/device/login/gcal', $token);
 				} elseif ($session['type'] == PROVIDER_SLACK) {
-					$presenceResponse = \Services\Slack::getPresenceStatus('/device/login/slack', $token, $session['userId']);
+					$userModel = new \Models\User();
+					$userResponse = $userModel->getUser($session['userId']);
+					$slackUserId = $userResponse->response['userId'];
+					$presenceResponse = \Services\Slack::getPresenceStatus('/device/login/slack', $token, $slackUserId);
 				}
 
 				$newSession = $presenceResponse->result;
@@ -100,10 +103,6 @@ class SessionManager {
 				$sessionState = SESSION_STATE_ERROR;
 				$closedReason = $this->tr . ' - ' . $e->getMessage();
 			}
-
-
-
-			// BadMethodCallException
 
 			$sessionModel->updateSession($session['id'], $token, $sessionState, $closedReason, $status, $statusDetail);
 
