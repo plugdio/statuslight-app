@@ -38,7 +38,6 @@ class MqttMessage {
 				$this->mqttMessage->save();
 */
 
-$this->l->debug("deleting: " . print_r($this->mqttMessage->cast(), true));
 				$this->mqttMessage->erase();				
 			} else {
 				$response->result[] = $this->mqttMessage->cast();

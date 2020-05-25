@@ -206,18 +206,21 @@ class Device {
 					$myDevice["pin"] = $device['pin'];
 					$myPendingDevices[] = $myDevice;
 				} elseif ($device["state"] == DEVICE_STATE_ACTIVE) {
-					$myDevice["id"] = $device['clientId'];
-					$clientResponse = $deviceModel->getDeviceByClientId($device["clientId"]);
-					if ($clientResponse->success) {
-						$myClient = $clientResponse->result;
-						$myDevice["clientState"] = $myClient["state"];
-						$myDevice["lastSeen"] = date('Y-m-d H:i:s', $myClient["updated"]);
-						$config = json_decode($myClient['implementation/config']);
+					$myDevice["id"] = $device['mqttClientId'];
+					$myDevice["lastSeen"] = $device["mqttUpdated"];
+					$clientDetails = json_decode($device['clientDetails']);
+					if (is_object($clientDetails)) {
+						if (!empty($clientDetails->state)) {
+							$myDevice["clientState"] = $clientDetails->state;
+						} else {
+							$myDevice["clientState"] = '-';
+						}
+						$config = json_decode($clientDetails->{'implementation/config'});
 						if (($config != null) && !empty($config->wifi->ssid)) {
 							$myDevice["network"] = $config->wifi->ssid;
 						}
-						if (!empty($myClient["statuslight/color"])) {
-							$myDevice["color"] = $myClient["statuslight/color"];
+						if (!empty($clientDetails->{'statuslight/color'})) {
+							$myDevice["color"] = $clientDetails->{'statuslight/color'};
 						} else {
 							$myDevice["color"] = 'white';
 						}

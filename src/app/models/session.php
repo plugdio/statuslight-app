@@ -23,6 +23,7 @@ class Session {
 			$this->session->next();
 */
 			$this->session->erase();
+			$this->session->next();
 		}
 		
 		$this->session->reset();	

@@ -139,14 +139,14 @@ class Device {
 			$this->device->mqttUpdated = date('Y-m-d H:i:s', time());
 		}
 
-		$mqttContent = json_decode($this->device->mqttContent);
-		if (empty($this->device->mqttContent) || empty($mqttContent) || !is_object($mqttContent)) {
-			$mqttContent = new \stdClass();
+		$clientDetails = json_decode($this->device->clientDetails);
+		if (empty($this->device->clientDetails) || empty($clientDetails) || !is_object($clientDetails)) {
+			$clientDetails = new \stdClass();
 		}
 
-		$mqttContent->{$topic} = $msg;
+		$clientDetails->{$topic} = $msg;
 
-		$this->device->mqttContent = json_encode($mqttContent);
+		$this->device->clientDetails = json_encode($clientDetails);
 
 		$this->device->save();
 	}

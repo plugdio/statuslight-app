@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS `devices` (
   `validity` datetime NOT NULL,
   `mqttClientId` varchar(50) NULL,
   `mqttUpdated` datetime NULL,
-  `mqttContent` longtext NULL
+  `clientDetails` longtext NULL
 );
 
 CREATE TABLE IF NOT EXISTS `sessions` (
