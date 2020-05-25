@@ -45,7 +45,7 @@ $f3->set('dbdir', $path . 'data/');
 $f3->set('teams_client_id', trim(getenv('TEAMSCLIENTID')));
 $f3->set('teams_client_secret', trim(getenv('TEAMSCLIENTSECRET')));
 $f3->set('gcal_client_id', trim(getenv('GCALCLIENTID')));
-$f3->set('gcal_client_secret', trim(getenv('gcal_client_secret')));
+$f3->set('gcal_client_secret', trim(getenv('GCALCLIENTSECRET')));
 $f3->set('slack_client_id', trim(getenv('SLACKCLIENTID')));
 $f3->set('slack_client_secret', trim(getenv('SLACKCLIENTSECRET')));
 $f3->set('mqtt_host', trim(getenv('MQTTHOST')));

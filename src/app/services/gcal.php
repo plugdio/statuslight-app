@@ -19,7 +19,7 @@ class GCal extends \Services\ServiceBase {
 		    'clientSecret' => $f3->get('gcal_client_secret'),
 		    'redirectUri'  => $f3->get('baseAppPath') . $redirectUri,
 		    'accessType'   => 'offline',
-		    'prompt'       => 'consent'
+		    'prompt'       => 'consent',
 //		    'proxy'                   => 'localhost:8888',
 //    		'verify'                  => false
 		]);
