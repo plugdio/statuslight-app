@@ -71,7 +71,7 @@ class SessionManager {
 				} elseif ($session['type'] == PROVIDER_SLACK) {
 					$userModel = new \Models\User();
 					$userResponse = $userModel->getUser($session['userId']);
-					$slackUserId = $userResponse->response['userId'];
+					$slackUserId = $userResponse->result['userId'];
 					$presenceResponse = \Services\Slack::getPresenceStatus('/device/login/slack', $token, $slackUserId);
 				}
 
