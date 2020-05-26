@@ -41,7 +41,7 @@ class SessionManager {
 
 		foreach ($sessionResponse->result as $session) {
 
-			$this->l->debug($this->tr . " - " . __METHOD__ . " - working with " . $session['id']);
+			$this->l->debug($this->tr . " - " . __METHOD__ . " - working with " . $session['id'] . ' - ' . $session['type']);
 
 			if (!in_array($session['type'], array(PROVIDER_AZURE, PROVIDER_GOOGLE, PROVIDER_SLACK))) {
 				$this->l->error($this->tr . " - " . __METHOD__ . " - Provider not supported " . $session['type']);
@@ -57,8 +57,10 @@ class SessionManager {
 	                	'refresh_token' => $token->getRefreshToken(),
 	            	]);
 	            }
-				if ( ($session['type'] == PROVIDER_GOOGLE) && ( ($token->getExpires() - time()) < 2000 ) ) {
+				if ( ($session['type'] == PROVIDER_GOOGLE) && ( ($token->getExpires() - time()) < 1000 ) ) {
 					$this->l->debug($this->tr . " - " . __METHOD__ . " - Google token needs to be refreshed");
+$this->l->debug($this->tr . " - " . __METHOD__ . " - token: " . print_r($token, true));
+$this->l->debug($this->tr . " - " . __METHOD__ . " - RefreshToken: " . print_r($token->getRefreshToken(), true));
 					$provider = \Services\GCal::getProvider('/device/login/gcal');
 					$grant = new \League\OAuth2\Client\Grant\RefreshToken();
 					$token = $provider->getAccessToken($grant, ['refresh_token' => $token->getRefreshToken()]);
@@ -69,6 +71,8 @@ class SessionManager {
 				} elseif ($session['type'] == PROVIDER_GOOGLE) {
 					$presenceResponse = \Services\GCal::getPresenceStatus('/device/login/gcal', $token);
 				} elseif ($session['type'] == PROVIDER_SLACK) {
+$this->l->debug($this->tr . " - " . __METHOD__ . " - Expires at: " . date('r', $token->getExpires()));
+$this->l->debug($this->tr . " - " . __METHOD__ . " - Expires in: " . ($token->getExpires() - time()) );
 					$userModel = new \Models\User();
 					$userResponse = $userModel->getUser($session['userId']);
 					$slackUserId = $userResponse->result['userId'];
