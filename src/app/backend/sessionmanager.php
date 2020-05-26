@@ -57,7 +57,7 @@ class SessionManager {
 	                	'refresh_token' => $token->getRefreshToken(),
 	            	]);
 	            }
-				if ( ($session['type'] == PROVIDER_GOOGLE) && ( ($token->getExpires() - time()) < 3000 ) ) {
+				if ( ($session['type'] == PROVIDER_GOOGLE) && ( ($token->getExpires() - time()) < 120 ) ) {
 					$this->l->debug($this->tr . " - " . __METHOD__ . " - Google token needs to be refreshed");
 					$provider = \Services\GCal::getProvider('/device/login/gcal');
 					$grant = new \League\OAuth2\Client\Grant\RefreshToken();
