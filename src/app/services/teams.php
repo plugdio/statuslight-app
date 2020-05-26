@@ -105,7 +105,7 @@ class Teams extends \Services\ServiceBase {
 
 			$providerResponse = $provider->request('get', $ref, $token, []);
 
-			$l->debug($tr . " - " . __METHOD__ . " - providerResponse: " . print_r($providerResponse, true));
+#			$l->debug($tr . " - " . __METHOD__ . " - providerResponse: " . print_r($providerResponse, true));
 
 		} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
 			$l->error($tr . " - " . __METHOD__ . " - Caught exception " . $e->getMessage() . ' - ' . $e->getTraceAsString());

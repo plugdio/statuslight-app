@@ -12,7 +12,7 @@ class Session {
         $this->session = new \DB\SQL\Mapper($f3->get('db'), 'sessions');
 	}
 
-	function saveSession($sessionType, $userId, $token) {
+	function saveSession($sessionType, $userId, $token, $refreshToken = null) {
 
 		$this->session->load(array('userId=? AND type=? AND state=?', $userId, $sessionType, SESSION_STATE_ACTIVE));
 		while (!$this->session->dry()) {
@@ -30,6 +30,9 @@ class Session {
     	$this->session->type = $sessionType;
     	$this->session->userId = $userId;
     	$this->session->token = serialize($token);
+    	if (!empty($refreshToken)) {
+    		$this->session->refreshToken = $refreshToken;
+    	}
     	$this->session->startTime = date('Y-m-d H:i:s');
     	$this->session->updatedTime = date('Y-m-d H:i:s');
     	$this->session->state = SESSION_STATE_ACTIVE;

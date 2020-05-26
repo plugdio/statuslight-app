@@ -88,7 +88,7 @@ class Device {
 				}
 
 				$sessionModel = new \Models\Session();
-				$sessionModel->saveSession(PROVIDER_GOOGLE, $userId, $token);
+				$sessionModel->saveSession(PROVIDER_GOOGLE, $userId, $token, $token->getRefreshToken());
 			} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
 				$this->l->error($this->tr . " - " . __METHOD__ . " - Caught exception " . $e->getMessage() . ' - ' . $e->getTraceAsString());
 				$f3->set('SESSION.userId', null);

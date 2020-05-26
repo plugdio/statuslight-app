@@ -83,9 +83,9 @@ class GCal extends \Services\ServiceBase {
 		    $token = self::getProvider($redirectUri)->getAccessToken('authorization_code', [
 		        'code' => $authCode,
 		    ]);
-#		    $refreshToken = $token->getRefreshToken();
+		    $refreshToken = $token->getRefreshToken();
 
-#	   		$l->debug($tr . " - " . __METHOD__ . " - refreshToken: " . print_r($refreshToken, true));
+	   		$l->debug($tr . " - " . __METHOD__ . " - refreshToken: " . print_r($refreshToken, true));
 		} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
 			$l->error($tr . " - " . __METHOD__ . " - Caught exception " . $e->getMessage() . ' - ' . $e->getTraceAsString());
 			return null;

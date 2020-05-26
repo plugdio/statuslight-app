@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS `sessions` (
   `userId` int NOT NULL,
   `type` varchar(10) NOT NULL,
   `token` longtext NULL,
+  `refreshToken` varchar(200) NULL,
   `state` varchar(10) NOT NULL,
   `startTime` datetime NOT NULL,
   `updatedTime` datetime NOT NULL,
