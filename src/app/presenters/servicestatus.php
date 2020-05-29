@@ -2,7 +2,7 @@
 
 namespace Presenters;
 
-class Status {
+class ServiceStatus {
 
 
 	function __construct() {

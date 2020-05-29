@@ -2,14 +2,14 @@
 
 namespace Services;
 
-class GCal extends \Services\ServiceBase {
+class GCal {
 
 	function __construct() {
 		parent::__construct();
 	}
 
 
-	public static function getProvider($redirectUri) {
+	public static function getProvider($target) {
 		$f3=\Base::instance();
 
 		// login link: https://developers.google.com/identity/protocols/oauth2/web-server
@@ -18,7 +18,7 @@ class GCal extends \Services\ServiceBase {
 		$gcalProvider = new \League\OAuth2\Client\Provider\Google([
 		    'clientId'     => $f3->get('gcal_client_id'),
 		    'clientSecret' => $f3->get('gcal_client_secret'),
-		    'redirectUri'  => $f3->get('baseAppPath') . $redirectUri,
+		    'redirectUri'  => $f3->get('baseAppPath') . '/login/' . PROVIDER_GOOGLE . '/' . $target,
 		    'accessType'   => 'offline',
 		    'prompt'       => 'consent',
 //		    'proxy'                   => 'localhost:8888',
@@ -29,17 +29,10 @@ class GCal extends \Services\ServiceBase {
 
 	} 
 
-	public static function getLoginUrl($loginType) {
+	public static function getLoginUrl($target) {
 		$f3=\Base::instance();
 		
-		if ($loginType == 'phone') {
-			$provider = self::getProvider('/gcal/login');
-		} elseif ($loginType == 'device') {
-			$provider = self::getProvider('/device/login/gcal');
-		} else {
-			return null;
-		}
-
+		$provider = self::getProvider($target);
 		$loginUrl = $provider->getAuthorizationUrl([
 				    'scope' => [
 				        'https://www.googleapis.com/auth/calendar.readonly'
@@ -51,7 +44,7 @@ class GCal extends \Services\ServiceBase {
 
 	} 
 
-	public static function getTokens($redirectUri) {
+	public static function getToken($target) {
 		$f3=\Base::instance();
 		
 		$tr = $f3->get('tr');
@@ -80,7 +73,7 @@ class GCal extends \Services\ServiceBase {
 		}
 
 		try {
-		    $token = self::getProvider($redirectUri)->getAccessToken('authorization_code', [
+		    $token = self::getProvider($target)->getAccessToken('authorization_code', [
 		        'code' => $authCode,
 		    ]);
 		    $refreshToken = $token->getRefreshToken();
@@ -95,7 +88,7 @@ class GCal extends \Services\ServiceBase {
 		
 	}
 
-	public static function getPresenceStatus($redirectUri, $token) {
+	public static function getPresenceStatus($target, $token) {
 		$f3=\Base::instance();
 		
 		$tr = $f3->get('tr');
@@ -197,68 +190,6 @@ class GCal extends \Services\ServiceBase {
 		$response->success = true;
 
 		return $response;
-
-	}
-
-	function login() {
-		$f3=\Base::instance();
-		$token = self::getTokens('/gcal/login');
-		
-		if (!empty($token)) {
-			$f3->set('SESSION.accessToken', $token->getToken());
-			$f3->set('SESSION.refreshToken', $token->getRefreshToken());
-			$f3->set('SESSION.accessTokenExpiresOn', $token->getExpires());
-		}
-
-		$f3->reroute('/gcal');
-	}
-
-	function status($f3, $args) {
-
-		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
-
-		$this->amIAuthenticated();
-	}
-
-
-	function getToken($f3, $args) {
-		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
-		if (!$this->amIAuthenticated(true)) {
-			$this->l->error($this->tr . " - " . __METHOD__ . " - Not authenticated");
-			return;
-		}
-		$response = new \Response($this->tr);
-		$f3->set('page_type', 'AJAX');
-
-		if ($f3->get('SESSION.accessTokenExpiresOn') < time() + 600) {
-			$this->l->debug($this->tr . " - " . __METHOD__ . " - Token needs to be refreshed");
-
-
-			$grant = new \League\OAuth2\Client\Grant\RefreshToken();
-			$token = self::getProvider('/gcal/login')->getAccessToken($grant, ['refresh_token' => $f3->get('SESSION.refreshToken')]);
-
-			$f3->set('SESSION.accessToken', $token->getToken());
-			$f3->set('SESSION.refreshToken', $token->getRefreshToken());
-			$f3->set('SESSION.accessTokenExpiresOn', $token->getExpires());
-
-		}
-
-		$response->result->accessToken = $f3->get('SESSION.accessToken');
-		$response->result->accessTokenExpiresOn = $f3->get('SESSION.accessTokenExpiresOn');
-#		$response->result->refreshToken = $f3->get('SESSION.refreshToken');
-		$response->success = true;
-		$f3->set('data', $response);
-	} 
-
-	function afterroute($f3) {
-#		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
-
-		if ($f3->get('page_type') == 'AJAX') {
-			header('Content-Type: application/json');
-			echo json_encode($f3->get('data'), JSON_PRETTY_PRINT);
-		} else {
-			echo \Template::instance()->render('status_gcal.html');
-		}
 
 	}
 

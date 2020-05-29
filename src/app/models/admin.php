@@ -9,7 +9,12 @@ class Admin {
 		$this->tr = $f3->get('tr');
 		$this->l = $f3->get('log');
 		
-        $this->admin = new \DB\SQL\Mapper($f3->get('db'), 'mqttadmins');
+		$db = new \DB\SQL(
+		    'mysql:host=' . trim(getenv('MYSQL_HOST')) . ';port=3306;dbname=statuslight',
+		    trim(getenv('MYSQL_USER')),
+		    trim(getenv('MYSQL_PASSWORD'))
+		);
+        $this->admin = new \DB\SQL\Mapper($db, 'mqttadmins');
 	}
 
 	function getAdmin($username, $password) {

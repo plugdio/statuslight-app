@@ -1,6 +1,6 @@
 <?php
 
-const PROVIDER_AZURE = 'azure';
+const PROVIDER_TEAMS = 'teams';
 const PROVIDER_GOOGLE = 'google';
 const PROVIDER_SLACK = 'slack';
 

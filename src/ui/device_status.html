@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<!-- Required meta tags -->
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+		<!-- Bootstrap CSS -->
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+		<check if="{{ @ENV == 'DEV' }}">
+		    <true>
+		    	<base href="{{ @SCHEME.'://'.@HOST.':'.@PORT.@BASE.'/'.@UI }}">
+		    </true>
+		    <false>
+		    	<base href="{{ @SCHEME.'://'.@HOST.@BASE.'/'.@UI }}">
+			</false>
+		</check>
+
+		<title>Statuslight Online</title>
+	</head>
+	<body>
+
+		<div id="statusContainer" class="container vh-100">
+
+			<br>
+      		<h3>Device</h3>
+      		<p>Hello {{ @SESSION.name }}!</p>
+      		<check if="{{ @status }}">
+      			<p>Your {{ trim(@service) }} status is {{ trim(@status) }}.</p>
+      		</check>
+
+      		<check if="{{ @no_devices_yet }}">
+				<true>
+					<p>To make your status visible, you need to register a device. If you have one already, click on the link bellow and follow the steps.</p>
+				</true>
+				<false>
+					<check if="{{ count(@active_devices) > 0 }}">
+						<p>Your active devices:</p>
+						<repeat group="{{ @active_devices }}" value="{{ @device }}">
+						    <p><span style="background-color: {{ trim(@device.color) }};">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> {{ trim(@device.id) }} - {{ trim(@device.clientState) }} - {{ trim(@device.network) }}  - {{ trim(@device.lastSeen) }}</p>
+						</repeat>
+					</check>
+					<check if="{{ count(@pending_devices) > 0 }}">
+						<p>Your can activate your new device with the bellow PIN code(s):</p>
+						<repeat group="{{ @pending_devices }}" value="{{ @device }}">
+						    <li><b>{{ trim(@device.pin) }}</b> - valid til: {{ trim(@device.validity) }}</li>
+						</repeat>
+					</check>
+				</false>
+			</check>
+			<br>
+			<p><a href="{{ @BASE }}/device/add">Add a new device</a></p>
+
+
+		</div>
+
+
+		<!-- Optional JavaScript -->
+		<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+		<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+		<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+	</body>
+</html>
+

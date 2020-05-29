@@ -43,14 +43,14 @@ class SessionManager {
 
 			$this->l->debug($this->tr . " - " . __METHOD__ . " - working with " . $session['id'] . ' - ' . $session['type']);
 
-			if (!in_array($session['type'], array(PROVIDER_AZURE, PROVIDER_GOOGLE, PROVIDER_SLACK))) {
+			if (!in_array($session['type'], array(PROVIDER_TEAMS, PROVIDER_GOOGLE, PROVIDER_SLACK))) {
 				$this->l->error($this->tr . " - " . __METHOD__ . " - Provider not supported " . $session['type']);
 				continue;
 			}
 
 			$token = unserialize($session['token']);
 			try {
-				if (($session['type'] == PROVIDER_AZURE) && ($token->hasExpired())) {
+				if (($session['type'] == PROVIDER_TEAMS) && ($token->hasExpired())) {
 					$this->l->debug($this->tr . " - " . __METHOD__ . " - Azure token needs to be refreshed");
 					$provider = \Services\Teams::getProvider('/device/login/teams');
 	            	$token = $provider->getAccessToken('refresh_token', [
@@ -64,13 +64,11 @@ class SessionManager {
 					$token = $provider->getAccessToken($grant, ['refresh_token' => $session['refreshToken']]);
 	        	}
 
-				if ($session['type'] == PROVIDER_AZURE) {
+				if ($session['type'] == PROVIDER_TEAMS) {
 					$presenceResponse = \Services\Teams::getPresenceStatus('/device/login/teams', $token);
 				} elseif ($session['type'] == PROVIDER_GOOGLE) {
 					$presenceResponse = \Services\GCal::getPresenceStatus('/device/login/gcal', $token);
 				} elseif ($session['type'] == PROVIDER_SLACK) {
-$this->l->debug($this->tr . " - " . __METHOD__ . " - Expires at: " . date('r', $token->getExpires()));
-$this->l->debug($this->tr . " - " . __METHOD__ . " - Expires in: " . ($token->getExpires() - time()) );
 					$userModel = new \Models\User();
 					$userResponse = $userModel->getUser($session['userId']);
 					$slackUserId = $userResponse->result['userId'];

@@ -2,37 +2,31 @@
 
 namespace Services;
 
-class Slack extends \Services\ServiceBase {
+class Slack {
 
 	function __construct() {
 		parent::__construct();
 	}
 
 
-	public static function getProvider($redirectUri) {
+	public static function getProvider($target) {
 		$f3=\Base::instance();
 
 		//https://github.com/adam-paterson/oauth2-slack
 		$slackProvider = new \AdamPaterson\OAuth2\Client\Provider\Slack([
 		    'clientId'          => $f3->get('slack_client_id'),
 		    'clientSecret'      => $f3->get('slack_client_secret'),
-		    'redirectUri'       => $f3->get('baseAppPath') . $redirectUri,
+		    'redirectUri'       => $f3->get('baseAppPath') . '/login/' . PROVIDER_TEAMS . '/' . $target,
 		]);
 
 		return $slackProvider;
 
 	} 
 
-	public static function getLoginUrl($loginType) {
+	public static function getLoginUrl($target) {
 		$f3=\Base::instance();
 		
-		if ($loginType == 'phone') {
-			$provider = self::getProvider('/slack/login');
-		} elseif ($loginType == 'device') {
-			$provider = self::getProvider('/device/login/slack');
-		} else {
-			return null;
-		}
+		$provider = self::getProvider($target);
 
 		$loginUrl = $provider->getAuthorizationUrl([
 				    'scope' => 'users:read',
@@ -42,7 +36,7 @@ class Slack extends \Services\ServiceBase {
 		return $loginUrl;
 	} 
 
-	public static function getTokens($redirectUri) {
+	public static function getToken($target) {
 		$f3=\Base::instance();
 		
 		$tr = $f3->get('tr');
@@ -60,7 +54,7 @@ class Slack extends \Services\ServiceBase {
 		} else {
 
 			try {
-				$token = self::getProvider($redirectUri)->getAccessToken('authorization_code', [
+				$token = self::getProvider($target)->getAccessToken('authorization_code', [
 	        		'code' => $f3->get('REQUEST.code')
 	    		]);
 			} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
@@ -78,7 +72,7 @@ class Slack extends \Services\ServiceBase {
 		
 	}
 
-	public static function getPresenceStatus($redirectUri, $token, $userId) {
+	public static function getPresenceStatus($target, $token, $userId) {
 		$f3=\Base::instance();
 		
 		$tr = $f3->get('tr');
@@ -142,73 +136,6 @@ class Slack extends \Services\ServiceBase {
 		$response->success = true;
 
 		return $response;
-
-	}
-
-	function login() {
-		$f3=\Base::instance();
-		$token = self::getTokens('/slack/login');
-
-		if (empty($token)) {
-			$f3->reroute($f3->get('baseStaticPath'));
-		}
-
-		$f3->set('SESSION.accessToken', $token->getToken());
-		$provider = self::getProvider('/slack/login');
-		$userId = $provider->getAuthorizedUser($token)->getId();
-		$f3->set('SESSION.user_id', $userId);
-
-		$this->l->debug($this->tr . " - " . __METHOD__ . " - userId: " . print_r($userId, true));
-
-		$f3->reroute('/slack');
-	}
-
-	function status($f3, $args) {
-
-		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
-
-		$this->amIAuthenticated();
-	}
-
-
-	function getToken($f3, $args) {
-		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
-		if (!$this->amIAuthenticated(true)) {
-			$this->l->error($this->tr . " - " . __METHOD__ . " - Not authenticated");
-			return;
-		}
-		$response = new \Response($this->tr);
-		$f3->set('page_type', 'AJAX');
-/*
-		if ($f3->get('SESSION.accessTokenExpiresOn') < time() + 600) {
-			$this->l->debug($this->tr . " - " . __METHOD__ . " - Token needs to be refreshed");
-
-
-			$grant = new RefreshToken();
-			$token = self::getProvider('/slack/login')->getAccessToken($grant, ['refresh_token' => $f3->get('SESSION.refreshToken')]);
-
-			$f3->set('SESSION.accessToken', $token->getToken());
-			$f3->set('SESSION.refreshToken', $token->getRefreshToken());
-			$f3->set('SESSION.accessTokenExpiresOn', $token->getExpires());
-
-		}
-*/
-		$response->result->accessToken = $f3->get('SESSION.accessToken');
-#		$response->result->accessTokenExpiresOn = $f3->get('SESSION.accessTokenExpiresOn');
-#		$response->result->refreshToken = $f3->get('SESSION.refreshToken');
-		$response->success = true;
-		$f3->set('data', $response);
-	} 
-
-	function afterroute($f3) {
-#		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
-
-		if ($f3->get('page_type') == 'AJAX') {
-			header('Content-Type: application/json');
-			echo json_encode($f3->get('data'), JSON_PRETTY_PRINT);
-		} else {
-			echo \Template::instance()->render('status_slack.html');
-		}
 
 	}
 

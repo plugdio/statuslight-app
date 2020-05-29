@@ -39,7 +39,8 @@ if (rtrim(strtoupper(getenv('STATUSLIGHT_ENV'))) == 'DEV') {
 
 $f3->set('path', $path);
 $f3->set('AUTOLOAD', $path . 'app/');
-$f3->set('UI', $path . 'ui/');
+#$f3->set('UI', $path . 'ui/');
+$f3->set('UI', 'ui/');
 $f3->set('dbdir', $path . 'data/');
 
 $f3->set('teams_client_id', trim(getenv('TEAMSCLIENTID')));
@@ -56,13 +57,6 @@ $f3->set('mqtt_password', trim(getenv('MQTTADMINPASS')));
 #$f3->set('db_host', trim(getenv('DBHOST')));
 #$f3->set('db_user', trim(getenv('DBUSER')));
 #$f3->set('db_pass', trim(getenv('DBPASS')));
-
-$db = new \DB\SQL(
-    'mysql:host=' . trim(getenv('MYSQL_HOST')) . ';port=3306;dbname=statuslight',
-    trim(getenv('MYSQL_USER')),
-    trim(getenv('MYSQL_PASSWORD'))
-);
-$f3->set('db', $db);
 
 $f3->set('log', $log);
 $tr = substr(md5(uniqid(rand(), true)),0,6);
@@ -92,42 +86,31 @@ $f3->set('ONERROR',
 $log->debug($tr . " - " . 'init' . " - START - ENV: " . getenv('STATUSLIGHT_ENV'));
 $log->info($tr . ' - New request: ' . $_SERVER["REQUEST_METHOD"] . " " . $_SERVER["REQUEST_URI"] . " - " . $_SERVER["AUTH_USER"]);
 
-if ( ($f3->get('ENV') == 'DEV') || ($f3->get('ENV') == 'TEST') ) {
-    $f3->route('GET /', '\Services\ServiceBase->blank');
-} else {
-    $f3->route('GET|HEAD /',
-        function($f3) {
-            $f3->reroute('https://statuslight.online');
-        }
-    );
-}
+$f3->route('GET|HEAD /',
+    function($f3) {
+        echo \Template::instance()->render('index.html');
+    }
+);
+
+$f3->route('GET|HEAD /device',
+    function($f3) {
+        echo \Template::instance()->render('device.html');
+    }
+);
 
 $f3->route('GET /blank', '\Services\ServiceBase->blank');
 
-$f3->route('GET /config', '\Services\ServiceBase->getConfig');
-$f3->route('GET /logout', '\Services\ServiceBase->logout');
+$f3->route('GET /config', '\Presenters\Config->getConfig');
 
-$f3->route('GET /teams/login', '\Services\Teams->login');
-$f3->route('GET /teams', '\Services\Teams->status');
-$f3->route('GET /teams/token', '\Services\Teams->getToken');
+$f3->route('GET /login/@service/@target', '\Presenters\Login->login');
+$f3->route('GET /logout', '\Presenters\Login->logout');
 
-
-$f3->route('GET /gcal/login', '\Services\GCal->login');
-$f3->route('GET /gcal', '\Services\GCal->status');
-$f3->route('GET /gcal/token', '\Services\GCal->getToken');
-
-
-$f3->route('GET /slack/login', '\Services\Slack->login');
-$f3->route('GET /slack', '\Services\Slack->status');
-$f3->route('GET /slack/token', '\Services\Slack->getToken');
-
-$f3->route('GET /device', '\Presenters\Device->main');
-$f3->route('GET /device/login/teams', '\Presenters\Device->loginWithTeams');
-$f3->route('GET /device/login/gcal', '\Presenters\Device->loginWithGoogle');
-$f3->route('GET /device/login/slack', '\Presenters\Device->loginWithSlack');
+$f3->route('GET /phone/status', '\Presenters\Phone->main');
+$f3->route('GET /phone/status/refresh', '\Presenters\Phone->status');
+$f3->route('GET /device/status', '\Presenters\Device->main');
 $f3->route('GET /device/add', '\Presenters\Device->addDevice');
 
-$f3->route('GET /status', '\Presenters\Status->main');
+$f3->route('GET /status', '\Presenters\ServiceStatus->main');
 
 $f3->route('GET /backend/mqttconnector', '\Backend\MqttComm->subscribe');
 $f3->route('GET /backend/sessionmanager', '\Backend\SessionManager->run');

@@ -2,21 +2,21 @@
 
 namespace Services;
 
-class Teams extends \Services\ServiceBase {
+class Teams {
 
 
 	function __construct() {
 		parent::__construct();
 	}
 
-	public static function getProvider($redirectUri) {
+	public static function getProvider($target) {
 		$f3=\Base::instance();
 		$tr = $f3->get('tr');
 		// https://github.com/thenetworg/oauth2-azure
 		$teamsProvider = new \TheNetworg\OAuth2\Client\Provider\Azure([
 		    'clientId'          => $f3->get('teams_client_id'),
 		    'clientSecret'      => $f3->get('teams_client_secret'),
-		    'redirectUri'		=> $f3->get('baseAppPath') . $redirectUri,
+		    'redirectUri'		=> $f3->get('baseAppPath') . '/login/' . PROVIDER_TEAMS . '/' . $target,
 		    'authWithResource' 	=> false,
 		    'state'				=> $tr,
 //		    'proxy'                   => 'localhost:8888',
@@ -30,22 +30,16 @@ class Teams extends \Services\ServiceBase {
 		return $teamsProvider;
 	} 
 
-	public static function getLoginUrl($loginType) {
+	public static function getLoginUrl($target) {
 		$f3=\Base::instance();
 
-		if ($loginType == 'phone') {
-			$provider = self::getProvider('/teams/login');
-		} elseif ($loginType == 'device') {
-			$provider = self::getProvider('/device/login/teams');
-		} else {
-			return null;
-		}
+		$provider = self::getProvider($target);
 		$loginUrl = $provider->getAuthorizationUrl(['state' => $f3->get('tr')]);
 		$f3->set('SESSION.state', $provider->getState());
 		return $loginUrl;
 	} 
 
-	public static function getTokens($redirectUri) {
+	public static function getToken($target) {
 		$f3=\Base::instance();
 		
 		$tr = $f3->get('tr');
@@ -74,7 +68,7 @@ class Teams extends \Services\ServiceBase {
 
 
 		try {
-		    $token = self::getProvider($redirectUri)->getAccessToken('authorization_code', [
+		    $token = self::getProvider($target)->getAccessToken('authorization_code', [
 		        'code' => $authCode,
 	//	        'resource' => 'https://graph.microsoft.com/',
 		    ]);
@@ -89,7 +83,7 @@ class Teams extends \Services\ServiceBase {
 		
 	}
 
-	public static function getPresenceStatus($redirectUri, $token) {
+	public static function getPresenceStatus($target, $token) {
 		$f3=\Base::instance();
 		
 		$tr = $f3->get('tr');
@@ -99,7 +93,7 @@ class Teams extends \Services\ServiceBase {
 
 		try {
 
-			$provider = self::getProvider($redirectUri);
+			$provider = self::getProvider($target);
 			$provider->urlAPI = 'https://graph.microsoft.com/beta/';
 			$ref = 'me/presence';
 
@@ -151,81 +145,6 @@ class Teams extends \Services\ServiceBase {
 		$response->success = true;
 
 		return $response;
-
-	}
-
-	function login() {
-		$f3=\Base::instance();
-		$token = self::getTokens('/teams/login');
-		
-		if (!empty($token)) {
-			$f3->set('SESSION.accessToken', $token->getToken());
-			$f3->set('SESSION.refreshToken', $token->getRefreshToken());
-			$f3->set('SESSION.accessTokenExpiresOn', $token->getExpires());
-		}
-
-		$f3->reroute('/teams');
-	}
-
-	function status($f3, $args) {
-
-		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
-
-		$this->amIAuthenticated();
-	}
-
-
-	function getToken($f3, $args) {
-		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
-		if (!$this->amIAuthenticated(true)) {
-			$this->l->error($this->tr . " - " . __METHOD__ . " - Not authenticated");
-			return;
-		}
-		$response = new \Response($this->tr);
-		$f3->set('page_type', 'AJAX');
-
-		if ($f3->get('SESSION.accessTokenExpiresOn') < time() + 600) {
-			$this->l->debug($this->tr . " - " . __METHOD__ . " - Token needs to be refreshed");
-
-/*
-			$this->graph = new \GraphAPI($f3->get('scope'), $f3->get('redirectUriTeams'), $this->tr, $this->l);
-			$this->graph->setAuthParams($f3->get('client_id'), $f3->get('client_secret'), $authCode);
-			$this->graph->setTokens($f3->get('SESSION.accessToken'), $f3->get('SESSION.refreshToken'));
-
-			$tokenResponse = $this->graph->getToken('refresh_token');
-
-			if (!$tokenResponse->success) {
-				$this->l->error($this->tr . " - " . __METHOD__ . " - Error geting new token: " . $authResponse->message); 
-				$f3->error(401, "Error authenticating: " . $authResponse->message);
-			}
-*/
-
-			$token = self::getProvider('/teams/login')->getAccessToken('refresh_token', [
-	                	'refresh_token' => $f3->get('SESSION.refreshToken'),
-	            	]);
-
-			$f3->set('SESSION.accessToken', $token->getToken());
-			$f3->set('SESSION.refreshToken', $token->getRefreshToken());
-			$f3->set('SESSION.accessTokenExpiresOn', $token->getExpires());
-
-		}
-		$this->l->debug($this->tr . " - " . __METHOD__ . " - Using current token");
-
-		$response->result->accessToken = $f3->get('SESSION.accessToken');
-		$response->result->accessTokenExpiresOn = $f3->get('SESSION.accessTokenExpiresOn');
-		$response->success = true;
-		$f3->set('data', $response);
-	} 
-
-	function afterroute($f3) {
-#		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
-
-		if ($f3->get('page_type') == 'AJAX') {
-			header('Content-Type: application/json');
-			echo json_encode($f3->get('data'), JSON_PRETTY_PRINT);
-		} else {
-			echo \Template::instance()->render('status_teams.html');
-		}
 
 	}
 

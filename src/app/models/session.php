@@ -9,11 +9,18 @@ class Session {
 		$this->tr = $f3->get('tr');
 		$this->l = $f3->get('log');
 		
-        $this->session = new \DB\SQL\Mapper($f3->get('db'), 'sessions');
+		$db = new \DB\SQL(
+		    'mysql:host=' . trim(getenv('MYSQL_HOST')) . ';port=3306;dbname=statuslight',
+		    trim(getenv('MYSQL_USER')),
+		    trim(getenv('MYSQL_PASSWORD'))
+		);
+
+        $this->session = new \DB\SQL\Mapper($db, 'sessions');
 	}
 
-	function saveSession($sessionType, $userId, $token, $refreshToken = null) {
+	function saveSession($sessionType, $userId, $token, $refreshToken = null, $sessionState, $closedReason, $status, $statusDetail) {
 
+		$response = new \Response($this->tr);
 		$this->session->load(array('userId=? AND type=? AND state=?', $userId, $sessionType, SESSION_STATE_ACTIVE));
 		while (!$this->session->dry()) {
 /*
@@ -35,8 +42,15 @@ class Session {
     	}
     	$this->session->startTime = date('Y-m-d H:i:s');
     	$this->session->updatedTime = date('Y-m-d H:i:s');
-    	$this->session->state = SESSION_STATE_ACTIVE;
+    	$this->session->state = $sessionState;
+    	$this->session->closedReason = $closedReason;
+    	$this->session->presenceStatus = $status;
+    	$this->session->presenceStatusDetail = $statusDetail;
     	$this->session->save();
+
+    	$response->result = $this->session->cast();
+		$response->success = true;
+		return $response;
 	}
 
 	function getActiveSessionForUser($userId) {

@@ -28,6 +28,7 @@ services:
     container_name: sl_php
     build:
       context: './php/'
+    restart: always
     environment:
       - STATUSLIGHT_ENV
       - DOMAIN
@@ -61,6 +62,7 @@ services:
         EMAIL: ${EMAIL}
         ADMINUSER: ${ADMINUSER}
         ADMINPASS: ${ADMINPASS}
+    restart: always
     networks:
       frontend:
         ipv4_address: 172.10.0.2
@@ -79,6 +81,7 @@ services:
       context: './mosquitto/'
       args:
         DOMAIN: ${DOMAIN}
+    restart: always
     container_name: sl_mosquitto
     ports:
       - "1883:1883"
