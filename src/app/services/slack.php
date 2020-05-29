@@ -16,7 +16,7 @@ class Slack {
 		$slackProvider = new \AdamPaterson\OAuth2\Client\Provider\Slack([
 		    'clientId'          => $f3->get('slack_client_id'),
 		    'clientSecret'      => $f3->get('slack_client_secret'),
-		    'redirectUri'       => $f3->get('baseAppPath') . '/login/' . PROVIDER_TEAMS . '/' . $target,
+		    'redirectUri'       => $f3->get('baseAppPath') . '/login/' . PROVIDER_SLACK . '/' . $target,
 		]);
 
 		return $slackProvider;
