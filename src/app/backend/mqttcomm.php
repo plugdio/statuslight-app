@@ -94,7 +94,7 @@ class MqttComm {
 		$l->debug($tr . " - " . __METHOD__ . " - Message received - Topic: " . $topic . ', msg: ' . $msg);
 		$deviceModel = new \Models\Device();
 		if (preg_match('/SL\/([^\/]*)\/\$(.*)/', $topic, $matches)) {
-			if ($matches[2] == 'state') && ($msg == 'ready') {
+			if (($matches[2] == 'state') && ($msg == 'ready')) {
 				$deviceModel->updateClient($matches[1], $matches[2], $msg, true);
 			} else {
 				$deviceModel->updateClient($matches[1], $matches[2], $msg, false);
