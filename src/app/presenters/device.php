@@ -68,6 +68,7 @@ class Device {
 					$myDevice["lastSeen"] = $device["mqttUpdated"];
 					$clientDetails = json_decode($device['clientDetails']);
 					if (is_object($clientDetails)) {
+						$myDevice["type"] = 'homie';
 						if (!empty($clientDetails->state)) {
 							$myDevice["clientState"] = $clientDetails->state;
 						} else {
@@ -83,6 +84,7 @@ class Device {
 							$myDevice["color"] = 'white';
 						}
 					} else {
+						$myDevice["type"] = 'non-homie';
 						$myDevice["state"] = '-';
 						$myDevice["updated"] = '-';
 					}
