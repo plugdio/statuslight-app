@@ -110,6 +110,8 @@ $f3->route('GET /phone/status/refresh', '\Presenters\Phone->status');
 $f3->route('GET /device/status', '\Presenters\Device->main');
 $f3->route('GET /device/add', '\Presenters\Device->addDevice');
 
+$f3->route('GET /profile', '\Presenters\Profile->main');
+
 $f3->route('GET /status', '\Presenters\ServiceStatus->main');
 
 $f3->route('GET /backend/mqttconnector', '\Backend\MqttComm->subscribe');
