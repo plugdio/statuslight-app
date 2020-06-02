@@ -52,27 +52,27 @@ class SessionManager {
 			try {
 				if (($session['type'] == PROVIDER_TEAMS) && ($token->hasExpired())) {
 					$this->l->debug($this->tr . " - " . __METHOD__ . " - Azure token needs to be refreshed");
-					$provider = \Services\Teams::getProvider('/device/login/teams');
+					$provider = \Services\Teams::getProvider($session['target']);
 	            	$token = $provider->getAccessToken('refresh_token', [
 	                	'refresh_token' => $token->getRefreshToken(),
 	            	]);
 	            }
 				if ( ($session['type'] == PROVIDER_GOOGLE) && ( ($token->getExpires() - time()) < 120 ) ) {
 					$this->l->debug($this->tr . " - " . __METHOD__ . " - Google token needs to be refreshed");
-					$provider = \Services\GCal::getProvider('/device/login/gcal');
+					$provider = \Services\GCal::getProvider($session['target']);
 					$grant = new \League\OAuth2\Client\Grant\RefreshToken();
 					$token = $provider->getAccessToken($grant, ['refresh_token' => $session['refreshToken']]);
 	        	}
 
 				if ($session['type'] == PROVIDER_TEAMS) {
-					$presenceResponse = \Services\Teams::getPresenceStatus('/device/login/teams', $token);
+					$presenceResponse = \Services\Teams::getPresenceStatus($session['target'], $token);
 				} elseif ($session['type'] == PROVIDER_GOOGLE) {
-					$presenceResponse = \Services\GCal::getPresenceStatus('/device/login/gcal', $token);
+					$presenceResponse = \Services\GCal::getPresenceStatus($session['target'], $token);
 				} elseif ($session['type'] == PROVIDER_SLACK) {
 					$userModel = new \Models\User();
 					$userResponse = $userModel->getUser($session['userId']);
 					$slackUserId = $userResponse->result['userId'];
-					$presenceResponse = \Services\Slack::getPresenceStatus('/device/login/slack', $token, $slackUserId);
+					$presenceResponse = \Services\Slack::getPresenceStatus($session['target'], $token, $slackUserId);
 				}
 
 				$newSession = $presenceResponse->result;

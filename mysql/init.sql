@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS `sessions` (
   `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `userId` int NOT NULL,
   `type` varchar(10) NOT NULL,
+  `target` varchar(10) NOT NULL,
   `token` longtext NULL,
   `refreshToken` varchar(200) NULL,
   `state` varchar(10) NOT NULL,

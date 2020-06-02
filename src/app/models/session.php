@@ -18,7 +18,7 @@ class Session {
         $this->session = new \DB\SQL\Mapper($db, 'sessions');
 	}
 
-	function saveSession($sessionType, $userId, $token, $refreshToken = null, $sessionState, $closedReason, $status, $statusDetail) {
+	function saveSession($sessionType, $target, $userId, $token, $refreshToken = null, $sessionState, $closedReason, $status, $statusDetail) {
 
 		$response = new \Response($this->tr);
 		$this->session->load(array('userId=? AND type=? AND state=?', $userId, $sessionType, SESSION_STATE_ACTIVE));
@@ -35,6 +35,7 @@ class Session {
 		
 		$this->session->reset();	
     	$this->session->type = $sessionType;
+    	$this->session->target = $target;
     	$this->session->userId = $userId;
     	$this->session->token = serialize($token);
     	if (!empty($refreshToken)) {

@@ -94,7 +94,7 @@ class Login {
 				$sessionState = $sessionDetails->sessionState;
 				$closedReason = $sessionDetails->closedReason;
 
-				$sessionResponse = $sessionModel->saveSession($service, $userId, $token, $refreshToken, $sessionState, $closedReason, $status, $statusDetail);
+				$sessionResponse = $sessionModel->saveSession($service, $target, $userId, $token, $refreshToken, $sessionState, $closedReason, $status, $statusDetail);
 
 
 			} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
