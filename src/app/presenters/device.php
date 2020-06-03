@@ -72,6 +72,15 @@ class Device {
 						if (!empty($clientDetails->state)) {
 							$myDevice["type"] = 'homie';
 							$myDevice["clientState"] = $clientDetails->state;
+							if ($clientDetails->state == 'ready') {
+								if (!empty($clientDetails->{'statuslight/color'})) {
+									$myDevice["color"] = $clientDetails->{'statuslight/color'};
+								} else {
+									$myDevice["color"] = 'white';
+								}
+							} else {
+								$myDevice["color"] = 'grey';
+							}
 						} else {
 							$myDevice["type"] = 'non-homie';
 							$myDevice["clientState"] = '-';
@@ -81,16 +90,6 @@ class Device {
 						if (($config != null) && !empty($config->wifi->ssid)) {
 							$myDevice["network"] = $config->wifi->ssid;
 						}
-						if (($myDevice["type"] == 'homie') && ($clientDetails->state == 'ready')) {
-							if (!empty($clientDetails->{'statuslight/color'})) {
-								$myDevice["color"] = $clientDetails->{'statuslight/color'};
-							} else {
-								$myDevice["color"] = 'white';
-							}
-						} else {
-							$myDevice["color"] = 'grey';
-						}
-
 					} else {
 						$myDevice["state"] = '-';
 						$myDevice["updated"] = '-';
