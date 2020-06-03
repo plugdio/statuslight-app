@@ -44,10 +44,10 @@
 
   <div class="collapse navbar-collapse" id="navbarColor02">
     <ul class="navbar-nav mr-auto">
-      <li class="nav-item active">
+      <li class="nav-item">
         <a class="nav-link" href="/device/status">Devices</a>
       </li>
-      <li class="nav-item">
+      <li class="nav-item active">
         <a class="nav-link" href="/profile">Profile</a>
       </li>
     </ul>
@@ -57,56 +57,76 @@
 		<div id="statusContainer" class="container vh-100" style="padding-top: 1rem;">
 
       		<p>Hello {{ @SESSION.name }}!</p>
-      		<check if="{{ @status }}">
-      			<p>Your have logged in with {{ trim(@service) }}. Your status is {{ trim(@status) }}.</p>
-      		</check>
+			<p>Here you find what information we store about you:</p>
 
-      		<check if="{{ @no_devices_yet }}">
-				<true>
-					<p>To make your status visible, you need to register a device. If you have one already, click on the link bellow and follow the steps.</p>
-				</true>
-				<false>
-					<check if="{{ count(@active_devices) > 0 }}">
-						<p>Your active devices:</p>
+			<table class="table">
+			  <thead>
+			    <tr>
+			      <th scope="col">User Id</th>
+			      <th scope="col">Name</th>
+			      <th scope="col">Email</th>
+			      <th scope="col">Creation time</th>
+			      <th scope="col">Provider</th>
+			    </tr>
+			  </thead>
+			  <tbody>
+			    <tr>
+			      <td>{{ trim(@user.userId) }}</td>
+			      <td>{{ trim(@user.name) }}</td>
+			      <td>{{ trim(@user.email) }}</td>
+			      <td>{{ trim(@user.created) }}</td>
+			      <td>{{ trim(@user.provider) }}</td>
+			    </tr>
+			  </tbody>
+			</table>
 
-						<table class="table">
-						  <thead>
-						    <tr>
-						      <th scope="col"><span data-toggle="tooltip" data-placement="top" title="" data-original-title="We can get more information if the device supports the homie convention.">Type*</span></th>
-						      <th scope="col">Color</th>
-						      <th scope="col">Id</th>
-						      <th scope="col">State</th>
-						      <th scope="col">Wifi network</th>
-						      <th scope="col">Last seen</th>
-						      <th></th>
-						    </tr>
-						  </thead>
-						  <tbody>
-							<repeat group="{{ @active_devices }}" value="{{ @device }}">
-							    <tr>
-							      <td>{{ trim(@device.type) }}</td>
-							      <td><span style="background-color: {{ trim(@device.color) }};">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td>
-							      <td>{{ trim(@device.id) }}</td>
-							      <td>{{ trim(@device.clientState) }}</td>
-							      <td>{{ trim(@device.network) }}</td>
-							      <td>{{ trim(@device.lastSeen) }}</td>
-							      <td><span data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete the device"><a href="{{ @BASE }}/device/delete/{{ trim(@device.deviceId) }}"><i class="fas fa-trash-alt"></i></a></span></td>
-							    </tr>
-							</repeat>
-						  </tbody>
-						</table>
+			<table class="table">
+			  <thead>
+			    <tr>
+			      <th scope="col">Session type</th>
+			      <th scope="col">State</th>
+			      <th scope="col">Start time</th>
+			      <th scope="col">Last updated time</th>
+			      <th scope="col">Presence status</th>
+			      <th scope="col">Presence status detail</th>
+			    </tr>
+			  </thead>
+			  <tbody>
+			    <tr>
+			      <td>{{ trim(@session.type) }}</td>
+			      <td>{{ trim(@session.state) }}</td>
+			      <td>{{ trim(@session.startTime) }}</td>
+			      <td>{{ trim(@session.updatedTime) }}</td>
+			      <td>{{ trim(@session.presenceStatus) }}</td>
+			      <td>{{ trim(@session.presenceStatusDetail) }}</td>
+			    </tr>
+			  </tbody>
+			</table>
 
-					</check>
-					<check if="{{ count(@pending_devices) > 0 }}">
-						<p>Your can activate your new device with the bellow PIN code(s):</p>
-						<repeat group="{{ @pending_devices }}" value="{{ @device }}">
-						    <li><b>{{ trim(@device.pin) }}</b> - valid til: {{ trim(@device.validity) }}</li>
-						</repeat>
-					</check>
-				</false>
-			</check>
+			<table class="table">
+			  <thead>
+			    <tr>
+			      <th scope="col">Device Id</th>
+			      <th scope="col">State</th>
+			      <th scope="col">Last updated time</th>
+			      <th scope="col">Details</th>
+			    </tr>
+			  </thead>
+			  <tbody>
+			  	<repeat group="{{ @devices }}" value="{{ @device }}">
+				    <tr>
+				      <td>{{ trim(@device.mqttClientId) }}</td>
+				      <td>{{ trim(@device.state) }}</td>
+				      <td>{{ trim(@device.mqttUpdated) }}</td>
+				      <td><pre>{{ @device.clientDetails }}</pre></td>
+				    </tr>
+				</repeat>
+			  </tbody>
+			</table>
+
 			<br>
-			<p><a href="{{ @BASE }}/device/add">Add a new device</a></p>
+			<p><a href="{{ @BASE }}/profile/delete">Delete my profile.</a></p>
+			<p>All user, session and device data will be erased.</p>
 
 
 		</div>

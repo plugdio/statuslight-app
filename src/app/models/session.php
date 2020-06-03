@@ -112,6 +112,23 @@ class Session {
     	$this->session->save();
 	}
 
+	function deleteSessionsForUser($userId) {
+		$response = new \Response($this->tr);
+		$this->session->load(array('userId = ?', $userId));
+		if ($this->session->dry()) {
+			$response->message = 'Session not found';
+			return $response;
+		}
+
+		while (!$this->session->dry()) {
+			$this->session->erase();					
+			$this->session->next();
+		}
+
+		$response->success = true;
+		return $response;
+	}
+
 }
 
 ?>

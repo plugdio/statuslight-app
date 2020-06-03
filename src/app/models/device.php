@@ -157,6 +157,36 @@ class Device {
 		$this->device->save();
 	}
 
+	function deleteDevice($id) {
+		$response = new \Response($this->tr);
+		$this->device->load(array('id = ?', $id));
+		if ($this->device->dry()) {
+			$response->message = 'Device not found';
+			return $response;
+		}
+
+		$this->device->erase();					
+
+		$response->success = true;
+		return $response;
+	}
+
+	function deleteDevicesForUser($userId) {
+		$response = new \Response($this->tr);
+		$this->device->load(array('userId = ?', $userId));
+		if ($this->device->dry()) {
+			$response->message = 'Device not found';
+			return $response;
+		}
+
+		while (!$this->device->dry()) {
+			$this->device->erase();					
+			$this->device->next();
+		}
+
+		$response->success = true;
+		return $response;
+	}
 
 }
 

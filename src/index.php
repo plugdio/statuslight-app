@@ -109,8 +109,10 @@ $f3->route('GET /phone/status', '\Presenters\Phone->main');
 $f3->route('GET /phone/status/refresh', '\Presenters\Phone->status');
 $f3->route('GET /device/status', '\Presenters\Device->main');
 $f3->route('GET /device/add', '\Presenters\Device->addDevice');
+$f3->route('GET /device/delete/@deviceId', '\Presenters\Device->deleteDevice');
 
 $f3->route('GET /profile', '\Presenters\Profile->main');
+$f3->route('GET /profile/delete', '\Presenters\Profile->delete');
 
 $f3->route('GET /status', '\Presenters\ServiceStatus->main');
 

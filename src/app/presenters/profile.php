@@ -19,82 +19,49 @@ class Profile {
 
 		$userId = $f3->get('SESSION.userId');
 
+		$userModel = new \Models\User();
+		$userResponse = $userModel->getUser($userId);
+		$myUser = $userResponse->result;
+		$f3->set('user', $myUser);
+
 		$sessionModel = new \Models\Session();
 		$sessionResponse = $sessionModel->getActiveSessionForUser($userId);
-
-		if (!$sessionResponse->success) {
-			$this->l->error($this->tr . " - " . __METHOD__ . " - no session - " . $sessionResponse->message);
-			$f3->reroute($f3->get('baseStaticPath'));
-		}
-
 		$mySession = $sessionResponse->result;
-
-		$f3->set('service', 'UNKNOWN PROVIDER');
-
-		if ($mySession['type'] == PROVIDER_TEAMS) {
-			$f3->set('service', 'Teams');
-			$f3->set('status', $mySession['presenceStatus']);
-		} elseif ($mySession['type'] == PROVIDER_GOOGLE) {
-			$f3->set('service', 'Google Calendar');
-			$f3->set('status', $mySession['presenceStatus']);
-		} elseif ($mySession['type'] == PROVIDER_SLACK) {
-			$f3->set('service', 'Slack');
-			$f3->set('status', $mySession['presenceStatus']);
-		}
+		$mySession['token'] = null;
+		$mySession['refreshToken'] = null;
+		$f3->set('session', $mySession);
 
 		$deviceModel = new \Models\Device();
 		$deviceResponse = $deviceModel->getDeviceByUserId($userId);
-
-		if (!$deviceResponse->success) {
-			$f3->set('no_devices_yet', true);
-		} else {
-			$f3->set('no_devices_yet', false);
+		$myDevices = array();
+		foreach ($deviceResponse->result as $device) {
+			$device['clientDetails'] = json_encode(json_decode($device['clientDetails']), JSON_PRETTY_PRINT);
+			$myDevices[] = $device;
 		}
+		$f3->set('devices', $myDevices);
 
-		$myActiveDevices = array();
-		$myPendingDevices = array();
+		echo \Template::instance()->render('profile.html');
 
-		if ($deviceResponse->success && count($deviceResponse->result) > 0) {
-			foreach ($deviceResponse->result as $device) {
-				$myDevice = array();
-				if ($device["state"] == DEVICE_STATE_TEMP) {
-					$myDevice["id"] = '-';
-					$myDevice["state"] = 'Pending activation';
-					$myDevice["validity"] = $device['validity'];
-					$myDevice["pin"] = $device['pin'];
-					$myPendingDevices[] = $myDevice;
-				} elseif ($device["state"] == DEVICE_STATE_ACTIVE) {
-					$myDevice["id"] = $device['mqttClientId'];
-					$myDevice["lastSeen"] = $device["mqttUpdated"];
-					$clientDetails = json_decode($device['clientDetails']);
-					if (is_object($clientDetails)) {
-						$myDevice["type"] = 'homie';
-						if (!empty($clientDetails->state)) {
-							$myDevice["clientState"] = $clientDetails->state;
-						} else {
-							$myDevice["clientState"] = '-';
-						}
-						$config = json_decode($clientDetails->{'implementation/config'});
-						if (($config != null) && !empty($config->wifi->ssid)) {
-							$myDevice["network"] = $config->wifi->ssid;
-						}
-						if (!empty($clientDetails->{'statuslight/color'})) {
-							$myDevice["color"] = $clientDetails->{'statuslight/color'};
-						} else {
-							$myDevice["color"] = 'white';
-						}
-					} else {
-						$myDevice["type"] = 'non-homie';
-						$myDevice["state"] = '-';
-						$myDevice["updated"] = '-';
-					}
-					$myActiveDevices[] = $myDevice;
-				}
-			}
-		}
+	}
 
-		$f3->set('active_devices', $myActiveDevices);
-		$f3->set('pending_devices', $myPendingDevices);
+	function delete($f3, $args) {
+
+		$this->l->debug($this->tr . " - " . __METHOD__ . " - START - " . $f3->get('SESSION.userId'));
+
+		$this->amIAuthenticated();
+
+		$userId = $f3->get('SESSION.userId');
+
+		$deviceModel = new \Models\Device();
+		$deviceResponse = $deviceModel->deleteDevicesForUser($userId);
+
+		$sessionModel = new \Models\Session();
+		$sessionResponse = $sessionModel->deleteSessionsForUser($userId);
+
+		$userModel = new \Models\User();
+		$userResponse = $userModel->deleteUser($userId);
+
+		$f3->reroute($f3->get('baseStaticPath'));
 
 	}
 
@@ -107,13 +74,6 @@ class Profile {
 			$f3->reroute($f3->get('baseStaticPath'));
 		}
 		return true;
-	}
-
-
-	function afterroute($f3) {
-#		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
-		echo \Template::instance()->render('device_status.html');
-
 	}
 
 }

@@ -57,6 +57,7 @@ class Device {
 		if ($deviceResponse->success && count($deviceResponse->result) > 0) {
 			foreach ($deviceResponse->result as $device) {
 				$myDevice = array();
+				$myDevice["deviceId"] = $device['id'];
 				if ($device["state"] == DEVICE_STATE_TEMP) {
 					$myDevice["id"] = '-';
 					$myDevice["state"] = 'Pending activation';
@@ -68,10 +69,11 @@ class Device {
 					$myDevice["lastSeen"] = $device["mqttUpdated"];
 					$clientDetails = json_decode($device['clientDetails']);
 					if (is_object($clientDetails)) {
-						$myDevice["type"] = 'homie';
 						if (!empty($clientDetails->state)) {
+							$myDevice["type"] = 'homie';
 							$myDevice["clientState"] = $clientDetails->state;
 						} else {
+							$myDevice["type"] = 'non-homie';
 							$myDevice["clientState"] = '-';
 						}
 						$config = json_decode($clientDetails->{'implementation/config'});
@@ -84,7 +86,6 @@ class Device {
 							$myDevice["color"] = 'white';
 						}
 					} else {
-						$myDevice["type"] = 'non-homie';
 						$myDevice["state"] = '-';
 						$myDevice["updated"] = '-';
 					}
@@ -125,6 +126,19 @@ class Device {
 
 	}
 
+	function deleteDevice($f3, $args) {
+
+		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
+		$deviceId = $f3->get('PARAMS.deviceId');
+
+		$this->amIAuthenticated();
+
+		$deviceModel = new \Models\Device();
+		$deviceModel->deleteDevice($deviceId);
+
+		$f3->reroute('/device/status');
+
+	}
 
 	function amIAuthenticated($ajax = false) {
 		$f3=\Base::instance();

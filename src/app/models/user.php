@@ -51,6 +51,19 @@ class User {
 
 	}
 
+	function deleteUser($userId) {
+		$response = new \Response($this->tr);
+		$this->user->load(array('id = ?', $userId));
+		if ($this->user->dry()) {
+			$response->message = 'User not found';
+			return $response;
+		}
+		$this->user->erase();					
+
+		$response->success = true;
+		return $response;
+	}
+
 }
 
 ?>
