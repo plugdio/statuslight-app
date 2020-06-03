@@ -21,6 +21,9 @@ class Profile {
 
 		$userModel = new \Models\User();
 		$userResponse = $userModel->getUser($userId);
+		if (!$userResponse->success) {
+			$f3->reroute($f3->get('baseStaticPath'));
+		}
 		$myUser = $userResponse->result;
 		$f3->set('user', $myUser);
 
@@ -60,6 +63,8 @@ class Profile {
 
 		$userModel = new \Models\User();
 		$userResponse = $userModel->deleteUser($userId);
+
+		$f3->clear('SESSION');
 
 		$f3->reroute($f3->get('baseStaticPath'));
 

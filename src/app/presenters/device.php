@@ -80,11 +80,16 @@ class Device {
 						if (($config != null) && !empty($config->wifi->ssid)) {
 							$myDevice["network"] = $config->wifi->ssid;
 						}
-						if (!empty($clientDetails->{'statuslight/color'})) {
-							$myDevice["color"] = $clientDetails->{'statuslight/color'};
+						if ($clientDetails->state == 'ready') {
+							if (!empty($clientDetails->{'statuslight/color'})) {
+								$myDevice["color"] = $clientDetails->{'statuslight/color'};
+							} else {
+								$myDevice["color"] = 'white';
+							}
 						} else {
-							$myDevice["color"] = 'white';
+							$myDevice["color"] = 'grey';
 						}
+
 					} else {
 						$myDevice["state"] = '-';
 						$myDevice["updated"] = '-';
