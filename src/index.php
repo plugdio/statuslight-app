@@ -29,11 +29,10 @@ $f3->set('CORS.origin', '*');
 if (rtrim(strtoupper(getenv('STATUSLIGHT_ENV'))) == 'DEV') {
     $f3->set('DEBUG',3);
     $f3->set('ENV', 'DEV');
-    $f3->set('baseStaticPath', 'http://' . trim(getenv('STATICURL')));
     $f3->set('baseAppPath', 'http://' . trim(getenv('DOMAIN')));
 } else {
+    $f3->set('GOOGLE_AD_ID', strtoupper(getenv('GOOGLE_AD_ID')));
     $f3->set('ENV', strtoupper(getenv('STATUSLIGHT_ENV')));
-    $f3->set('baseStaticPath', 'https://' . trim(getenv('STATICURL')));
     $f3->set('baseAppPath', 'https://' . trim(getenv('DOMAIN')));
 }
 

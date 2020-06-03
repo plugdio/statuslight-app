@@ -32,7 +32,7 @@ services:
     environment:
       - STATUSLIGHT_ENV
       - DOMAIN
-      - STATICURL
+      - GOOGLE_AD_ID
       - MQTTHOST
       - MQTTPORT
       - MQTTADMINUSER

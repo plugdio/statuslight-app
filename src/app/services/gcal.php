@@ -56,16 +56,16 @@ class GCal {
 		if ( !empty($f3->get('REQUEST.error')) ) {
 			$this->l->error($this->tr . " - " . __METHOD__ . " - Error authenticating: " . $f3->get('REQUEST.error'));
 #			$f3->error(401, "Authentication error");
-			$f3->reroute($f3->get('baseStaticPath') . '?error=' . urlencode('Authentication error'));
+			$f3->reroute($f3->get('baseAppPath') . '?error=' . urlencode('Authentication error'));
 			return;
 		}
 
 		if ( empty($f3->get('REQUEST.code')) ) {
-			$f3->reroute($f3->get('baseStaticPath'));
+			$f3->reroute($f3->get('baseAppPath'));
 		} elseif ( empty($f3->get('REQUEST.state')) || ($f3->get('REQUEST.state') !== $f3->get('SESSION.state')) ) {
 			// State is invalid, possible CSRF attack in progress
     		$l->error($tr . " - " . __METHOD__ . " - Invalid state: " . $f3->get('REQUEST.state') . " vs " . $f3->get('SESSION.state'));
-			$f3->reroute($f3->get('baseStaticPath') . '?error=' . urlencode('Invalid state'));
+			$f3->reroute($f3->get('baseAppPath') . '?error=' . urlencode('Invalid state'));
 			return;
 		} elseif ( !empty($f3->get('REQUEST.code')) ) {
 			$authCode = $f3->get('REQUEST.code');

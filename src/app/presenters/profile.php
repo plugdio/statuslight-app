@@ -22,7 +22,7 @@ class Profile {
 		$userModel = new \Models\User();
 		$userResponse = $userModel->getUser($userId);
 		if (!$userResponse->success) {
-			$f3->reroute($f3->get('baseStaticPath'));
+			$f3->reroute($f3->get('baseAppPath'));
 		}
 		$myUser = $userResponse->result;
 		$f3->set('user', $myUser);
@@ -66,7 +66,7 @@ class Profile {
 
 		$f3->clear('SESSION');
 
-		$f3->reroute($f3->get('baseStaticPath'));
+		$f3->reroute($f3->get('baseAppPath'));
 
 	}
 
@@ -76,7 +76,7 @@ class Profile {
 		if ( empty($f3->get('SESSION.accessToken')) ) {
 #		if ( empty($f3->get('SESSION.accessToken')) || empty($f3->get('SESSION.refreshToken')) ) {
 			$this->l->error($this->tr . " - " . __METHOD__ . " - no tokens - " . print_r($f3->get('SESSION'), true));
-			$f3->reroute($f3->get('baseStaticPath'));
+			$f3->reroute($f3->get('baseAppPath'));
 		}
 		return true;
 	}
