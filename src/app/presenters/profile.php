@@ -70,11 +70,10 @@ class Profile {
 
 	}
 
-	function amIAuthenticated($ajax = false) {
+	function amIAuthenticated() {
 		$f3=\Base::instance();
 
 		if ( empty($f3->get('SESSION.accessToken')) ) {
-#		if ( empty($f3->get('SESSION.accessToken')) || empty($f3->get('SESSION.refreshToken')) ) {
 			$this->l->error($this->tr . " - " . __METHOD__ . " - no tokens - " . print_r($f3->get('SESSION'), true));
 			$f3->reroute($f3->get('baseAppPath'));
 		}

@@ -24,7 +24,7 @@ $log->pushHandler($logStdOut);
 
 $f3 = \Base::instance();
 
-$f3->set('CORS.origin', '*'); 
+#$f3->set('CORS.origin', '*');
 
 if (rtrim(strtoupper(getenv('STATUSLIGHT_ENV'))) == 'DEV') {
     $f3->set('DEBUG',3);
