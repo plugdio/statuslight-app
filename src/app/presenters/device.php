@@ -75,12 +75,13 @@ class Device {
 						} else {
 							$myDevice["type"] = 'non-homie';
 							$myDevice["clientState"] = '-';
+							$myDevice["color"] = 'white';
 						}
 						$config = json_decode($clientDetails->{'implementation/config'});
 						if (($config != null) && !empty($config->wifi->ssid)) {
 							$myDevice["network"] = $config->wifi->ssid;
 						}
-						if ($clientDetails->state == 'ready') {
+						if (($myDevice["type"] == 'homie') && ($clientDetails->state == 'ready')) {
 							if (!empty($clientDetails->{'statuslight/color'})) {
 								$myDevice["color"] = $clientDetails->{'statuslight/color'};
 							} else {
