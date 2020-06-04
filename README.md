@@ -56,6 +56,6 @@ All element of the service is available on GitHub.
 
 - The Statuslight Online service deployable with docker-compose - https://github.com/plugdio/statuslight-app
 - Reference implementation for a device - https://github.com/plugdio/statuslight-rgb-device
-- The configuration UI for the device - https://github.com/plugdio/statuslight-rgb-device-ui
+- The configuration UI for the device - https://github.com/plugdio/statuslight-device-ui
 
 If you have questions, please submit an issue.
