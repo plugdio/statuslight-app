@@ -151,7 +151,7 @@ class GCal {
 				} else {
 					$newState = SESSION_STATE_ACTIVE;
 					$closedReason = null;
-					if (count($providerResponse->calendars->{$primaryCalendareId}->busy) > 1) {
+					if (count($providerResponse->calendars->{$primaryCalendareId}->busy) > 0) {
 						$status = STATUS_BUSY;
 						$statusDetail = STATUS_BUSY;
 					} elseif (count($providerResponse->calendars->{$primaryCalendareId}->busy) == 0) {

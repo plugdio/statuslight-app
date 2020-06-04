@@ -37,7 +37,7 @@
 	<body>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <a class="navbar-brand" href="#">Statuslight Online</a>
+  <span class="navbar-brand">Statuslight Online</span>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor02" aria-controls="navbarColor02" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
@@ -102,6 +102,7 @@
 						<repeat group="{{ @pending_devices }}" value="{{ @device }}">
 						    <li><b>{{ trim(@device.pin) }}</b> - valid til: {{ trim(@device.validity) }}</li>
 						</repeat>
+						<p><small>You need to authenticate your device on MQTT: username can be anything (but you can’t change it later) and for the the password use the PIN above.</small></p>
 					</check>
 				</false>
 			</check>

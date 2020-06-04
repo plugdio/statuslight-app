@@ -69,14 +69,18 @@
           </div>
         </div>
 
+        <h1 style="padding-top: 1rem;">What is this?</h1>
+        <p>The Statuslight Online service fetches your status information from different services and allows you to visualize it physically to others. You can either show your status on a phone’s screen or you could build your own device.</p>
+        <p>Building your own device is not difficult but requires some understanding of the MQTT protocol, microcontrollers, and other electronic components.</p>
+
         <h1>How it works?</h1>
-        <p>You login with your Office 365, Google or Slack account and you to register your device(s). The service will then send updates to the device(s) as your status changes.</p>
+        <p>You login to Statuslight Online with your Office 365, Google or Slack account and you add your device(s). The service will then send updates to the device(s) as your status changes.</p>
         <ul>
         <li>For Teams we use the presence information (<a href="https://docs.microsoft.com/en-us/microsoftteams/presence-admins" target="_blank">https://docs.microsoft.com/en-us/microsoftteams/presence-admins</a>)
         <li>For Google we use the free/busy information of your primary calendar (<a href="https://developers.google.com/calendar/v3/reference/freebusy" target="_blank">https://developers.google.com/calendar/v3/reference/freebusy</a>)
         <li>For Slack we use the status text; we set you busy if the status is ‘In a meeting’ (<a href="https://api.slack.com/docs/presence-and-status" target="_blank">https://api.slack.com/docs/presence-and-status</a>)
         </ul>
-        <p>Detailed user guide can be found here: <a href="">TODO: ADD LINK</a></p>
+        <p>(It may happen that your company policy does not allow you to use external applications with your corporate account.)</p>
 
       <h1>Protocol</h1>
       <p>The service works with any device that is capable to talk MQTT. It can be an ESP2866/ESP32, an Arduino or a Raspberry Pi. We have a reference project with ESP2866 (<a href="https://github.com/plugdio/statuslight-device" target="_blank">https://github.com/plugdio/statuslight-device</a>)</p>
@@ -86,6 +90,7 @@
         SL / {your_device_id} / statuslight / status / set --> busy
         SL / {your_device_id} / statuslight / statusdetail / set --> Teams: Busy/In a meeting
       </pre>
+      <p>You need to authenticate your device on MQTT: username can be anything (but you can’t change it later) and the password is the PIN number that is presented after you added a device.</p>
       <p>The values for the status topic can be:</p>
       <ul>
         <li>free
@@ -96,6 +101,31 @@
         <li>error
       </ul>
       <p>For statusdetail we use extra details from the presence provider.</p>
+
+      <h1>Build your own device</h1>
+      <p>There is a reference implementation for the service: the light of the device will be green, red or yellow depending on your status. The source code can be found here: <a href="https://github.com/plugdio/statuslight-device" target="_blank">https://github.com/plugdio/statuslight-device</a></p>
+      <p>You need:</p>
+      <ul>
+        <li>LOLIN (WEMOS) D1 mini
+        <li>RGB LED Shield for LOLIN (WEMOS) D1 mini
+        <li>Soldering iron and tin
+      </ul>
+      <p>It’s recommended to use the repository with PlatformIO, but you can also use the Arduino IDE too. The code is based on the homie-esp8266 (<a href="https://github.com/homieiot/homie-esp8266" target="_blank">https://github.com/homieiot/homie-esp8266)</a> so we can use all the nice features from it, like the UI for configuration. (Don’t forget to upload the data folder to the device.)</p>
+      <p>After you have built the code and uploaded it to your device:</p>
+      <ol>
+        <li>Turn on the device. It will create a new wifi network with the name SL-xxxxxxx.
+        <li>Connect to that network and follow the steps in the configuration UI: select the wifi network that the device should use, enter the password for it, and enter your PIN number.
+        <li>Then your device will reboot and it’s ready to be used.
+      </ol>
+
+      <h1>Questions?</h1>
+      <p>All element of the service is available on GitHub.</p>
+      <ul>
+        <li>The Statuslight Online service deployable with docker-compose - <a href="https://github.com/plugdio/statuslight-app" target="_blank">https://github.com/plugdio/statuslight-app</a>
+        <li>Reference implementation for a device - <a href="https://github.com/plugdio/statuslight-device" target="_blank">https://github.com/plugdio/statuslight-device</a>
+        <li>The configuration UI for the device - <a href="https://github.com/plugdio/statuslight-device-ui" target="_blank">https://github.com/plugdio/statuslight-device-ui</a>
+      </ul>
+      <p>If you have questions, please submit an issue.</p>
 
 		</div>
 
