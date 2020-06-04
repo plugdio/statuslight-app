@@ -52,6 +52,7 @@ $f3->set('mqtt_host', trim(getenv('MQTTHOST')));
 $f3->set('mqtt_port', trim(getenv('MQTTPORT')));
 $f3->set('mqtt_user', trim(getenv('MQTTADMINUSER')));
 $f3->set('mqtt_password', trim(getenv('MQTTADMINPASS')));
+$f3->set('encryptionKey', trim(getenv('ENCRYPTIONKEY')));
 
 #$f3->set('db_host', trim(getenv('DBHOST')));
 #$f3->set('db_user', trim(getenv('DBUSER')));

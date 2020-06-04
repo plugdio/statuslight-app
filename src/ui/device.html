@@ -83,7 +83,7 @@
         <p>(It may happen that your company policy does not allow you to use external applications with your corporate account.)</p>
 
       <h1>Protocol</h1>
-      <p>The service works with any device that is capable to talk MQTT. It can be an ESP2866/ESP32, an Arduino or a Raspberry Pi. We have a reference project with ESP2866 (<a href="https://github.com/plugdio/statuslight-device" target="_blank">https://github.com/plugdio/statuslight-device</a>)</p>
+      <p>The service works with any device that is capable to talk MQTT. It can be an ESP2866/ESP32, an Arduino or a Raspberry Pi. We have a reference project with ESP2866 (<a href="https://github.com/plugdio/statuslight-rgb-device" target="_blank">https://github.com/plugdio/statuslight-rgb-device</a>)</p>
       <p>The protocol follows the Homie IoT convention (<a href="https://homieiot.github.io/" target="_blank">https://homieiot.github.io/</a>). There is a 'statuslight' node with 2 properties: status and statusdetail. The service publishes the information to these every minute.</p>
       <p>Your device doesn’t need to use the Homie framework or implement the full convention, it’s enough to subscribe to these topics.</p>
       <pre>
@@ -103,7 +103,7 @@
       <p>For statusdetail we use extra details from the presence provider.</p>
 
       <h1>Build your own device</h1>
-      <p>There is a reference implementation for the service: the light of the device will be green, red or yellow depending on your status. The source code can be found here: <a href="https://github.com/plugdio/statuslight-device" target="_blank">https://github.com/plugdio/statuslight-device</a></p>
+      <p>There is a reference implementation for the service: the light of the device will be green, red or yellow depending on your status. The source code can be found here: <a href="https://github.com/plugdio/statuslight-rgb-device" target="_blank">https://github.com/plugdio/statuslight-rgb-device</a></p>
       <p>You need:</p>
       <ul>
         <li>LOLIN (WEMOS) D1 mini
@@ -122,8 +122,8 @@
       <p>All element of the service is available on GitHub.</p>
       <ul>
         <li>The Statuslight Online service deployable with docker-compose - <a href="https://github.com/plugdio/statuslight-app" target="_blank">https://github.com/plugdio/statuslight-app</a>
-        <li>Reference implementation for a device - <a href="https://github.com/plugdio/statuslight-device" target="_blank">https://github.com/plugdio/statuslight-device</a>
-        <li>The configuration UI for the device - <a href="https://github.com/plugdio/statuslight-device-ui" target="_blank">https://github.com/plugdio/statuslight-device-ui</a>
+        <li>Reference implementation for a device - <a href="https://github.com/plugdio/statuslight-rgb-device" target="_blank">https://github.com/plugdio/statuslight-rgb-device</a>
+        <li>The configuration UI for the device - <a href="https://github.com/plugdio/statuslight-rgb-device-ui" target="_blank">https://github.com/plugdio/statuslight-rgb-device-ui</a>
       </ul>
       <p>If you have questions, please submit an issue.</p>
 

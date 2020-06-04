@@ -43,6 +43,11 @@ class SessionManager {
 
 			$this->l->debug($this->tr . " - " . __METHOD__ . " - working with " . $session['id'] . ' - ' . $session['type']);
 
+			if (empty($session['token'])) {
+				$this->l->error($this->tr . " - " . __METHOD__ . " - No token");
+				continue;
+			}
+
 			if (!in_array($session['type'], array(PROVIDER_TEAMS, PROVIDER_GOOGLE, PROVIDER_SLACK))) {
 				$this->l->error($this->tr . " - " . __METHOD__ . " - Provider not supported " . $session['type']);
 				continue;

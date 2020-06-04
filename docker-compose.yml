@@ -46,6 +46,7 @@ services:
       - MYSQL_HOST=172.20.0.5
       - MYSQL_USER=statuslight
       - MYSQL_PASSWORD
+      - ENCRYPTIONKEY
     networks:
       backend:
         ipv4_address: 172.20.0.3

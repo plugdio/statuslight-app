@@ -2,12 +2,15 @@
 
 namespace Models;
 
+require_once "lib/cryptor.php";
+
 class Session {
 
 	function __construct() {
 		$f3=\Base::instance();
 		$this->tr = $f3->get('tr');
 		$this->l = $f3->get('log');
+		$this->encryptionKey = $f3->get('encryptionKey');
 		
 		$db = new \DB\SQL(
 		    'mysql:host=' . trim(getenv('MYSQL_HOST')) . ';port=3306;dbname=statuslight',
@@ -19,6 +22,8 @@ class Session {
 	}
 
 	function saveSession($sessionType, $target, $userId, $token, $refreshToken = null, $sessionState, $closedReason, $status, $statusDetail) {
+
+		$cryptor = new \Chirp\Cryptor($this->encryptionKey);
 
 		$response = new \Response($this->tr);
 		$this->session->load(array('userId=? AND type=? AND state=?', $userId, $sessionType, SESSION_STATE_ACTIVE));
@@ -37,9 +42,12 @@ class Session {
     	$this->session->type = $sessionType;
     	$this->session->target = $target;
     	$this->session->userId = $userId;
-    	$this->session->token = serialize($token);
+
+    	$tokenString = serialize($token);
+  		$this->session->token = $cryptor->encrypt($tokenString);
+
     	if (!empty($refreshToken)) {
-    		$this->session->refreshToken = $refreshToken;
+    		$this->session->refreshToken = $cryptor->encrypt($refreshToken);
     	}
     	$this->session->startTime = date('Y-m-d H:i:s');
     	$this->session->updatedTime = date('Y-m-d H:i:s');
@@ -68,6 +76,9 @@ class Session {
 	}
 
 	function getActiveSessions() {
+
+		$cryptor = new \Chirp\Cryptor($this->encryptionKey);
+
 		$response = new \Response($this->tr);
 		$this->session->load(array('state=?', SESSION_STATE_ACTIVE));
 		if ($this->session->dry()) {
@@ -85,7 +96,12 @@ class Session {
 */
 				$this->session->erase();
 			} else {
-				$response->result[] = $this->session->cast();
+				$mySession = $this->session->cast();
+				$mySession['token'] = $cryptor->decrypt($mySession['token']);
+				if (!empty($mySession['refreshToken'])) {
+					$mySession['refreshToken'] = $cryptor->decrypt($mySession['refreshToken']);
+				}
+				$response->result[] = $mySession;
 			}
 			$this->session->next();
 		}
@@ -95,6 +111,9 @@ class Session {
 	}
 
 	function updateSession($sessionId, $token, $newState, $closedReason = null, $status = null, $subStatus = null) {
+		
+		$cryptor = new \Chirp\Cryptor($this->encryptionKey);
+
 		$response = new \Response($this->tr);
 		
 		$this->session->load(array('id=?', $sessionId));
@@ -103,7 +122,8 @@ class Session {
 			return $response;
 		}
 		
-    	$this->session->token = serialize($token);
+    	$tokenString = serialize($token);
+  		$this->session->token = $cryptor->encrypt($tokenString);
     	$this->session->updatedTime = date('Y-m-d H:i:s');
     	$this->session->state = $newState;
     	$this->session->closedReason = $closedReason;
