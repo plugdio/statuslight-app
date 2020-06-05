@@ -51,6 +51,9 @@ After you have built the code and uploaded it to your device:
 2. Connect to that network and follow the steps in the configuration UI: select the wifi network that the device should use, enter the password for it, and enter your PIN number.
 3. Then your device will reboot and it’s ready to be used.
 
+<img src="src/ui/assets/img/ui-12.PNG" width="550">
+<img src="src/ui/assets/img/ui-34.PNG" width="550">
+
 # Questions?
 All element of the service is available on GitHub.
 
