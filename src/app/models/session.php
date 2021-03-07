@@ -110,6 +110,7 @@ class Session {
 				$this->session->erase();
 			} else {
 				if ($this->session->type == PROVIDER_DUMMY) {
+					$this->session->next();
 					continue;
 				}
 				$mySession = $this->session->cast();
