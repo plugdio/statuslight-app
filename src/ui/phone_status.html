@@ -107,11 +107,11 @@
 							$('#statusContainer').attr('class','container vh-100 bg-success');
 							$('#statusIcon').attr('class','fas fa-check text-light');
 							$('#statusText').text(data.result.statusDetail); 
-						} else if (data.availability == 'busy') {
+						} else if (data.result.status == 'busy') {
 							$('#statusContainer').attr('class','container vh-100 bg-danger');
 							$('#statusIcon').attr('class','fas fa-phone text-light');
 							$('#statusText').text(data.result.statusDetail);
-						} else if (data.availability == 'away') {
+						} else if (data.result.status == 'away') {
 							$('#statusContainer').attr('class','container vh-100 bg-warning');
 							$('#statusIcon').attr('class','fas fa-clock text-light');
 							$('#statusText').text(data.result.statusDetail);
