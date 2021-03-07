@@ -21,7 +21,7 @@ class Session {
         $this->session = new \DB\SQL\Mapper($db, 'sessions');
 	}
 
-	function saveSession($sessionType, $target, $userId, $token, $refreshToken = null, $sessionState, $closedReason, $status, $statusDetail) {
+	function saveSession($sessionType, $target, $userId, $token, $refreshToken = null, $sessionState, $closedReason, $status, $statusDetail, $period = 0) {
 
 		$cryptor = new \Chirp\Cryptor($this->encryptionKey);
 
@@ -50,7 +50,11 @@ class Session {
     		$this->session->refreshToken = $cryptor->encrypt($refreshToken);
     	}
     	$this->session->startTime = date('Y-m-d H:i:s');
-    	$this->session->updatedTime = date('Y-m-d H:i:s');
+    	if (($sessionType == PROVIDER_DUMMY) && ($period > 0)) {
+			$this->session->updatedTime = date('Y-m-d H:i:s', time() + $period * 60);
+		} else {
+			$this->session->updatedTime = date('Y-m-d H:i:s');
+		}
     	$this->session->state = $sessionState;
     	$this->session->closedReason = $closedReason;
     	$this->session->presenceStatus = $status;
@@ -77,7 +81,7 @@ class Session {
 
 	function getActiveDummySessionForUser($userId) {
 		$response = new \Response($this->tr);
-		$this->session->load(array('userId=? AND state=? AND type=? AND updatedTime < NOW()', $userId, SESSION_STATE_ACTIVE, PROVIDER_DUMMY));
+		$this->session->load(array('userId=? AND state=? AND type=? AND updatedTime > NOW()', $userId, SESSION_STATE_ACTIVE, PROVIDER_DUMMY));
 		if ($this->session->dry()) {
 			$response->message = 'Session not found';
 			return $response;
@@ -149,9 +153,13 @@ class Session {
     	$this->session->save();
 	}
 
-	function deleteSessionsForUser($userId) {
+	function deleteSessionsForUser($userId, $onlyDummy = false) {
 		$response = new \Response($this->tr);
-		$this->session->load(array('userId = ?', $userId));
+		if ($onlyDummy) {
+			$this->session->load(array('userId = ? AND type=?', $userId, PROVIDER_DUMMY));
+		} else {
+			$this->session->load(array('userId = ?', $userId));
+		}
 		if ($this->session->dry()) {
 			$response->message = 'Session not found';
 			return $response;

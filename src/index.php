@@ -108,6 +108,7 @@ $f3->route('GET /logout', '\Presenters\Login->logout');
 $f3->route('GET /phone/status', '\Presenters\Phone->main');
 $f3->route('GET /phone/status/refresh', '\Presenters\Phone->status');
 $f3->route('GET /device/status', '\Presenters\Device->main');
+$f3->route('POST /device/status/update', '\Presenters\Device->updateStatus');
 $f3->route('GET /device/add', '\Presenters\Device->addDevice');
 $f3->route('GET /device/delete/@deviceId', '\Presenters\Device->deleteDevice');
 
