@@ -49,6 +49,16 @@ class Phone {
 		$response = new \Response($this->tr);
 		$response->result->status = $sessionResponse->result['presenceStatus'];
 		$response->result->statusDetail = $sessionResponse->result['presenceStatusDetail'];
+
+		$dummySessionResponse = $sessionModel->getActiveDummySessionForUser($userId);
+
+		if (!$dummySessionResponse->success) {
+			$this->l->debug($this->tr . " - " . __METHOD__ . " - No active dummy sessions");
+		} else {
+			$response->result->status = $dummySessionResponse->result['presenceStatus'];
+			$response->result->statusDetail = $dummySessionResponse->result['presenceStatusDetail'];
+		}
+
 		$response->success = true;
 
 		header('Content-Type: application/json');

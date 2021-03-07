@@ -111,6 +111,15 @@ class SessionManager {
 
 			$sessionModel->updateSession($session['id'], $token, $sessionState, $closedReason, $status, $statusDetail);
 
+			$dummySessionResponse = $sessionModel->getActiveDummySessionForUser($session['userId']);
+
+			if (!$dummySessionResponse->success) {
+				$this->l->debug($this->tr . " - " . __METHOD__ . " - No active dummy sessions");
+			} else {
+				$status = $dummySessionResponse->result['presenceStatus'];
+				$statusDetail = $dummySessionResponse->result['presenceStatusDetail'];
+			}
+
 			$mqttMessageModel = new \Models\MqttMessage();
 			$deviceModel = new \Models\Device();
 			$deviceResponse = $deviceModel->getDeviceByUserId($session['userId']);

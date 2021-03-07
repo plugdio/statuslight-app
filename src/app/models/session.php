@@ -64,7 +64,20 @@ class Session {
 
 	function getActiveSessionForUser($userId) {
 		$response = new \Response($this->tr);
-		$this->session->load(array('userId=? AND state=?', $userId, SESSION_STATE_ACTIVE));
+		$this->session->load(array('userId=? AND state=? AND type!=?', $userId, SESSION_STATE_ACTIVE, PROVIDER_DUMMY));
+		if ($this->session->dry()) {
+			$response->message = 'Session not found';
+			return $response;
+		}
+
+		$response->result = $this->session->cast();
+		$response->success = true;
+		return $response;
+	}
+
+	function getActiveDummySessionForUser($userId) {
+		$response = new \Response($this->tr);
+		$this->session->load(array('userId=? AND state=? AND type=? AND updatedTime < NOW()', $userId, SESSION_STATE_ACTIVE, PROVIDER_DUMMY));
 		if ($this->session->dry()) {
 			$response->message = 'Session not found';
 			return $response;
@@ -96,6 +109,9 @@ class Session {
 */
 				$this->session->erase();
 			} else {
+				if ($this->session->type == PROVIDER_DUMMY) {
+					continue;
+				}
 				$mySession = $this->session->cast();
 				$mySession['token'] = $cryptor->decrypt($mySession['token']);
 				if (!empty($mySession['refreshToken'])) {
