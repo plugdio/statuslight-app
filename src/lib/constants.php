@@ -3,6 +3,7 @@
 const PROVIDER_TEAMS = 'teams';
 const PROVIDER_GOOGLE = 'google';
 const PROVIDER_SLACK = 'slack';
+const PROVIDER_DUMMY = 'dummy';
 
 const SESSION_STATE_ACTIVE = 'ACTIVE';
 const SESSION_STATE_INACTIVE = 'INACTIVE';
