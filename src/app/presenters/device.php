@@ -145,6 +145,32 @@ class Device {
 
 	}
 
+	function updateStatus($f3, $args) {
+
+		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
+
+		$this->amIAuthenticated();
+
+		$userId = $f3->get('SESSION.userId');
+		$status = $f3->get('POST.status');
+		$period = $f3->get('POST.period');
+
+		$sessionModel = new \Models\Session();
+			
+		if ($period == -1) {
+			# reset the manual status
+			$sessionResponse = $sessionModel->deleteSessionsForUser($userId, true);
+		} else {
+			$sessionResponse = $sessionModel->saveSession(PROVIDER_DUMMY, 'device', $userId, '-', null, SESSION_STATE_ACTIVE, null, STATUS_BUSY, 'Manual status');
+		}
+
+		if (!$sessionResponse->success) {
+		}
+
+		$f3->reroute('/device/status');
+
+	}
+
 	function amIAuthenticated($ajax = false) {
 		$f3=\Base::instance();
 
