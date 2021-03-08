@@ -9,6 +9,7 @@ class Device {
 		$f3=\Base::instance();
 		$this->tr = $f3->get('tr');
 		$this->l = $f3->get('log');
+		$this->ajax = false;
 	}
 
 	function main($f3, $args) {
@@ -149,25 +150,54 @@ class Device {
 
 		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
 
+		$this->ajax = true;
+
+		$response = new \Response($this->tr);
+
 		$this->amIAuthenticated();
 
 		$userId = $f3->get('SESSION.userId');
 		$status = $f3->get('POST.status');
 		$period = $f3->get('POST.period');
 
+		//TODO: input validation
+
+		if (empty($userId) || empty($status) || empty($period)) {
+			$this->l->debug($this->tr . " - " . __METHOD__ . " - wrong input", $f3->get('POST'));
+			$response->message = 'wrong input';
+			header('Content-Type: application/json');
+			echo json_encode($response, JSON_PRETTY_PRINT);
+			return;
+		}
+
 		$sessionModel = new \Models\Session();
 			
 		if ($period == -1) {
 			# reset the manual status
 			$sessionResponse = $sessionModel->deleteSessionsForUser($userId, true);
+			//TODO: trigger MQTT update
 		} else {
-			$sessionResponse = $sessionModel->saveSession(PROVIDER_DUMMY, 'device', $userId, '-', null, SESSION_STATE_ACTIVE, null, STATUS_BUSY, 'Manual status');
+			$sessionResponse = $sessionModel->saveSession(PROVIDER_DUMMY, 'device', $userId, '-', null, SESSION_STATE_ACTIVE, null, $status, 'Manual status', $period);
+			
+			$mqttMessageModel = new \Models\MqttMessage();
+			$deviceModel = new \Models\Device();
+			$deviceResponse = $deviceModel->getDeviceByUserId($userId);
+
+			if ($deviceResponse->success && count($deviceResponse->result) > 0) {
+				foreach ($deviceResponse->result as $device) {
+					$mqttMessageModel->putInQueue('SL/' . $device['mqttClientId'] . '/statuslight/status/set', $status);
+					$mqttMessageModel->putInQueue('SL/' . $device['mqttClientId'] . '/statuslight/statusdetail/set', 'Manual status');
+				}
+			}
+
 		}
 
-		if (!$sessionResponse->success) {
+		if ($sessionResponse->success) {
+			$response->success = true;
 		}
 
-		$f3->reroute('/device/status');
+		header('Content-Type: application/json');
+		echo json_encode($response, JSON_PRETTY_PRINT);
 
 	}
 
@@ -185,7 +215,9 @@ class Device {
 
 	function afterroute($f3) {
 #		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
-		echo \Template::instance()->render('device_status.html');
+		if (!$this->ajax) {
+			echo \Template::instance()->render('device_status.html');
+		}
 
 	}
 
