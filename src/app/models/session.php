@@ -81,9 +81,9 @@ class Session {
 
 	function getActiveDummySessionForUser($userId) {
 		$response = new \Response($this->tr);
-		$this->session->load(array('userId=? AND state=? AND type=? AND updatedTime > NOW()', $userId, SESSION_STATE_ACTIVE, PROVIDER_DUMMY));
+		$this->session->load(array('userId=? AND state=? AND type=? AND updatedTime > ?', $userId, SESSION_STATE_ACTIVE, PROVIDER_DUMMY, date('Y-m-d H:i:s')));
 		if ($this->session->dry()) {
-			$response->message = 'Session not found';
+			$response->message = 'Dummy session not found';
 			return $response;
 		}
 
