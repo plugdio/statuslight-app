@@ -9,7 +9,6 @@ class Device {
 		$f3=\Base::instance();
 		$this->tr = $f3->get('tr');
 		$this->l = $f3->get('log');
-		$this->ajax = false;
 	}
 
 	function main($f3, $args) {
@@ -150,15 +149,13 @@ class Device {
 
 		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
 
-		$this->ajax = true;
-
 		$response = new \Response($this->tr);
 
 		$this->amIAuthenticated();
 
 		$userId = $f3->get('SESSION.userId');
-		$status = $f3->get('POST.status');
-		$period = $f3->get('POST.period');
+		$status = $args["status"];
+		$period = $args["period"];
 
 		//TODO: input validation
 
@@ -192,12 +189,7 @@ class Device {
 
 		}
 
-		if ($sessionResponse->success) {
-			$response->success = true;
-		}
-
-		header('Content-Type: application/json');
-		echo json_encode($response, JSON_PRETTY_PRINT);
+		$f3->reroute('/phone/status');
 
 	}
 
@@ -215,9 +207,7 @@ class Device {
 
 	function afterroute($f3) {
 #		$this->l->debug($this->tr . " - " . __METHOD__ . " - START");
-		if (!$this->ajax) {
-			echo \Template::instance()->render('device_status.html');
-		}
+		echo \Template::instance()->render('device_status.html');
 
 	}
 
