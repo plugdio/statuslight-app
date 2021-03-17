@@ -10,10 +10,6 @@ CREATE TABLE IF NOT EXISTS `mqttadmins` (
   UNIQUE (username)
 );
 
-INSERT INTO mqttadmins (name, username, password) VALUES("SL Application", "adm_app", MD5("123qweQWE")) 
-	ON DUPLICATE KEY UPDATE    
-	password=MD5("123qweQWE");
-
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `userId` varchar(100) NOT NULL,

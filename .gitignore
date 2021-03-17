@@ -8,6 +8,8 @@
 /src/start.sh
 /src/mqttconnect.sh
 /src/sessionmanager.sh
+/data
+/letsencrypt
 *.log
 /mosquitto/data/*
 src/config_dev.ini

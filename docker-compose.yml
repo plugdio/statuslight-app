@@ -16,6 +16,7 @@ services:
       - MYSQL_DATABASE=statuslight
       - MYSQL_USER=statuslight
       - MYSQL_PASSWORD
+      - MQTTADMINPASS
     volumes:
       - ./data/:/var/lib/mysql
       - ./mysql/:/docker-entrypoint-initdb.d
