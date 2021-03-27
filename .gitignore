@@ -4,6 +4,7 @@
 /src/logs/*.log
 /src/uploads/*
 /src/vendor
+src/admin
 /src/composer.phar
 /src/start.sh
 /src/mqttconnect.sh

@@ -151,6 +151,9 @@ class Device {
 
 		$response = new \Response($this->tr);
 
+		$f3->set('popup', true);
+		$f3->set('SESSION.popup', true);
+
 		$this->amIAuthenticated();
 
 		$userId = $f3->get('SESSION.userId');
@@ -172,24 +175,23 @@ class Device {
 		if ($period == -1) {
 			# reset the manual status
 			$sessionResponse = $sessionModel->deleteSessionsForUser($userId, true);
-			//TODO: trigger MQTT update
-		} else {
-			$sessionResponse = $sessionModel->saveSession(PROVIDER_DUMMY, 'device', $userId, '-', null, SESSION_STATE_ACTIVE, null, $status, 'Manual status', $period);
-			
-			$mqttMessageModel = new \Models\MqttMessage();
-			$deviceModel = new \Models\Device();
-			$deviceResponse = $deviceModel->getDeviceByUserId($userId);
-
-			if ($deviceResponse->success && count($deviceResponse->result) > 0) {
-				foreach ($deviceResponse->result as $device) {
-					$mqttMessageModel->putInQueue('SL/' . $device['mqttClientId'] . '/statuslight/status/set', $status);
-					$mqttMessageModel->putInQueue('SL/' . $device['mqttClientId'] . '/statuslight/statusdetail/set', 'Manual status');
-				}
+			$sessionResponse = $sessionModel->getActiveSessionForUser($userId);
+			if ($sessionResponse->success) {
+				$status = $sessionResponse->result['presenceStatus'];
+				$statusDetail = $sessionResponse->result['presenceStatusDetail'];
+			} else {
+				$status = 'error';
+				$statusDetail = 'error';
 			}
-
+		} else {
+			$statusDetail = 'Manual status';
+			$sessionResponse = $sessionModel->saveSession(PROVIDER_DUMMY, 'device', $userId, '-', null, SESSION_STATE_ACTIVE, null, $status, $statusDetail, $period);			
 		}
 
-		$f3->reroute('/phone/status');
+		$sessionManager = new \Backend\SessionManager();
+		$sessionManager->publishSessionStatus($userId, $status, $statusDetail);
+
+		$f3->reroute('/popup/status');
 
 	}
 
@@ -199,7 +201,11 @@ class Device {
 		if ( empty($f3->get('SESSION.accessToken')) ) {
 #		if ( empty($f3->get('SESSION.accessToken')) || empty($f3->get('SESSION.refreshToken')) ) {
 			$this->l->error($this->tr . " - " . __METHOD__ . " - no tokens - " . print_r($f3->get('SESSION'), true));
-			$f3->reroute($f3->get('baseAppPath'));
+			if ($f3->get('popup')) {
+				$f3->reroute($f3->get('baseAppPath') . '/popup/login');
+			} else {
+				$f3->reroute($f3->get('baseAppPath'));
+			}
 		}
 		return true;
 	}

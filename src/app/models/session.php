@@ -67,6 +67,9 @@ class Session {
 	}
 
 	function getActiveSessionForUser($userId) {
+
+		$cryptor = new \Chirp\Cryptor($this->encryptionKey);
+
 		$response = new \Response($this->tr);
 		$this->session->load(array('userId=? AND state=? AND type!=?', $userId, SESSION_STATE_ACTIVE, PROVIDER_DUMMY));
 		if ($this->session->dry()) {
@@ -74,7 +77,14 @@ class Session {
 			return $response;
 		}
 
-		$response->result = $this->session->cast();
+		$mySession = $this->session->cast();
+		
+		$mySession['token'] = $cryptor->decrypt($mySession['token']);
+		if (!empty($mySession['refreshToken'])) {
+			$mySession['refreshToken'] = $cryptor->decrypt($mySession['refreshToken']);
+		}
+		
+		$response->result = $mySession;
 		$response->success = true;
 		return $response;
 	}
@@ -151,6 +161,27 @@ class Session {
 		$this->session->presenceStatus = $status;
 		$this->session->presenceStatusDetail = $subStatus;
     	$this->session->save();
+
+		$response->success = true;
+		return $response;
+	}
+
+	function updateTeamsSessionStatus($userId, $status = null, $subStatus = null) {
+		
+		$response = new \Response($this->tr);
+		$this->session->load(array('userId=? AND type=? AND state=?', $userId, PROVIDER_TEAMS, SESSION_STATE_ACTIVE));
+		if ($this->session->dry()) {
+			$response->message = 'Session not found';
+			return $response;
+		}
+		
+    	$this->session->updatedTime = date('Y-m-d H:i:s');
+		$this->session->presenceStatus = $status;
+		$this->session->presenceStatusDetail = $subStatus;
+    	$this->session->save();
+
+		$response->success = true;
+		return $response;
 	}
 
 	function deleteSessionsForUser($userId, $onlyDummy = false) {

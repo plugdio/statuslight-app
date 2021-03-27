@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <check if="{{ @ENV=='PROD' }}">
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id={{ trim(@GOOGLE_AD_ID) }}"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', '{{ trim(@GOOGLE_AD_ID) }}');
+  </script>
+  </check>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <check if="{{ @ENV == 'DEV' }}">
+    <true>
+      <base href="{{ @SCHEME.'://'.@HOST.':'.@PORT.@BASE.'/'.@UI }}">
+    </true>
+    <false>
+      <base href="{{ @SCHEME.'://'.@HOST.@BASE.'/'.@UI }}">
+    </false>
+  </check>
+
+  <title>Statuslight Online</title>
+
+  <!-- Custom fonts for this theme -->
+  <link href="assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css">
+
+  <!-- Theme CSS -->
+  <link href="assets/css/freelancer.css" rel="stylesheet">
+
+</head>
+
+<body id="page-top">
+
+
+  <!-- Masthead -->
+  <header class="masthead bg-primary text-white text-center" style="padding-top: 1rem; padding-bottom: 0rem;">
+    <div class="container d-flex align-items-center flex-column">
+
+        <div id="errorAlert" class="alert alert-warning alert-dismissible show" style="display:none;" role="alert">
+        <span id="errorText">-</span>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        </div>
+
+        <!-- Masthead Avatar Image -->
+        <img class="masthead-avatar mb-3" style="width: 5rem;" src="assets/img/circle-cropped.png" alt="">
+
+    </div>
+  </header>
+
+  <!-- Login Section -->
+  <section class="page-section portfolio" id="login" style="padding: 1rem;">
+    <div class="container">
+
+      <!-- Login Section Heading -->
+      <h2 class="page-section-heading text-center text-uppercase text-secondary mb-0">Login</h2>
+
+      <!-- Icon Divider -->
+      <div class="divider-custom">
+        <div class="divider-custom-line"></div>
+        <div class="divider-custom-icon">
+          <i class="fas fa-star"></i>
+        </div>
+        <div class="divider-custom-line"></div>
+      </div>
+
+      <!-- Login Grid Items -->
+      <div class="row align-items-center justify-content-center row-cols-3">
+
+        <!-- Login Item 1 -->
+        <div class="col-lg-2 col-md-3 col-sm-3 col-3">
+          <div class="portfolio-item mx-auto text-center" style="font-size: 0.8rem;">
+            <a id="teamsLogin" href="/#">
+              <img class="img-fluid" style="max-width: 80%;" src="assets/img/teams.png" alt="">
+            </a>
+            <p>Microsoft Teams</p>
+          </div>
+        </div>
+
+        <!-- Login Item 2 -->
+        <div class="col-lg-2 col-md-3 col-sm-3 col-3">
+          <div class="portfolio-item mx-auto text-center" style="font-size: 0.8rem;">
+            <a id="gcalLogin" href="/#">
+              <img class="img-fluid" style="max-width: 80%;" src="assets/img/gcal.png" alt="">
+            </a>
+            <p>Google Calendar</p>
+          </div>
+        </div>
+
+        <!-- Portfolio Item 3 -->
+        <div class="col-lg-2 col-md-3 col-sm-3 col-3">
+          <div class="portfolio-item mx-auto text-center" style="font-size: 0.8rem;">
+            <a id="slackLogin" href="/#">
+              <img class="img-fluid" style="max-width: 80%;" src="assets/img/slack.png" alt="">
+            </a>
+            <p>Slack</p>
+          </div>
+        </div>
+
+      </div>
+      <!-- /.row -->
+
+    </div>
+  </section>
+
+ 
+  <!-- Copyright Section -->
+  <section class="copyright py-4 text-center text-white">
+    <div class="container">
+      <small>Copyright &copy; Statuslight Online 2020 | <a href="mailto: statuslight@plugdio.com">statuslight@plugdio.com</a></small>
+      <br>
+      <small><a href="/privacy-policy.html">Privacy policy</a></small>
+    </div>
+  </section>
+
+ 
+  <!-- Scroll to Top Button (Only visible on small and extra-small screen sizes) -->
+  <div class="scroll-to-top d-lg-none position-fixed ">
+    <a class="js-scroll-trigger d-block text-center text-white rounded" href="/#page-top">
+      <i class="fa fa-chevron-up"></i>
+    </a>
+  </div>
+
+  <!-- Bootstrap core JavaScript -->
+  <script src="assets/vendor/jquery/jquery.min.js"></script>
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Plugin JavaScript -->
+  <script src="assets/vendor/jquery-easing/jquery.easing.min.js"></script>
+
+  <!-- Custom scripts for this template -->
+  <script src="assets/js/freelancer.min.js"></script>
+
+  <script type="text/javascript">
+    var getParams = new URLSearchParams(window.location.search)
+    if (getParams.has('error')) {
+      var errorText = getParams.get('error')
+      console.log('Error: ' + errorText)
+      $('#errorText').text(errorText);
+      $('#errorAlert').show();
+    }
+    if (getParams.has('test')) {
+      var errorText = getParams.get('error')
+      console.log('Testing')
+//      $('#gcalIcon').show();
+    }
+  </script>
+
+  <script type="text/javascript">
+
+      var getJSON = function(url, tokenHeader, callback) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        if (tokenHeader != null) {
+          xhr.setRequestHeader("authorization", "Bearer " + tokenHeader);
+        }
+        xhr.responseType = 'json';
+        xhr.onload = function() {
+          var status = xhr.status;
+          if (status === 200) {
+//            if (xhr.response.success == true) {
+              callback(null, xhr.response);
+//            } else {
+//              callback(xhr.response.message, xhr.response);
+//            }
+          } else {
+            callback(status, xhr.response);
+          }
+        };
+        xhr.send();
+      };
+
+      var getConfig = function() {
+        console.log('Getting the config ... ');
+
+        getJSON('{{ @baseAppPath }}/config', null, function(err, data) {
+          if (err !== null) {
+            console.log('Something went wrong #1: ' + err);
+          } else {
+            if (data.success == true) {
+              $('#teamsLogin').attr("href", data.result.teamsLoginUrlDevice);
+              $('#gcalLogin').attr("href", data.result.googleLoginUrlDevice);
+              $('#slackLogin').attr("href", data.result.slackLoginUrlDevice);
+            } else {
+              console.log('Something went wrong #2: ' + data.message);
+            }
+          }
+        });
+      };
+
+      getConfig();
+  </script>
+
+</body>
+
+</html>
