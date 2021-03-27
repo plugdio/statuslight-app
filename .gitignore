@@ -4,10 +4,13 @@
 /src/logs/*.log
 /src/uploads/*
 /src/vendor
+src/admin
 /src/composer.phar
 /src/start.sh
 /src/mqttconnect.sh
 /src/sessionmanager.sh
+/data
+/letsencrypt
 *.log
 /mosquitto/data/*
 src/config_dev.ini

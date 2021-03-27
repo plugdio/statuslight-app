@@ -26,6 +26,7 @@ class Teams {
 		$teamsProvider->pathAuthorize = "/oauth2/v2.0/authorize";
 		$teamsProvider->pathToken = "/oauth2/v2.0/token";
 		$teamsProvider->scope = ["offline_access user.read Presence.Read"];
+#		$teamsProvider->scope = ["offline_access user.read Presence.Read.All"];
 
 		return $teamsProvider;
 	} 
@@ -114,20 +115,9 @@ class Teams {
 			if (array_key_exists('activity', $providerResponse)) {
 				$statusDetail = $providerResponse["availability"] . '/' . $providerResponse["activity"];
 			}
-			if (in_array($providerResponse["availability"], array('Available', 'AvailableIdle'))) {
-				$status = STATUS_FREE;
-			} elseif (in_array($providerResponse["availability"], array('Busy', 'BusyIdle', 'DoNotDisturb'))) {
-				$status = STATUS_BUSY;
-			} elseif (in_array($providerResponse["availability"], array('Away', 'BeRightBack'))) {
-				$status = STATUS_AWAY;
-			} elseif (in_array($providerResponse["availability"], array('Offline'))) {
-				$status = STATUS_OFFLINE;
-			} elseif (in_array($providerResponse["availability"], array('PresenceUnknown'))) {
-				$status = STATUS_UNKNOWN;
-			} else {
-				$this->l->error($this->tr . " - " . __METHOD__ . " - Unknown availability: " . $providerResponse["availability"]);
-				$status = STATUS_ERROR;
-			}
+			
+			$status = self::translateStatus($providerResponse["availability"]);
+			
 		} elseif (array_key_exists('exception', $providerResponse)) {
 			$newState = SESSION_STATE_ERROR;
 			$closedReason = $tr . ' - ' . $providerResponse["exception"];
@@ -146,6 +136,160 @@ class Teams {
 
 		return $response;
 
+	}
+
+	public static function subscribeToPresenceChanges($target, $token, $providerUserId) {
+		$f3=\Base::instance();
+		
+		$tr = $f3->get('tr');
+		$l = $f3->get('log');
+
+		$l->debug($tr . " - " . __METHOD__ . " - START");
+
+		$response = new \Response($tr);
+
+		try {
+
+			$provider = self::getProvider($target);
+			$provider->urlAPI = 'https://graph.microsoft.com/beta/';
+
+			#https://docs.microsoft.com/en-us/graph/api/subscription-post-subscriptions?view=graph-rest-beta&tabs=http
+			#https://www.c-sharpcorner.com/blogs/get-notification-when-microsoft-teams-presence-changes-using-graph-api
+			#https://gotoguy.blog/2020/07/12/subscribing-to-teams-presence-with-graph-api-using-power-platform/
+			#https://stackoverflow.com/questions/64702174/subscribing-to-presence-in-ms-graph-api-for-multiple-users
+			$ref = 'subscriptions';
+			$body = new \stdClass();
+			$body->changeType = 'updated';
+			$body->notificationUrl = $f3->get('baseAppPath') . '/graph/notification';
+			$body->resource = '/communications/presences/' . $providerUserId;
+			$expirationTime = time() + 59 * 60;
+			$body->expirationDateTime = date(DATE_RFC3339, $expirationTime);
+			$body->clientState = $tr;
+
+			$providerResponse = $provider->post($ref, json_encode($body), $token, []);
+#			$providerResponse = $provider->delete("subscriptions/a8145707-3019-49a5-91fa-d7811437705c", $token);
+			/*
+			Array (
+				[@odata.context] => https://graph.microsoft.com/beta/$metadata#subscriptions/$entity
+				[id] => 20982c99-8e5e-4d57-bcbf-6f36ef71e572
+				[resource] => /communications/presences/23460553-2421-4ac9-b5ef-37ffb4ca07d4
+				[applicationId] => 824ac24a-e853-4d80-89df-e5de49b6f502
+				[changeType] => updated
+				[clientState] => secretClientValue
+				[notificationUrl] => https://test.statuslight.online/graph/notification
+				[notificationQueryOptions] =>      
+				[notificationContentType] =>      
+				[lifecycleNotificationUrl] =>      
+				[expirationDateTime] => 2021-03-23T16:26:28Z     
+				[creatorId] => 23460553-2421-4ac9-b5ef-37ffb4ca07d4     
+				[includeResourceData] =>      
+				[latestSupportedTlsVersion] => v1_2     
+				[encryptionCertificate] =>      
+				[encryptionCertificateId] =>  
+			)
+			*/
+			
+			$l->debug($tr . " - " . __METHOD__ . " - providerResponse: " . print_r($providerResponse, true));
+
+		} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
+			$l->error($tr . " - " . __METHOD__ . " - Caught exception " . $e->getMessage() . ' - ' . $e->getTraceAsString());
+			$l->error($tr . " - " . __METHOD__ . " - token: " . print_r($token, true));
+			$providerResponse = array(
+				'exception' => $e->getMessage()
+			);
+			$response->result = $providerResponse;
+			return $response;
+		}
+		if (!empty($providerResponse["id"])) {
+			$response->success = true;
+			$providerResponse["expirationTime"] = $expirationTime;
+		} else {
+			$l->error($tr . " - " . __METHOD__ . " - Subscription error - ");
+		}
+
+		$response->result = $providerResponse;
+		return $response;
+
+	}
+
+	public static function renewSubscription($token, $subscriptionId) {
+		$f3=\Base::instance();
+		
+		$tr = $f3->get('tr');
+		$l = $f3->get('log');
+
+		$l->debug($tr . " - " . __METHOD__ . " - START");
+
+		$response = new \Response($tr);
+
+		try {
+
+			$provider = self::getProvider('device');
+			$provider->urlAPI = 'https://graph.microsoft.com/beta/';
+
+			$ref = 'subscriptions/' . $subscriptionId;
+			$body = new \stdClass();
+			$expirationTime = time() + 59 * 60;
+			$body->expirationDateTime = date(DATE_RFC3339, $expirationTime);
+
+			$providerResponse = $provider->patch($ref, json_encode($body), $token, []);
+
+			/*
+			{
+			"id":"7f105c7d-2dc5-4530-97cd-4e7ae6534c07",
+			"resource":"me/messages",
+			"applicationId": "24d3b144-21ae-4080-943f-7067b395b913",
+			"changeType":"created,updated",
+			"clientState":"secretClientValue",
+			"notificationUrl":"https://webhook.azurewebsites.net/api/send/myNotifyClient",
+			"lifecycleNotificationUrl":"https://webhook.azurewebsites.net/api/send/lifecycleNotifications",
+			"expirationDateTime":"2016-11-22T18:23:45.9356913Z",
+			"creatorId": "8ee44408-0679-472c-bc2a-692812af3437",
+			"latestSupportedTlsVersion": "v1_2",
+			"encryptionCertificate": "",
+			"encryptionCertificateId": "",
+			"includeResourceData": false,
+			"notificationContentType": "application/json"
+			}
+			*/
+			
+			$l->debug($tr . " - " . __METHOD__ . " - providerResponse: " . print_r($providerResponse, true));
+
+		} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
+			$l->error($tr . " - " . __METHOD__ . " - Caught exception " . $e->getMessage() . ' - ' . $e->getTraceAsString());
+			$l->error($tr . " - " . __METHOD__ . " - token: " . print_r($token, true));
+			$providerResponse = array(
+				'exception' => $e->getMessage()
+			);
+			$response->result = $providerResponse;
+			return $response;
+		}
+		if (!empty($providerResponse["id"])) {
+			$response->success = true;
+			$providerResponse["expirationTime"] = $expirationTime;
+		} else {
+			$l->error($tr . " - " . __METHOD__ . " - Subscription error - ");
+		}
+
+		$response->result = $providerResponse;
+		return $response;
+
+	}
+
+	public static function translateStatus($status) {
+		if (in_array($status, array('Available', 'AvailableIdle'))) {
+			return STATUS_FREE;
+		} elseif (in_array($status, array('Busy', 'BusyIdle', 'DoNotDisturb'))) {
+			return STATUS_BUSY;
+		} elseif (in_array($status, array('Away', 'BeRightBack'))) {
+			return STATUS_AWAY;
+		} elseif (in_array($status, array('Offline'))) {
+			return STATUS_OFFLINE;
+		} elseif (in_array($status, array('PresenceUnknown'))) {
+			return STATUS_UNKNOWN;
+		} else {
+			return STATUS_UNKNOWN;
+		}
 	}
 
 }

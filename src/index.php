@@ -107,6 +107,7 @@ $f3->route('GET /logout', '\Presenters\Login->logout');
 
 $f3->route('GET /phone/status', '\Presenters\Phone->main');
 $f3->route('GET /phone/status/refresh', '\Presenters\Phone->status');
+
 $f3->route('GET /device/status', '\Presenters\Device->main');
 $f3->route('GET /device/status/update/@status/@period', '\Presenters\Device->updateStatus');
 $f3->route('GET /device/add', '\Presenters\Device->addDevice');
@@ -114,6 +115,10 @@ $f3->route('GET /device/delete/@deviceId', '\Presenters\Device->deleteDevice');
 
 $f3->route('GET /profile', '\Presenters\Profile->main');
 $f3->route('GET /profile/delete', '\Presenters\Profile->delete');
+
+$f3->route('GET /popup/login',  '\Presenters\Popup->login');
+$f3->route('GET /popup/status', '\Presenters\Popup->main');
+
 
 $f3->route('GET /status', '\Presenters\ServiceStatus->main');
 
@@ -126,12 +131,15 @@ $f3->route('POST /backend/mqtt/acl', '\Backend\MqttAuth->acl');
 
 #$f3->route('GET /backend/jobs/getstatus', '\Backend\SessionManager->refreshSessions');
 
+#https://docs.microsoft.com/en-us/graph/webhooks#notification-endpoint-validation
+#POST https://{notificationUrl}?validationToken={opaqueTokenCreatedByMicrosoftGraph}
+$f3->route('POST /graph/notification', '\Presenters\Graph->notification');
 
 try {
     $f3->run();
 } catch (Exception $e) {
     $log->debug($tr . " - " . 'run' . " - Caught exception: " . $e->getMessage());
-    $log->debug($tr . " - " . 'run' . " - Caught exception: " . print_r($e, true));
+#    $log->debug($tr . " - " . 'run' . " - Caught exception: " . print_r($e, true));
 	$f3->set('error_text', "Caught exception: " . $e->getMessage() . ' - ' . $e->getTraceAsString());
     echo \Template::instance()->render('index.html');
 }

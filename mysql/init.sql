@@ -10,10 +10,6 @@ CREATE TABLE IF NOT EXISTS `mqttadmins` (
   UNIQUE (username)
 );
 
-INSERT INTO mqttadmins (name, username, password) VALUES("SL Application", "adm_app", MD5("123qweQWE")) 
-	ON DUPLICATE KEY UPDATE    
-	password=MD5("123qweQWE");
-
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `userId` varchar(100) NOT NULL,
@@ -56,4 +52,15 @@ CREATE TABLE `mqttmessages` (
   `queueIn` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `queueOut` datetime NULL,
   `state` varchar(10) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS `subscriptions` (
+  `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `userId` int NOT NULL,
+  `subscriptionId` varchar(100) NOT NULL,
+  `startTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `expirationTime` datetime NOT NULL,
+  `state` varchar(10) NOT NULL,
+  `clientState` varchar(20) NOT NULL,
+  `resource` varchar(100) NOT NULL
 );

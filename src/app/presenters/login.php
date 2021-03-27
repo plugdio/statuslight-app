@@ -96,6 +96,39 @@ class Login {
 
 				$sessionResponse = $sessionModel->saveSession($service, $target, $userId, $token, $refreshToken, $sessionState, $closedReason, $status, $statusDetail);
 
+				if (($service == PROVIDER_TEAMS) && ($target == 'device')) {
+					# 1. check if there is a subscription for the user
+					# if not, create one
+					
+					$this->l->debug($this->tr . " - " . __METHOD__ . " - Creating graph subscription");
+
+					$subscriptionModel = new \Models\Subscription();
+					$subscriptionResponse = $subscriptionModel->getActiveSubscriptionForUser($userId);
+			
+					if (!$subscriptionResponse->success) {
+						
+						$providerResponse = \Services\Teams::subscribeToPresenceChanges($target, $token, $providerUserId);
+
+						if ($providerResponse->success) {
+
+							$subscriptionResponse = $subscriptionModel->saveSubscription($userId, $providerResponse->result["id"], $providerResponse->result["expirationTime"], $this->tr, $providerResponse->result["resource"]);
+					
+							if (!$subscriptionResponse->success) {
+								$this->l->error($this->tr . " - " . __METHOD__ . " - subscription create error - " . $subscriptionResponse->message);
+								$f3->error(500);
+							}
+			
+							$this->l->debug($this->tr . " - " . __METHOD__ . " - Subscription created");
+					
+						} else {
+							$this->l->error($this->tr . " - " . __METHOD__ . " - Subscription error - ");
+						}
+
+					} else {
+						$this->l->debug($this->tr . " - " . __METHOD__ . " - Subscription exisits");
+					}
+
+				}
 
 			} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
 				$this->l->error($this->tr . " - " . __METHOD__ . " - Caught exception " . $e->getMessage() . ' - ' . $e->getTraceAsString());
@@ -105,8 +138,12 @@ class Login {
 		} else {
 			$this->l->error($this->tr . " - " . __METHOD__ . " - empty token");
 		}
-
-		$f3->reroute('/' . $target . '/status');
+		if ($f3->get('SESSION.popup')){
+			$f3->clear('SESSION.popup');
+			$f3->reroute('/popup/status');
+		} else {
+			$f3->reroute('/' . $target . '/status');
+		}
 	}
 
 	function logout($f3, $args) {
