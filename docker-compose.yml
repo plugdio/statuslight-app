@@ -33,7 +33,7 @@ services:
     environment:
       - STATUSLIGHT_ENV
       - DOMAIN
-      - GOOGLE_AD_ID
+      - GOOGLE_TAG_ID
       - MQTTHOST
       - MQTTPORT
       - MQTTADMINUSER
